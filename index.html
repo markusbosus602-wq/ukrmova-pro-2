@@ -173,13 +173,13 @@
   </div>
 </div>
 
-<!-- Новий екран вибору розділів (замість старого themes) -->
+<!-- Головний вибір розділів -->
 <div id="sections" class="screen">
   <div class="card">
     <h2>Обери розділ</h2>
     <button class="btn theme-btn" onclick="show('imennyky')">Іменники</button>
     <button class="btn theme-btn" onclick="show('prykmetnyky')">Прикметники</button>
-    <button class="btn theme-btn" onclick="startTheme('chyslivnyky')">Числівники</button>
+    <button class="btn theme-btn" onclick="show('chyslivnyky')">Числівники</button>
     <button class="btn red" onclick="show('menu')">НАЗАД</button>
   </div>
 </div>
@@ -201,6 +201,16 @@
     <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni')">Ступені порівняння прикметників</button>
     <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni_2')">Ступені порівняння прикметників 2</button>
     <button class="btn theme-btn" onclick="startTheme('ne_z_prykmetnykamy')">Правопис НЕ з прикметниками</button>
+    <button class="btn red" onclick="show('sections')">НАЗАД</button>
+  </div>
+</div>
+
+<!-- Окремий екран для Числівників -->
+<div id="chyslivnyky" class="screen">
+  <div class="card">
+    <h2>Числівники</h2>
+    <button class="btn theme-btn" onclick="startTheme('chyslivnyky_1')">Числівники №1</button>
+    <button class="btn theme-btn" onclick="startTheme('chyslivnyky_2')">Числівники №2</button>
     <button class="btn red" onclick="show('sections')">НАЗАД</button>
   </div>
 </div>
@@ -520,11 +530,17 @@ const themes = {
     {q:"не/озорий степ", a:"разом", w:["разом","окремо"]},
     {q:"не/щира посмішка, а фальшива", a:"окремо", w:["разом","окремо"]}
   ].sort(() => Math.random() - 0.5),
-  chyslivnyky: [
+  chyslivnyky_1: [
     {q:"Обери порядковий числівник", a:"сьомий", w:["Сім","семеро","одна сьома"]},
     {q:"Обери власне кількісний числівник", a:"три", w:["Третій","троє","три десятих"]},
     {q:"Обери дробовий числівник", a:"п'ять сьомих", w:["П'ятеро","п'ятий","п'ять"]},
     {q:"Обери збірний числівник", a:"двоє", w:["Другий","два","дві десятих"]}
+  ].sort(() => Math.random() - 0.5),
+  chyslivnyky_2: [
+    {q:"Обери правильну форму числівника", a:"стами зошитами", w:["у ста зошитах","стома зошитами"]},
+    {q:"Обери правильну форму числівника", a:"шестидесяти гривень", w:["сімдесяти аркушів","п'ятидесятьом людям"]},
+    {q:"Обери правильну форму числівника", a:"П'ятистами олівцями", w:["шестиста друзів","вісьмомастами горобцями"]},
+    {q:"Обери правильну форму", a:"на сороках партах", w:["шістьохсот гривень","дев'ятьомастами фарбами"]}
   ].sort(() => Math.random() - 0.5)
 };
 
@@ -773,7 +789,6 @@ function startTheme(theme) {
   correctCount = 0;
   wrongCount = 0;
 
-  // Ініціалізація лічильника спроб, якщо його ще немає
   if (!user.themeAttempts) user.themeAttempts = {};
   if (!user.themeAttempts[theme]) user.themeAttempts[theme] = 0;
 
@@ -784,7 +799,6 @@ function startTheme(theme) {
 function loadQuestion() {
   const qs = themes[currentTheme];
   if (currentIndex >= qs.length) {
-    // Збільшуємо лічильник спроб після завершення теми
     user.themeAttempts[currentTheme] = (user.themeAttempts[currentTheme] || 0) + 1;
     save();
 

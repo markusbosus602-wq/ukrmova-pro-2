@@ -248,13 +248,13 @@ let currentCorrectAnswer = '';
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
 
-// РОБОЧІ стікери-призи (прямі посилання, завантажуються)
-const prizeStickers = {
-  0:   "https://i.imgur.com/8Y0zZ0W.gif",     // "Try again" котик
-  25:  "https://i.imgur.com/silver-medal.png", // срібна медаль
-  50:  "https://i.imgur.com/gold-trophy.gif",  // золотий кубок
-  75:  "https://i.imgur.com/platinum-star.png",// платинова зірка
-  100: "https://i.imgur.com/perfect-crown.gif" // корона + вогонь
+// Посилання на Telegram-паки стікерів (замість img)
+const prizeTelegramPacks = {
+  0:   "https://t.me/addstickers/TryAgainMotivation",          // "Спробуй ще раз"
+  25:  "https://t.me/addstickers/SilverMedalPack",             // срібло
+  50:  "https://t.me/addstickers/GoldTrophyUkraine",           // золото
+  75:  "https://t.me/addstickers/PlatinumStarPack",            // платина
+  100: "https://t.me/addstickers/PerfectChampionFire"          // 100% чемпіон
 };
 
 // ================================================
@@ -825,8 +825,8 @@ function loadQuestion() {
 
     save();
 
-    // Стикер для рівня
-    const stickerUrl = prizeStickers[prizeLevel] || prizeStickers[0];
+    // Посилання на Telegram-пак стікерів
+    const telegramPack = prizeTelegramPacks[prizeLevel] || prizeTelegramPacks[0];
 
     document.getElementById('qtext').textContent = "Тема завершена!";
     document.getElementById('feedback').innerHTML = '';
@@ -838,7 +838,11 @@ function loadQuestion() {
         <strong>Цю тему ти проходив:</strong> ${user.themeAttempts[currentTheme]} раз(ів)<br><br>
 
         <h3 style="color:var(--gold); margin:20px 0;">Вітаємо! Ти отримав приз рівня ${prizeLevel}%!</h3>
-        <img src="${stickerUrl}" style="max-width:240px; border-radius:16px; box-shadow:0 8px 25px rgba(0,0,0,0.5); margin:15px auto; display:block;">
+        
+        <a href="${telegramPack}" target="_blank" style="display:inline-block; margin:20px auto; padding:14px 28px; background:#0088cc; color:white; font-size:18px; border-radius:12px; text-decoration:none; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+          Додати стікер-приз у Telegram →
+        </a><br><br>
+
         <p style="font-size:20px; color:#fff; background:var(--green); padding:12px; border-radius:12px; display:inline-block;">
           +${bonuses[prizeLevel]} ₴ додано на баланс!
         </p><br><br>

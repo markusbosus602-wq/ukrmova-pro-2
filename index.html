@@ -173,7 +173,6 @@
   </div>
 </div>
 
-<!-- Головний вибір розділів -->
 <div id="sections" class="screen">
   <div class="card">
     <h2>Обери розділ</h2>
@@ -205,7 +204,6 @@
   </div>
 </div>
 
-<!-- Окремий екран для Числівників -->
 <div id="chyslivnyky" class="screen">
   <div class="card">
     <h2>Числівники</h2>
@@ -249,6 +247,15 @@ let currentCorrectAnswer = '';
 
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
+
+// СТИКЕРИ-ПРИЗИ ЗА ВІДСОТОК (можеш замінити посилання на свої)
+const prizeStickers = {
+  0:   "https://i.imgur.com/bronze-medal.gif",      // бронза / спробував
+  25:  "https://i.imgur.com/silver-medal.png",      // срібло
+  50:  "https://i.imgur.com/gold-trophy.gif",       // золото
+  75:  "https://i.imgur.com/platinum-diamond.gif",  // платина
+  100: "https://i.imgur.com/perfect-crown.gif"      // 100% — корона + вогонь
+};
 
 // ================================================
 // ПОВНІ ТЕМИ / ЗАВДАННЯ
@@ -537,10 +544,10 @@ const themes = {
     {q:"Обери збірний числівник", a:"двоє", w:["Другий","два","дві десятих"]}
   ].sort(() => Math.random() - 0.5),
   chyslivnyky_2: [
-    {q:"Обери правильну форму числівника", a:"у ста зошитах", w:["стами зошитами","стома зошитами"]},
-    {q:"Обери правильну форму числівника", a:"сімдесяти аркушів", w:["шестидесяти гривень","п'ятидесятьом людям"]},
-    {q:"Обери правильну форму числівника", a:"вісьмомастами горобцями", w:["шестиста друзів","п'ятистами олівцями"]},
-    {q:"Обери правильну форму", a:"дев'ятьомастами фарбами", w:["шістьохсот гривень","на сороках партах"]}
+    {q:"Обери правильну форму числівника", a:"стами зошитами", w:["у ста зошитах","стома зошитами"]},
+    {q:"Обери правильну форму числівника", a:"шестидесяти гривень", w:["сімдесяти аркушів","п'ятидесятьом людям"]},
+    {q:"Обери правильну форму числівника", a:"П'ятистами олівцями", w:["шестиста друзів","вісьмомастами горобцями"]},
+    {q:"Обери правильну форму", a:"на сороках партах", w:["шістьохсот гривень","дев'ятьомастами фарбами"]}
   ].sort(() => Math.random() - 0.5)
 };
 
@@ -579,7 +586,7 @@ window.onload = function() {
 };
 
 // ================================================
-// РЕШТА ФУНКЦІЙ (без змін)
+// РЕШТА ФУНКЦІЙ
 // ================================================
 
 function tryAutoLogin() {
@@ -800,17 +807,43 @@ function loadQuestion() {
   const qs = themes[currentTheme];
   if (currentIndex >= qs.length) {
     user.themeAttempts[currentTheme] = (user.themeAttempts[currentTheme] || 0) + 1;
+
+    // Рахуємо відсоток правильних
+    const totalQuestions = qs.length;
+    const percent = Math.round((correctCount / totalQuestions) * 100);
+
+    // Визначаємо рівень призу
+    let prizeLevel = 0;
+    if (percent >= 100) prizeLevel = 100;
+    else if (percent >= 75) prizeLevel = 75;
+    else if (percent >= 50) prizeLevel = 50;
+    else if (percent >= 25) prizeLevel = 25;
+
+    // Бонуси за рівень
+    const bonuses = {0: 0, 25: 50, 50: 150, 75: 300, 100: 500};
+    user.points += bonuses[prizeLevel];
+
     save();
+
+    // Стикер для рівня
+    const stickerUrl = prizeStickers[prizeLevel] || prizeStickers[0];
 
     document.getElementById('qtext').textContent = "Тема завершена!";
     document.getElementById('feedback').innerHTML = '';
     document.getElementById('abox').innerHTML = `
-      <div class="summary">
+      <div class="summary" style="text-align:center;">
         <strong>Гравець:</strong> ${user ? user.name : '—'}<br><br>
-        <strong style="color:var(--green)">Правильних відповідей:</strong> ${correctCount}<br>
-        <strong style="color:var(--red)">Неправильних відповідей:</strong> ${wrongCount}<br><br>
+        <strong style="color:var(--green)">Правильних:</strong> ${correctCount} з ${totalQuestions} (${percent}%)<br>
+        <strong style="color:var(--red)">Неправильних:</strong> ${wrongCount}<br><br>
         <strong>Цю тему ти проходив:</strong> ${user.themeAttempts[currentTheme]} раз(ів)<br><br>
-        <strong>Поточний баланс:</strong> ${user ? user.points.toLocaleString() : 0} ₴
+
+        <h3 style="color:var(--gold); margin:20px 0;">Вітаємо! Ти отримав приз рівня ${prizeLevel}%!</h3>
+        <img src="${stickerUrl}" style="max-width:240px; border-radius:16px; box-shadow:0 8px 25px rgba(0,0,0,0.5); margin:15px auto; display:block;">
+        <p style="font-size:20px; color:#fff; background:var(--green); padding:12px; border-radius:12px; display:inline-block;">
+          +${bonuses[prizeLevel]} ₴ додано на баланс!
+        </p><br><br>
+
+        <strong>Поточний баланс:</strong> ${user.points.toLocaleString()} ₴
       </div>
       <button class="btn" onclick="show('sections')">Обрати іншу тему</button>
     `;

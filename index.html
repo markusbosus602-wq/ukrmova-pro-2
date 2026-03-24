@@ -827,9 +827,7 @@ window.onload = function() {
   const splash = document.getElementById('splash');
   const video = document.getElementById('splash-video');
   const startBtn = document.getElementById('startBtn');
-
   video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
-
   startBtn.onclick = function() {
     startBtn.style.display = 'none';
     video.muted = false;
@@ -840,12 +838,10 @@ window.onload = function() {
       video.play().catch(()=>{});
     });
   };
-
   video.onended = function() {
     splash.style.display = 'none';
     tryAutoLogin();
   };
-
   setTimeout(() => {
     if (splash.style.display !== 'none') {
       splash.style.display = 'none';

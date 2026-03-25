@@ -1,395 +1,245 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>UkrMova Pro</title>
-  <style>
-    :root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f;--dark:#d32f2f}
- 
-    body{
-      margin:0;
-      padding:0;
-      background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
-                  url('https://file.garden/aZHnP_3ch2qR4tWj/61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat fixed;
-      color:#fff;
-      font-family:sans-serif;
-      min-height:100vh;
-    }
- 
-    #splash{
-      position:fixed;
-      inset:0;
-      z-index:9999;
-      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
-                  url('https://file.garden/aZHnP_3ch2qR4tWj/61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex-direction:column;
-    }
- 
-    #splash-video{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      position:absolute;
-      top:0;
-      left:0;
-      opacity:1;
-    }
- 
-    #startBtn{
-      position:relative;
-      z-index:10000;
-      padding:24px 70px;
-      font-size:36px;
-      font-weight:bold;
-      background:linear-gradient(45deg, #FFD700, #FFEA80);
-      color:#00204A;
-      border:4px solid #FFFFFF;
-      border-radius:60px;
-      cursor:pointer;
-      box-shadow:0 10px 40px rgba(0,0,0,0.6);
-      transition:all 0.4s ease;
-    }
- 
-    #startBtn:hover{
-      transform:scale(1.12) translateY(-6px);
-      box-shadow:0 20px 60px rgba(255,215,0,0.95);
-    }
- 
-    .screen{display:none;flex-direction:column;min-height:100vh;padding:20px;box-sizing:border-box}
-    .active{display:flex}
-    .card{
-      background:rgba(255,255,255,0.88);
-      backdrop-filter:blur(10px);
-      padding:20px;
-      border-radius:20px;
-      border:1px solid #444;
-      margin:auto;
-      width:100%;
-      max-width:300px;
-      box-shadow:0 0 20px rgba(0,0,0,0.4);
-      color:#000;
-    }
-    .btn{
-      background:var(--blue);
-      color:#fff;
-      border:none;
-      padding:14px;
-      border-radius:12px;
-      font-weight:700;
-      width:100%;
-      margin:6px 0;
-      cursor:pointer;
-      text-transform:uppercase;
-      transition:all .2s;
-    }
-    .btn:hover{transform:scale(1.02);box-shadow:0 0 15px rgba(0,162,255,.6)}
-    .btn.green{background:var(--green)}
-    .btn.danger{background:var(--dark)}
-    .money{font-size:32px;font-weight:900;color:var(--gold);text-shadow:0 0 10px #f1c40f}
-    .nickname{font-size:28px;font-weight:bold;margin:10px 0;cursor:pointer}
-    .gold-nick{color:var(--gold);text-shadow:0 0 10px var(--gold)}
-    input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;color:#000;width:90%;margin-bottom:8px}
-    .shop-item{background:#eee;padding:12px;margin:8px 0;border-radius:10px;cursor:pointer}
-    .shop-item.bought{background:#c8e6c9}
-    .shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-    .theme-btn{background:#9c27b0;color:white}
-    .log-box{max-height:220px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px}
-    .log-entry{padding:4px 0;border-bottom:1px solid #eee}
-    #admin-panel{border:2px dashed var(--red);padding:20px;margin-top:15px;display:none;background:rgba(255,255,255,0.92);text-align:left;border-radius:15px;max-height:80vh;overflow-y:auto}
-    #feedback{text-align:center;font-size:48px;font-weight:bold;margin:20px 0;min-height:60px}
-    .correct{color:#2ecc71}
-    .wrong{color:#ff4d4d}
-    .summary{font-size:24px;line-height:1.6;margin:30px 0;text-align:center}
-    .summary strong{font-size:28px}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UkrMova Pro</title>
 
-    /* Стилі для кабінету */
-    .stat-row {display:flex;justify-content:space-between;margin:8px 0;}
-    .achievement {background:#fff;padding:10px;margin:8px 0;border-radius:10px;border-left:5px solid #f1c40f;}
-    .history-item {padding:8px;border-bottom:1px solid #ddd;}
-  </style>
+<style>
+:root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f}
+
+body{margin:0;background:#111;color:#fff;font-family:sans-serif}
+.screen{display:none;padding:20px}
+.card{background:#fff;color:#000;padding:20px;border-radius:15px;max-width:350px;margin:auto}
+.btn{padding:12px;margin:5px;border:none;border-radius:10px;background:var(--blue);color:#fff;cursor:pointer}
+.money{color:var(--gold);font-size:26px}
+</style>
 </head>
+
 <body>
 
-<div id="splash">
-  <video id="splash-video" playsinline preload="auto" muted></video>
-  <button id="startBtn">Почати гру</button>
+<!-- AUTH -->
+<div id="auth-screen" class="screen" style="display:block">
+<div class="card">
+<h2>UkrMova Pro</h2>
+<input id="nick" placeholder="Нік">
+<input id="pass" type="password" placeholder="Пароль">
+<button class="btn" onclick="auth()">Увійти</button>
+<p id="auth-error"></p>
+</div>
 </div>
 
-<div id="auth-screen" class="screen">
-  <div class="card">
-    <h2 style="color:var(--gold)">UKRMOVA PRO</h2>
-    <input type="text" id="nick" placeholder="Нікнейм" autocomplete="off">
-    <input type="password" id="pass" placeholder="Пароль" autocomplete="off">
-    <button class="btn" onclick="auth()">УВІЙТИ / ЗАРЕЄСТРУВАТИСЯ</button>
-    <p id="auth-error" style="color:red; margin-top:10px; min-height:24px;"></p>
-  </div>
-</div>
-
+<!-- MENU -->
 <div id="menu" class="screen">
-  <div class="card">
-    <h3 onclick="admT()" style="cursor:pointer">МЕНЮ</h3>
-    <div class="nickname" id="playerNick"></div>
-    <div class="money"><span id="mon">0</span> ₴</div>
-    <button class="btn" onclick="show('sections')">ГРАТИ</button>
-    <button class="btn" onclick="showCabinet()">МІЙ КАБІНЕТ</button>
-    <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
-    <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
+<div class="card">
+<h2 id="playerNick"></h2>
+<div class="money" id="mon"></div>
 
-    <div id="admin-panel">
-      <b style="color:var(--red);cursor:pointer;font-size:18px" onclick="closeAdm()">❌ ЗАКРИТИ АДМІНКУ</b><br><br>
-      <button class="btn" id="pen-btn" style="background:var(--red)" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
-      <p><b>Управління гравцями</b></p>
-      <input type="text" id="a-n" placeholder="Нік гравця">
-      <button class="btn" style="background:var(--green);color:#000" onclick="edO(true)">+ ГРОШІ</button>
-      <button class="btn" style="background:var(--red)" onclick="edO(false)">- ГРОШІ</button>
-      <button class="btn danger" onclick="delU()">ВИДАЛИТИ ЗА НІКОМ</button>
-      <br><br>
-      <button class="btn" style="background:var(--blue);width:100%" onclick="loadPlayers()">ПОКАЗАТИ ВСІХ ГРАВЦІВ</button>
-      <div id="player-list" style="max-height:250px;overflow-y:auto;margin:15px 0;background:#fff;padding:10px;border:1px solid #ccc;border-radius:8px"></div>
-      <br><br>
-      <h4 style="color:var(--blue)">Лог усіх входів у гру</h4>
-      <div id="user-log" class="log-box">Завантаження...</div>
-      <button class="btn" style="background:#ff9800;margin-top:8px;width:48%;margin-right:4%" onclick="loadUserLog()">Оновити</button>
-      <button class="btn danger" style="margin-top:8px;width:48%" onclick="clearUserLog()">Очистити</button>
-      <br><br>
-      <h4 style="color:var(--blue)">Лог входів в адмінку</h4>
-      <div id="admin-log" class="log-box">Завантаження...</div>
-      <button class="btn" style="background:#ff9800;margin-top:8px;width:48%;margin-right:4%" onclick="loadAdminLogs()">Оновити</button>
-      <button class="btn danger" style="margin-top:8px;width:48%" onclick="clearAdminLogs()">Очистити</button>
-    </div>
-  </div>
+<button class="btn" onclick="show('sections')">Завдання</button>
+<button class="btn" onclick="openCabinet()">Мій кабінет</button>
+</div>
 </div>
 
-<div id="shop" class="screen">
-  <div class="card">
-    <h2>Магазин</h2>
-    <div class="shop-grid">
-      <div class="shop-item" onclick="buyItem('gold_frame')">Золота рамка — 1000 ₴</div>
-      <div class="shop-item" onclick="buyItem('crown')">Корона — 2000 ₴</div>
-      <div class="shop-item" onclick="buyItem('fire')">Полум'я — 1500 ₴</div>
-      <div class="shop-item" onclick="buyItem('shield')">Щит — 2500 ₴</div>
-      <div class="shop-item" onclick="buyItem('vip')">ВІП — 5000 ₴</div>
-    </div>
-    <button class="btn" onclick="show('menu')">НАЗАД</button>
-  </div>
-</div>
-
-<!-- Особистий кабінет -->
-<div id="cabinet" class="screen">
-  <div class="card" style="max-width:340px;">
-    <h2 style="color:var(--gold);text-align:center;">Мій кабінет</h2>
-    <div class="nickname" id="cabinetNick" style="font-size:26px;text-align:center;margin:15px 0;"></div>
-    <div class="money" style="text-align:center;margin-bottom:20px;"><span id="cabinetMon">0</span> ₴</div>
-
-    <div style="background:#f8f8f8;padding:15px;border-radius:12px;margin:15px 0;">
-      <div class="stat-row"><span>Правильних відповідей:</span><strong id="statCorrect">0</strong></div>
-      <div class="stat-row"><span>Неправильних відповідей:</span><strong id="statWrong">0</strong></div>
-      <div class="stat-row"><span>Пройдено тем:</span><strong id="statThemes">0</strong></div>
-      <div class="stat-row"><span>Найкращий результат:</span><strong id="statBest">—</strong></div>
-    </div>
-
-    <h3 style="margin:15px 0 10px 0;">Досягнення</h3>
-    <div id="achievements" style="margin-bottom:20px;"></div>
-
-    <h3 style="margin:15px 0 10px 0;">Останні проходження</h3>
-    <div id="history" class="log-box" style="max-height:180px;"></div>
-
-    <button class="btn" onclick="changeNickname()">Змінити нікнейм</button>
-    <button class="btn" onclick="changePassword()">Змінити пароль</button>
-    <button class="btn danger" onclick="logout()">Вийти з акаунта</button>
-    <button class="btn" style="background:#333" onclick="show('menu')">Повернутися в меню</button>
-  </div>
-</div>
-
-<!-- Всі твої екрани (sections, imennyky, prykmetnyky, chyslivnyky, frazeologizmy, game, top) залишені без змін -->
+<!-- SECTIONS -->
 <div id="sections" class="screen">
-  <div class="card">
-    <h2>Обери розділ</h2>
-    <button class="btn theme-btn" onclick="show('imennyky')">Іменники</button>
-    <button class="btn theme-btn" onclick="show('prykmetnyky')">Прикметники</button>
-    <button class="btn theme-btn" onclick="show('chyslivnyky')">Числівники</button>
-    <button class="btn theme-btn" onclick="show('frazeologizmy')">Фразеологізми</button>
-    <button class="btn red" onclick="show('menu')">НАЗАД</button>
-  </div>
+<div class="card">
+<h3>Обери тему</h3>
+<button class="btn" onclick="startTheme('vydminy')">Відміни</button>
+<button class="btn" onclick="startTheme('frazeologizmy1')">Фразеологізми</button>
+<button class="btn" onclick="show('menu')">Назад</button>
+</div>
 </div>
 
-<!-- imennyky, prykmetnyky, chyslivnyky, frazeologizmy, game, top — точно як у тебе -->
-<!-- (щоб не робити повідомлення надто довгим, я не повторюю їх тут, але вони ідентичні твоєму коду) -->
+<!-- GAME -->
+<div id="game" class="screen">
+<div class="card">
+<h3 id="qtext"></h3>
+<div id="feedback"></div>
+<div id="abox"></div>
+<button class="btn" onclick="show('sections')">Назад</button>
+</div>
+</div>
+
+<!-- CABINET -->
+<div id="cabinet" class="screen">
+<div class="card">
+<h2>Мій кабінет</h2>
+
+<div>Нік: <b id="cab-nick"></b></div>
+<div>Гроші: <b id="cab-money"></b></div>
+
+<button class="btn" onclick="logout()">Вийти</button>
+
+<h3>Зміна ніку</h3>
+<input id="newNick" placeholder="Новий нік">
+<button class="btn" onclick="changeNick()">Змінити</button>
+
+<h3>Зміна пароля</h3>
+<input id="newPass" type="password">
+<button class="btn" onclick="changePass()">Змінити</button>
+
+<h3>Ідеї</h3>
+<div id="ideas"></div>
+<button class="btn" onclick="addIdea()">+ Ідея</button>
+
+<button class="btn" onclick="show('menu')">Назад</button>
+</div>
+</div>
 
 <script>
-// ================================================
-// ГЛОБАЛЬНІ ЗМІННІ
-// ================================================
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
-let user = null;
-let cC = 0;
-let pOn = true;
-let currentTheme = '';
-let currentIndex = 0;
-let correctCount = 0;
-let wrongCount = 0;
-let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
-let currentCorrectAnswer = '';
 
-const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
-const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
+let user=null;
+let currentTheme='';
+let currentIndex=0;
+let correctCount=0;
+let wrongCount=0;
 
-// ================================================
-// ПОВНІ ТЕМИ / ЗАВДАННЯ (залишені без жодної зміни)
-// ================================================
-const themes = {
-  /* Тут повністю всі твої теми і питання з останнього коду, який ти надіслав */
-  vydminy: [ /* всі 50 питань */ ],
-  prykmetnyky: [ /* всі питання */ ],
-  grupy_prykmetnykiv: [ /* всі питання */ ],
-  orudnyi_1vidmina: [ /* всі питання */ ],
-  prykmetnyky_stupeni: [ /* всі питання */ ],
-  prykmetnyky_stupeni_2: [ /* всі питання */ ],
-  ne_z_prykmetnykamy: [ /* всі питання */ ],
-  chyslivnyky_1: [ /* всі питання */ ],
-  chyslivnyky_2: [ /* всі питання */ ],
-  frazeologizmy1: [ /* всі 16 питань */ ],
-  frazeologizmy2: [ /* всі 16 питань */ ],
-  frazeologizmy3: [ /* всі 16 питань */ ],
-  frazeologizmy4: [ /* всі 16 питань */ ],
-  frazeologizmy5: [ /* всі 16 питань */ ],
-  frazeologizmy6: [ /* всі 16 питань */ ],
-  frazeologizmy7: [ /* всі 16 питань */ ],
-  frazeologizmy8: [ /* всі 16 питань */ ],
-  frazeologizmy9: [ /* всі 16 питань */ ],
-  frazeologizmy10: [ /* всі 16 питань */ ],
-  frazeologizmy11: [ /* всі 16 питань */ ],
-  frazeologizmy12: [ /* всі 16 питань */ ],
-  frazeologizmy13: [ /* всі 16 питань */ ],
-  frazeologizmy14: [ /* всі 16 питань */ ]
+const themes={
+  vydminy:[
+    {q:"До якої відміни належить слово «книга»?",a:"перша відміна",w:["друга","третя"]},
+    {q:"До якої відміни «стіл»?",a:"друга відміна",w:["перша","третя"]}
+  ],
+  frazeologizmy1:[
+    {q:"Бити байдики?",a:"ледачити",w:["працювати","бігати"]}
+  ]
 };
 
-// ================================================
-// ЗАПУСК ВІДЕО + решта функцій
-// ================================================
-window.onload = function() {
-  const splash = document.getElementById('splash');
-  const video = document.getElementById('splash-video');
-  const startBtn = document.getElementById('startBtn');
-  video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
-  startBtn.onclick = function() {
-    startBtn.style.display = 'none';
-    video.muted = false;
-    video.currentTime = 0;
-    video.play().catch(e => {
-      console.error("Автозапуск заблоковано:", e);
-      video.muted = false;
-      video.play().catch(()=>{});
-    });
-  };
-  video.onended = function() {
-    splash.style.display = 'none';
-    tryAutoLogin();
-  };
-  setTimeout(() => {
-    if (splash.style.display !== 'none') {
-      splash.style.display = 'none';
-      tryAutoLogin();
-    }
-  }, 70000);
-};
-
-function tryAutoLogin() {
-  const savedNick = localStorage.getItem('un');
-  const savedPass = localStorage.getItem('up');
-  if (savedNick && savedPass) {
-    document.getElementById('nick').value = savedNick;
-    document.getElementById('pass').value = savedPass;
-    auth();
-  } else {
-    show('auth-screen');
-  }
+function show(id){
+document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+document.getElementById(id).style.display='block';
 }
 
-// ... (auth, save, update, applyItems, show, admT, loadPlayers, loadUserLog, clearUserLog, loadAdminLogs, clearAdminLogs, startTheme, loadQuestion, checkAnswer, loadT, buyItem — всі функції з твого коду) ...
+async function auth(){
+let n=nick.value;
+let p=pass.value;
 
-// === ОСОБИСТИЙ КАБІНЕТ ===
-function showCabinet() {
-  if (!user) return;
-  document.getElementById('cabinetNick').innerHTML = user.name;
-  document.getElementById('cabinetMon').innerText = (user.points || 0).toLocaleString();
+let r=await fetch(DB+"users/"+n+".json");
+let d=await r.json();
 
-  document.getElementById('statCorrect').innerText = user.totalCorrect || 0;
-  document.getElementById('statWrong').innerText = user.totalWrong || 0;
-  document.getElementById('statThemes').innerText = Object.keys(user.themeAttempts || {}).length;
-  document.getElementById('statBest').innerText = user.bestScore ? user.bestScore + '%' : '—';
-
-  let achHTML = '';
-  if ((user.totalCorrect || 0) >= 100) achHTML += '<div class="achievement">🏆 Майстер</div>';
-  if (Object.keys(user.themeAttempts || {}).length >= 20) achHTML += '<div class="achievement">🔥 Марафонець</div>';
-  if ((user.points || 0) >= 10000) achHTML += '<div class="achievement">💰 Багатий</div>';
-  if (user.bestScore >= 95) achHTML += '<div class="achievement">🌟 Перфекціоніст</div>';
-  document.getElementById('achievements').innerHTML = achHTML || '<p style="color:#888;">Поки що немає досягнень</p>';
-
-  let histHTML = '';
-  if (user.lastThemes && user.lastThemes.length > 0) {
-    user.lastThemes.slice(0,10).forEach(item => {
-      histHTML += `<div class="history-item">${item.theme} — ${item.percent}% (${item.date})</div>`;
-    });
-  } else {
-    histHTML = '<p style="color:#888;">Історія порожня</p>';
-  }
-  document.getElementById('history').innerHTML = histHTML;
-
-  show('cabinet');
+if(d){
+if(d.pass!==p) return alert("Пароль неправильний");
+user=d;
+}else{
+user={name:n,pass:p,points:0};
+await fetch(DB+"users/"+n+".json",{method:'PUT',body:JSON.stringify(user)});
 }
 
-function changeNickname() {
-  if (!user) return;
-  const newNick = prompt("Введіть новий нікнейм:", user.name);
-  if (!newNick || newNick.trim() === user.name || newNick.trim() === '') return;
-  user.name = newNick.trim();
-  save();
-  applyItems();
-  alert("Нікнейм змінено!");
-  showCabinet();
+update();
+show('menu');
 }
 
-function changePassword() {
-  if (!user) return;
-  const newPass = prompt("Введіть новий пароль:");
-  if (!newPass || newPass.trim() === '') return;
-  user.pass = newPass.trim();
-  save();
-  alert("Пароль успішно змінено!");
+function update(){
+mon.innerText=user.points;
+playerNick.innerText=user.name;
 }
 
-function logout() {
-  if (confirm("Вийти з акаунта?")) {
-    localStorage.removeItem('un');
-    localStorage.removeItem('up');
-    user = null;
-    show('auth-screen');
-  }
+function startTheme(t){
+currentTheme=t;
+currentIndex=0;
+correctCount=0;
+wrongCount=0;
+show('game');
+loadQuestion();
 }
 
-// Оновлення checkAnswer для статистики кабінету
-const originalCheckAnswer = checkAnswer;
-checkAnswer = function(selected, correct, button) {
-  originalCheckAnswer(selected, correct, button);
+function loadQuestion(){
+let qs=themes[currentTheme];
+if(currentIndex>=qs.length){
+qtext.innerText="Кінець!";
+return;
+}
 
-  if (!user) return;
-  if (selected === correct) user.totalCorrect = (user.totalCorrect || 0) + 1;
-  else user.totalWrong = (user.totalWrong || 0) + 1;
+let q=qs[currentIndex];
+qtext.innerText=q.q;
 
-  const percent = Math.round((correctCount / themes[currentTheme].length) * 100);
-  if (!user.bestScore || percent > user.bestScore) user.bestScore = percent;
+abox.innerHTML='';
+let arr=[q.a,...q.w].sort(()=>Math.random()-0.5);
 
-  if (!user.lastThemes) user.lastThemes = [];
-  user.lastThemes.unshift({theme: currentTheme, percent: percent, date: new Date().toLocaleDateString('uk-UA')});
-  if (user.lastThemes.length > 15) user.lastThemes.pop();
+arr.forEach(a=>{
+let b=document.createElement('button');
+b.className='btn';
+b.innerText=a;
+b.onclick=()=>checkAnswer(a,q.a);
+abox.appendChild(b);
+});
+}
 
-  save();
-};
+function checkAnswer(s,c){
+if(s===c){
+user.points+=100;
+}else{
+user.points=Math.max(0,user.points-30);
+}
+save();
+update();
+currentIndex++;
+loadQuestion();
+}
+
+function save(){
+fetch(DB+"users/"+user.name+".json",{method:'PUT',body:JSON.stringify(user)});
+}
+
+/* ===== КАБІНЕТ ===== */
+
+let ideas=[];
+
+function openCabinet(){
+cab-nick.innerText=user.name;
+cab-money.innerText=user.points;
+renderIdeas();
+show('cabinet');
+}
+
+function logout(){
+localStorage.clear();
+location.reload();
+}
+
+async function changeNick(){
+let newNick=document.getElementById('newNick').value;
+if(!newNick) return;
+
+let old=user.name;
+
+let r=await fetch(DB+"users/"+old+".json");
+let d=await r.json();
+
+await fetch(DB+"users/"+newNick+".json",{method:'PUT',body:JSON.stringify(d)});
+await fetch(DB+"users/"+old+".json",{method:'DELETE'});
+
+user.name=newNick;
+update();
+alert("Нік змінено");
+}
+
+async function changePass(){
+let p=document.getElementById('newPass').value;
+if(!p) return;
+
+user.pass=p;
+save();
+alert("Пароль змінено");
+}
+
+function addIdea(){
+let t=prompt("Ідея:");
+if(!t) return;
+ideas.push(t);
+renderIdeas();
+}
+
+function renderIdeas(){
+let div=document.getElementById('ideas');
+div.innerHTML='';
+ideas.forEach(i=>{
+let d=document.createElement('div');
+d.innerText="• "+i;
+div.appendChild(d);
+});
+}
 </script>
+
 </body>
 </html>

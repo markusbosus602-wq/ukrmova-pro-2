@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Адмін-панель — UkrMova PRO Bot</title>
+<title>Адмін-панель — UkrMova PRO</title>
 <style>
   * {
     margin: 0;
@@ -14,20 +14,18 @@
   body {
     background: linear-gradient(135deg, #0a0f0a 0%, #0a2a0a 100%);
     color: #0f0;
-    font-family: 'Courier New', 'Fira Code', monospace;
+    font-family: 'Courier New', monospace;
     font-size: 14px;
-    line-height: 1.5;
     min-height: 100vh;
     padding: 20px;
   }
   
   h1 {
     color: #0f0;
-    text-shadow: 0 0 15px #0f0, 0 0 5px #0f0;
+    text-shadow: 0 0 15px #0f0;
     text-align: center;
-    font-size: 32px;
+    font-size: 28px;
     margin-bottom: 20px;
-    letter-spacing: 3px;
   }
   
   h2, h3 {
@@ -35,55 +33,41 @@
     border-bottom: 2px solid #0f0;
     padding-bottom: 8px;
     margin: 20px 0 15px 0;
-    text-shadow: 0 0 5px #0f0;
-  }
-  
-  h3 {
-    font-size: 20px;
-    margin: 15px 0 10px 0;
   }
   
   button {
-    background: linear-gradient(135deg, #0a5a0a 0%, #0a3a0a 100%);
+    background: #0a5a0a;
     color: #0f0;
     border: 1px solid #0f0;
     padding: 8px 16px;
-    margin: 4px 6px;
+    margin: 4px;
     cursor: pointer;
     border-radius: 6px;
     font-family: inherit;
     font-weight: bold;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0,255,0,0.2);
+    transition: all 0.2s;
   }
   
   button:hover {
-    background: linear-gradient(135deg, #0f0 0%, #0a8a0a 100%);
+    background: #0f0;
     color: #000;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,255,0,0.4);
+    transform: scale(1.02);
   }
   
   button.danger {
-    background: linear-gradient(135deg, #8a0a0a 0%, #5a0a0a 100%);
+    background: #8a0a0a;
     border-color: #f00;
     color: #faa;
   }
   
-  button.danger:hover {
-    background: linear-gradient(135deg, #f00 0%, #a00 100%);
-    color: #fff;
-  }
-  
   button.warning {
-    background: linear-gradient(135deg, #8a6a0a 0%, #5a3a0a 100%);
+    background: #8a6a0a;
     border-color: #ff0;
     color: #ff0;
   }
   
   button.success {
-    background: linear-gradient(135deg, #0a8a0a 0%, #0a5a0a 100%);
-    border-color: #0f0;
+    background: #0a8a0a;
   }
   
   input, select, textarea {
@@ -91,16 +75,9 @@
     color: #0f0;
     border: 1px solid #0f0;
     padding: 8px 12px;
-    margin: 4px 6px;
+    margin: 4px;
     border-radius: 6px;
     font-family: inherit;
-    font-size: 14px;
-  }
-  
-  input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: #0f0;
-    box-shadow: 0 0 10px rgba(0,255,0,0.3);
   }
   
   table {
@@ -108,27 +85,17 @@
     border-collapse: collapse;
     margin: 15px 0;
     background: #0a0f0a;
-    border-radius: 8px;
-    overflow: hidden;
+    font-size: 13px;
   }
   
   th, td {
     border: 1px solid #0f0;
-    padding: 10px 8px;
+    padding: 8px;
     text-align: left;
   }
   
   th {
-    background: linear-gradient(135deg, #0a3a0a 0%, #0a2a0a 100%);
-    color: #0f0;
-    font-weight: bold;
-    text-transform: uppercase;
-    font-size: 12px;
-    letter-spacing: 1px;
-  }
-  
-  tr:hover {
-    background: rgba(0, 255, 0, 0.1);
+    background: #0a3a0a;
   }
   
   #login {
@@ -138,8 +105,7 @@
     border: 2px solid #0f0;
     border-radius: 20px;
     margin: 80px auto;
-    max-width: 450px;
-    box-shadow: 0 0 50px rgba(0,255,0,0.2);
+    max-width: 400px;
   }
   
   #login input {
@@ -155,45 +121,39 @@
     margin: 0 auto;
   }
   
-  #error {
+  .error-msg {
     color: #f44;
     margin-top: 15px;
     font-weight: bold;
   }
   
   .section {
-    margin: 25px 0;
+    margin: 20px 0;
     padding: 20px;
     border: 1px solid #0f0;
     border-radius: 12px;
     background: rgba(0, 20, 0, 0.3);
-    backdrop-filter: blur(5px);
   }
   
   .log-box {
     max-height: 300px;
     overflow-y: auto;
     background: #0a0f0a;
-    padding: 12px;
+    padding: 10px;
     border: 1px solid #0f0;
     border-radius: 8px;
-    margin-top: 12px;
+    margin-top: 10px;
   }
   
   .log-entry {
-    margin: 6px 0;
-    padding: 6px 10px;
+    margin: 5px 0;
+    padding: 5px;
     border-bottom: 1px dashed #0a6a0a;
-    font-size: 12px;
-  }
-  
-  .log-entry:hover {
-    background: rgba(0, 255, 0, 0.1);
   }
   
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 15px;
     margin: 15px 0;
   }
@@ -202,59 +162,27 @@
     background: rgba(0, 30, 0, 0.8);
     border: 1px solid #0f0;
     border-radius: 10px;
-    padding: 15px;
+    padding: 12px;
     text-align: center;
   }
   
   .stat-number {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: bold;
     color: #0f0;
-    text-shadow: 0 0 10px #0f0;
   }
   
   .badge {
     display: inline-block;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
     margin: 2px;
   }
   
-  .badge-gold { background: #ffd700; color: #000; }
   .badge-vip { background: #ff00ff; color: #fff; }
+  .badge-gold { background: #ffd700; color: #000; }
   .badge-crown { background: #ffa500; color: #000; }
-  .badge-fire { background: #ff4500; color: #fff; }
-  .badge-shield { background: #4169e1; color: #fff; }
-  
-  .control-group {
-    display: inline-block;
-    margin: 5px;
-  }
-  
-  pre {
-    background: #0a0f0a;
-    padding: 12px;
-    border-radius: 8px;
-    overflow-x: auto;
-    font-size: 12px;
-    border: 1px solid #0f0;
-  }
-  
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-  
-  .online {
-    color: #0f0;
-    animation: blink 1s infinite;
-  }
-  
-  .offline {
-    color: #f00;
-  }
   
   .modal {
     display: none;
@@ -278,145 +206,106 @@
     width: 90%;
   }
   
-  .telegram-config {
-    background: rgba(0,40,0,0.8);
+  .broadcast-preview {
+    background: rgba(0,30,0,0.5);
     border: 1px solid #0f0;
     border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 12px;
   }
   
-  .status-ok {
-    color: #0f0;
-  }
-  
-  .status-error {
-    color: #f00;
-  }
+  .status-ok { color: #0f0; }
+  .status-error { color: #f00; }
+  .status-warning { color: #ff0; }
 </style>
 </head>
 <body>
 
 <div id="login">
-  <h2>🔐 АДМІН-ПАНЕЛЬ UKRMOVA PRO BOT</h2>
-  <input type="password" id="pass" placeholder="Введіть пароль адміністратора" autocomplete="off">
+  <h2>🔐 АДМІН-ПАНЕЛЬ</h2>
+  <input type="password" id="adminPassword" placeholder="Введіть пароль">
   <br><br>
-  <button onclick="login()">🚪 УВІЙТИ</button>
-  <div id="error"></div>
+  <button onclick="checkLogin()">УВІЙТИ</button>
+  <div id="loginError" class="error-msg"></div>
 </div>
 
 <div id="content">
 
-<h1>🤖 UKRMOVA PRO BOT — АДМІН-ПАНЕЛЬ</h1>
+<h1>🤖 UKRMOVA PRO — АДМІН-ПАНЕЛЬ</h1>
 
-<div class="section telegram-config">
-  <h3>🤖 НАЛАШТУВАННЯ TELEGRAM БОТА</h3>
-  <div>
-    <label>Bot Token:</label>
-    <input type="text" id="botToken" placeholder="Введіть токен бота" style="width: 300px;">
-    <button onclick="saveBotToken()">💾 Зберегти</button>
-    <button onclick="testBotConnection()">🔌 Перевірити підключення</button>
-    <div id="botStatus" style="margin-top: 10px;"></div>
+<div class="section">
+  <h3>📢 РОЗСИЛКА УВІДОМЛЕНЬ (ВСІМ, ХТО ВІДКРИВАВ БОТА)</h3>
+  <textarea id="broadcastMsg" rows="5" placeholder="Текст уведомлення..." style="width: 100%;"></textarea>
+  <div class="broadcast-preview" id="previewMsg" style="display: none;"></div>
+  <div style="margin-top: 10px;">
+    <button onclick="previewMessage()" class="">👁️ ПЕРЕГЛЯД</button>
+    <button onclick="sendToAllSave()" class="success">📢 НАДІСЛАТИ ВСІМ ГРАВЦЯМ</button>
+    <button onclick="sendToVIPSave()" class="warning">💎 ТІЛЬКИ VIP ГРАВЦЯМ</button>
   </div>
+  <div id="sendResult" style="margin-top: 10px; color: #ff0;"></div>
+  <p style="font-size: 12px; margin-top: 15px; color: #aaa;">💡 <strong>Важливо:</strong> Повідомлення отримають ВСІ гравці, які коли-небудь запускали бота. Вони побачать його при наступному вході в гру!</p>
 </div>
 
 <div class="section">
-  <h3>📢 РОЗСИЛКА В TELEGRAM</h3>
-  <div style="margin-bottom: 15px;">
-    <textarea id="broadcastMsg" rows="4" cols="60" placeholder="Текст повідомлення для розсилки..." style="width: 100%;"></textarea>
-  </div>
-  <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-    <button onclick="sendToAll()" class="success">📢 ВСІМ ГРАВЦЯМ</button>
-    <button onclick="sendToVIP()" class="warning">💎 ТІЛЬКИ VIP</button>
-    <button onclick="showSendToOneForm()" class="">👤 ОДНОМУ ГРАВЦЮ</button>
-  </div>
-  <div id="sendToOneArea" style="display: none; margin-top: 15px;">
-    <input type="text" id="singleNick" placeholder="Нікнейм гравця">
-    <button onclick="sendToOne()">📨 Надіслати</button>
-  </div>
-  <div id="sendResult" style="margin-top: 10px; color: #ff0;"></div>
+  <h3>📊 СТАТИСТИКА</h3>
+  <div id="statsPanel" class="stats-grid"></div>
+  <button onclick="loadStats()">🔄 Оновити</button>
 </div>
 
 <div class="section">
   <h3>👥 УПРАВЛІННЯ ГРАВЦЯМИ</h3>
-  <div style="margin-bottom: 15px;">
-    <input type="text" id="searchNick" placeholder="🔍 Пошук за нікнеймом" onkeyup="filterPlayers()">
-    <button onclick="loadPlayers()" class="success">📋 Оновити список</button>
-    <button onclick="showAddPlayerForm()" class="success">➕ Додати гравця</button>
-    <button onclick="exportPlayersData()" class="warning">💾 Експорт гравців</button>
+  <div>
+    <input type="text" id="searchNick" placeholder="🔍 Пошук" onkeyup="loadPlayers()">
+    <button onclick="loadPlayers()" class="success">📋 Оновити</button>
+    <button onclick="showAddPlayer()">➕ Додати гравця</button>
   </div>
   
   <div style="margin: 15px 0; padding: 15px; background: rgba(0,30,0,0.5); border-radius: 8px;">
     <strong>🎮 Дії з гравцем:</strong><br>
-    <input type="text" id="nick" placeholder="Нікнейм гравця" style="width: 200px;">
+    <input type="text" id="playerNick" placeholder="Нікнейм" style="width: 180px;">
     <button onclick="addMoney()">💰 + Гроші</button>
     <button onclick="subMoney()">💰 - Гроші</button>
-    <button onclick="setLevel()">⭐ Змінити рівень</button>
-    <button onclick="resetPlayer()" class="warning">🔄 Скинути прогрес</button>
-    <button onclick="delUser()" class="danger">🗑️ Видалити</button>
-    <button onclick="giveAchievement()">🏆 Додати досягнення</button>
-    <button onclick="sendMessageToPlayer()">📨 Повідомлення (в бот)</button>
-    <button onclick="sendDirectTelegram()">📱 Написати в Telegram</button>
-    <button onclick="viewPlayerStats()">📊 Статистика</button>
+    <button onclick="setPlayerLevel()">⭐ Рівень</button>
+    <button onclick="resetPlayerProgress()">🔄 Скинути</button>
+    <button onclick="deletePlayer()" class="danger">🗑️ Видалити</button>
+    <button onclick="giveAchievementToPlayer()">🏆 Досягнення</button>
+    <button onclick="showPlayerStats()">📊 Статистика</button>
   </div>
   
-  <div id="players" style="margin-top: 15px; overflow-x: auto;"></div>
+  <div id="playersList" style="overflow-x: auto;"></div>
 </div>
 
 <div class="section">
-  <h3>📝 ЛОГИ ВХОДІВ (Telegram)</h3>
-  <div style="margin-bottom: 10px;">
-    <button onclick="loadLogs()" class="success">🔄 Оновити</button>
-    <button onclick="clearLogs()" class="danger">🗑️ Очистити всі логи</button>
-    <button onclick="exportLogs()" class="warning">💾 Експортувати логи</button>
-    <input type="text" id="filterLogs" placeholder="🔍 Фільтр за ніком" style="width: 200px;" onkeyup="filterLogs()">
-  </div>
-  <div id="logs" class="log-box"></div>
+  <h3>📝 ЛОГИ ВХОДІВ</h3>
+  <button onclick="loadLogs()" class="success">🔄 Оновити</button>
+  <button onclick="clearLogs()" class="danger">🗑️ Очистити</button>
+  <input type="text" id="logFilter" placeholder="🔍 Фільтр" onkeyup="loadLogs()" style="width: 200px;">
+  <div id="logsList" class="log-box"></div>
 </div>
 
 <div class="section">
   <h3>⚙️ АКТИВНІСТЬ АДМІНІВ</h3>
-  <button onclick="loadAdminLogs()" class="success">🔄 Оновити</button>
+  <button onclick="loadAdminLogs()">🔄 Оновити</button>
   <button onclick="clearAdminLogs()" class="danger">🗑️ Очистити</button>
-  <div id="adminLogs" class="log-box"></div>
-</div>
-
-<div class="section">
-  <h3>📊 СТАТИСТИКА СЕРВЕРУ</h3>
-  <div id="stats" class="stats-grid"></div>
-  <button onclick="loadStats()" class="success">🔄 Оновити статистику</button>
+  <div id="adminLogsList" class="log-box"></div>
 </div>
 
 <div class="section">
   <h3>🎮 ІГРОВА ЕКОНОМІКА</h3>
-  <div class="control-group">
-    <button onclick="resetAllPlayers()" class="danger">⚠️ СКИНУТИ ВСІХ ГРАВЦІВ</button>
-    <button onclick="giveAllPlayersBonus()" class="success">🎁 БОНУС ВСІМ ГРАВЦЯМ</button>
-    <button onclick="setGameSettings()">⚙️ Налаштування гри</button>
-    <button onclick="showTopPlayers()">🏆 ТОП-10 гравців</button>
-  </div>
-  <div id="gameSettings" style="margin-top: 15px;"></div>
-  <div id="topPlayers" style="margin-top: 15px;"></div>
+  <button onclick="giveAllBonus()" class="success">🎁 БОНУС ВСІМ</button>
+  <button onclick="resetAllPlayers()" class="danger">⚠️ СКИНУТИ ВСІХ</button>
+  <button onclick="showTopPlayers()">🏆 ТОП-10</button>
+  <div id="topPlayersList" style="margin-top: 15px;"></div>
 </div>
 
 <div class="section">
-  <h3>📤 ІМПОРТ/ЕКСПОРТ</h3>
-  <button onclick="exportFullDatabase()" class="warning">💾 Експорт повної БД (JSON)</button>
-  <button onclick="showImportForm()">📥 Імпорт даних</button>
-  <button onclick="backupDatabase()">💿 Створити резервну копію</button>
-  <div id="importArea" style="display: none; margin-top: 15px;">
-    <textarea id="importData" rows="5" cols="50" placeholder="Вставте JSON дані для імпорту..."></textarea>
-    <button onclick="importData()">Імпортувати</button>
-  </div>
-</div>
-
-<div class="section">
-  <button onclick="logout()" class="danger" style="float: right;">🚪 ВИЙТИ</button>
+  <button onclick="doLogout()" class="danger" style="float: right;">🚪 ВИЙТИ</button>
   <div style="clear: both;"></div>
 </div>
 
-<div id="output" style="margin-top: 20px; background: rgba(0,20,0,0.8); padding: 12px; border: 1px solid #0f0; border-radius: 8px;">
-  <pre id="consoleOutput">✅ Система готова...</pre>
+<div id="consoleOutput" style="margin-top: 20px; background: #0a0f0a; padding: 10px; border: 1px solid #0f0; border-radius: 8px;">
+  <pre>✅ Система готова...</pre>
 </div>
 
 </div>
@@ -430,592 +319,282 @@
 </div>
 
 <script>
-const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
-const PASSWORD = "228ff";
-let interval = null;
-let allPlayers = [];
-let botToken = localStorage.getItem('botToken') || '';
+const DB_URL = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
+const ADMIN_PASSWORD = "228ff";
 
-// Збереження токена
-function saveBotToken() {
-  const token = document.getElementById("botToken").value.trim();
-  if (token) {
-    botToken = token;
-    localStorage.setItem('botToken', token);
-    addConsoleMessage("✅ Токен бота збережено", "success");
-    testBotConnection();
-  } else {
-    alert("Введіть токен бота");
-  }
-}
+let autoRefresh = null;
 
-// Перевірка підключення до бота
-async function testBotConnection() {
-  if (!botToken) {
-    document.getElementById("botStatus").innerHTML = '<span class="status-error">❌ Токен не встановлено</span>';
-    return;
-  }
+function checkLogin() {
+  const pass = document.getElementById("adminPassword").value;
   
-  try {
-    const response = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
-    const data = await response.json();
-    if (data.ok) {
-      document.getElementById("botStatus").innerHTML = `<span class="status-ok">✅ Бот підключено: @${data.result.username}</span>`;
-      addConsoleMessage(`✅ Бот підключено: @${data.result.username}`);
-    } else {
-      document.getElementById("botStatus").innerHTML = '<span class="status-error">❌ Помилка підключення</span>';
-    }
-  } catch(e) {
-    document.getElementById("botStatus").innerHTML = '<span class="status-error">❌ Не вдалося підключитися до Telegram API</span>';
-  }
-}
-
-// Відправка повідомлення через Telegram API
-async function sendTelegramMessage(chatId, message) {
-  if (!botToken) {
-    addConsoleMessage("❌ Токен бота не встановлено!", "error");
-    return false;
-  }
-  
-  try {
-    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: message,
-        parse_mode: 'HTML'
-      })
-    });
-    const data = await response.json();
-    return data.ok;
-  } catch(e) {
-    addConsoleMessage(`❌ Помилка відправки: ${e.message}`, "error");
-    return false;
-  }
-}
-
-// Розсилка всім
-async function sendToAll() {
-  const message = document.getElementById("broadcastMsg").value.trim();
-  if (!message) return alert("Введіть текст повідомлення");
-  if (!botToken) return alert("❌ Спочатку налаштуйте токен бота!");
-  if (!confirm(`📢 Розіслати ВСІМ гравцям?\n\n"${message}"\n\nПродовжити?`)) return;
-  
-  const users = await get("users");
-  let success = 0;
-  let fail = 0;
-  
-  for (let key in users) {
-    const user = users[key];
-    if (user.telegram_id) {
-      const result = await sendTelegramMessage(user.telegram_id, 
-        `📢 *РОЗСИЛКА ВІД АДМІНА*\n\n${message}\n\n📅 ${new Date().toLocaleString('uk-UA')}`
-      );
-      if (result) success++; else fail++;
-      await delay(50); // Затримка щоб не заблокували
-    }
-  }
-  
-  addConsoleMessage(`📢 Розсилка завершена: успішно ${success}, помилок ${fail}`);
-  alert(`✅ Розсилку отримали ${success} гравців\n❌ Не отримали ${fail} (немає telegram_id)`);
-  logAdminAction(`Розіслав повідомлення всім: успішно ${success}, помилок ${fail}`);
-  document.getElementById("broadcastMsg").value = "";
-}
-
-// Розсилка тільки VIP
-async function sendToVIP() {
-  const message = document.getElementById("broadcastMsg").value.trim();
-  if (!message) return alert("Введіть текст повідомлення");
-  if (!botToken) return alert("❌ Спочатку налаштуйте токен бота!");
-  if (!confirm(`💎 Розіслати ТІЛЬКИ VIP гравцям?\n\n"${message}"\n\nПродовжити?`)) return;
-  
-  const users = await get("users");
-  let success = 0;
-  let fail = 0;
-  
-  for (let key in users) {
-    const user = users[key];
-    if (user.items?.vip && user.telegram_id) {
-      const result = await sendTelegramMessage(user.telegram_id,
-        `💎 *VIP РОЗСИЛКА ВІД АДМІНА*\n\n${message}\n\n📅 ${new Date().toLocaleString('uk-UA')}`
-      );
-      if (result) success++; else fail++;
-      await delay(50);
-    }
-  }
-  
-  addConsoleMessage(`💎 VIP-розсилка: успішно ${success}, помилок ${fail}`);
-  alert(`✅ VIP-розсилку отримали ${success} гравців`);
-  logAdminAction(`VIP-розсилка: ${success} отримали`);
-}
-
-function showSendToOneForm() {
-  const area = document.getElementById("sendToOneArea");
-  area.style.display = area.style.display === "none" ? "block" : "none";
-}
-
-// Відправка одному гравцю
-async function sendToOne() {
-  const nick = document.getElementById("singleNick").value.trim();
-  const message = document.getElementById("broadcastMsg").value.trim();
-  
-  if (!nick) return alert("Введіть нікнейм гравця");
-  if (!message) return alert("Введіть текст повідомлення");
-  if (!botToken) return alert("❌ Спочатку налаштуйте токен бота!");
-  
-  const user = await get(`users/${nick}`);
-  if (!user.name) return alert("❌ Гравця не знайдено");
-  
-  if (!user.telegram_id) {
-    alert("⚠️ У цього гравця немає telegram_id. Повідомлення буде збережено в боті.");
-    // Зберігаємо повідомлення в Firebase
-    if (!user.messages) user.messages = [];
-    user.messages.push({
-      from: "Адмін",
-      text: message,
-      time: new Date().toLocaleString("uk-UA"),
-      read: false
-    });
-    await put(`users/${nick}`, user);
-    addConsoleMessage(`📨 Повідомлення збережено для ${nick} (немає Telegram)`);
-    alert("✅ Повідомлення збережено! Гравець побачить його при наступному вході.");
-  } else {
-    const result = await sendTelegramMessage(user.telegram_id,
-      `👤 *ОСОБИСТЕ ПОВІДОМЛЕННЯ ВІД АДМІНА*\n\n${message}\n\n📅 ${new Date().toLocaleString('uk-UA')}`
-    );
-    if (result) {
-      addConsoleMessage(`📨 Повідомлення надіслано ${nick} в Telegram`);
-      alert("✅ Повідомлення надіслано в Telegram!");
-    } else {
-      alert("❌ Не вдалося надіслати повідомлення");
-    }
-  }
-  
-  logAdminAction(`Надіслав повідомлення гравцю ${nick}`);
-  document.getElementById("singleNick").value = "";
-}
-
-// Відправка прямого Telegram повідомлення (якщо є telegram_id)
-async function sendDirectTelegram() {
-  const nick = document.getElementById("nick").value.trim();
-  if (!nick) return alert("Введіть нікнейм");
-  if (!botToken) return alert("❌ Спочатку налаштуйте токен бота!");
-  
-  const user = await get(`users/${nick}`);
-  if (!user.name) return alert("❌ Гравця не знайдено");
-  
-  if (!user.telegram_id) {
-    alert("⚠️ У цього гравця немає telegram_id. Використайте кнопку 'Повідомлення (в бот)'");
-    return;
-  }
-  
-  const message = prompt("📨 Введіть текст повідомлення для відправки в Telegram:");
-  if (!message) return;
-  
-  const result = await sendTelegramMessage(user.telegram_id,
-    `👤 *ПОВІДОМЛЕННЯ ВІД АДМІНА*\n\n${message}\n\n📅 ${new Date().toLocaleString('uk-UA')}`
-  );
-  
-  if (result) {
-    addConsoleMessage(`📨 Повідомлення надіслано ${nick} в Telegram`);
-    alert("✅ Повідомлення надіслано!");
-    logAdminAction(`Надіслав Telegram повідомлення ${nick}`);
-  } else {
-    alert("❌ Помилка відправки");
-  }
-}
-
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// ========== ІНШІ ФУНКЦІЇ (з попередньої версії) ==========
-function login() {
-  const input = document.getElementById("pass").value.trim();
-  if (input === PASSWORD) {
+  if (pass === ADMIN_PASSWORD) {
     document.getElementById("login").style.display = "none";
     document.getElementById("content").style.display = "block";
-    document.getElementById("error").textContent = "";
-    document.getElementById("botToken").value = botToken;
-    if (botToken) testBotConnection();
-    startAutoUpdate();
+    document.getElementById("loginError").innerHTML = "";
+    startAutoRefresh();
     loadPlayers();
     loadLogs();
     loadStats();
     loadAdminLogs();
+    addLog("✅ Успішний вхід");
     logAdminAction("Увійшов в адмін-панель");
-    addConsoleMessage("✅ Успішний вхід в адмін-панель");
   } else {
-    document.getElementById("error").textContent = "❌ Неправильний пароль!";
+    document.getElementById("loginError").innerHTML = "❌ Неправильний пароль!";
+    addLog("❌ Невдала спроба входу", "error");
   }
 }
 
-function logout() {
+document.addEventListener("DOMContentLoaded", function() {
+  const passInput = document.getElementById("adminPassword");
+  if (passInput) {
+    passInput.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        checkLogin();
+      }
+    });
+  }
+});
+
+function doLogout() {
   if (confirm("Вийти?")) {
-    clearInterval(interval);
+    if (autoRefresh) clearInterval(autoRefresh);
     document.getElementById("content").style.display = "none";
     document.getElementById("login").style.display = "block";
-    document.getElementById("pass").value = "";
-    addConsoleMessage("👋 Вихід з адмін-панелі");
+    document.getElementById("adminPassword").value = "";
+    addLog("👋 Вихід");
   }
 }
 
-function startAutoUpdate() {
-  if (interval) clearInterval(interval);
-  interval = setInterval(() => {
+function startAutoRefresh() {
+  if (autoRefresh) clearInterval(autoRefresh);
+  autoRefresh = setInterval(() => {
     loadPlayers();
     loadLogs();
     loadStats();
   }, 15000);
 }
 
-async function get(path) {
+async function fetchData(path) {
   try {
-    const r = await fetch(DB + path + ".json");
-    return await r.json() || {};
-  } catch (e) {
-    addConsoleMessage(`❌ Помилка: ${e.message}`, "error");
+    const res = await fetch(DB_URL + path + ".json");
+    return await res.json() || {};
+  } catch(e) {
+    addLog("❌ Помилка: " + e.message, "error");
     return {};
   }
 }
 
-async function put(path, data) {
-  await fetch(DB + path + ".json", {
+async function saveData(path, data) {
+  await fetch(DB_URL + path + ".json", {
     method: "PUT",
     body: JSON.stringify(data)
   });
 }
 
-async function del(path) {
-  await fetch(DB + path + ".json", { method: "DELETE" });
+async function deleteData(path) {
+  await fetch(DB_URL + path + ".json", { method: "DELETE" });
 }
 
-async function loadPlayers() {
-  const users = await get("users");
-  allPlayers = users;
-  const container = document.getElementById("players");
-  const searchTerm = document.getElementById("searchNick")?.value.toLowerCase() || "";
+function previewMessage() {
+  const msg = document.getElementById("broadcastMsg").value.trim();
+  if (!msg) {
+    alert("Введіть текст повідомлення");
+    return;
+  }
+  const previewDiv = document.getElementById("previewMsg");
+  previewDiv.innerHTML = `<strong>📋 Текст уведомлення:</strong><br><pre style="margin-top: 5px; white-space: pre-wrap;">${msg}</pre>`;
+  previewDiv.style.display = "block";
+  setTimeout(() => {
+    previewDiv.style.display = "none";
+  }, 5000);
+}
 
-  if (!Object.keys(users).length) {
+// ========== РОЗСИЛКА ДЛЯ ВСІХ ГРАВЦІВ (зберігається в Firebase) ==========
+async function sendToAllSave() {
+  const msg = document.getElementById("broadcastMsg").value.trim();
+  if (!msg) return alert("Введіть текст повідомлення");
+  if (!confirm(`📢 Надіслати повідомлення ВСІМ гравцям?\n\nВони побачать його при наступному вході в гру.\n\n"${msg}"`)) return;
+  
+  const users = await fetchData("users");
+  let count = 0;
+  
+  addLog("💾 Зберігаю повідомлення для всіх гравців...");
+  
+  for (let key in users) {
+    const user = users[key];
+    if (!user.messages) user.messages = [];
+    user.messages.push({
+      from: "Адмін",
+      text: msg,
+      time: new Date().toLocaleString("uk-UA"),
+      read: false
+    });
+    await saveData(`users/${key}`, user);
+    count++;
+  }
+  
+  addLog(`💾 Повідомлення збережено для ${count} гравців`);
+  alert(`✅ Повідомлення збережено для ${count} гравців!\n📨 Вони побачать його при наступному вході в гру.`);
+  logAdminAction(`Зберіг повідомлення для всіх ${count} гравців`);
+  document.getElementById("broadcastMsg").value = "";
+}
+
+// ========== РОЗСИЛКА ТІЛЬКИ ДЛЯ VIP ==========
+async function sendToVIPSave() {
+  const msg = document.getElementById("broadcastMsg").value.trim();
+  if (!msg) return alert("Введіть текст повідомлення");
+  if (!confirm(`💎 Надіслати повідомлення ТІЛЬКИ VIP гравцям?\n\n"${msg}"`)) return;
+  
+  const users = await fetchData("users");
+  let count = 0;
+  
+  addLog("💎 VIP-розсилка...");
+  
+  for (let key in users) {
+    const user = users[key];
+    if (user.items?.vip) {
+      if (!user.messages) user.messages = [];
+      user.messages.push({
+        from: "Адмін (VIP)",
+        text: msg,
+        time: new Date().toLocaleString("uk-UA"),
+        read: false
+      });
+      await saveData(`users/${key}`, user);
+      count++;
+    }
+  }
+  
+  addLog(`💎 VIP-розсилка: збережено для ${count} VIP гравців`);
+  alert(`✅ VIP-повідомлення збережено для ${count} гравців!`);
+  logAdminAction(`VIP-розсилка: збережено для ${count} гравців`);
+  document.getElementById("broadcastMsg").value = "";
+}
+
+// ========== ІНШІ ФУНКЦІЇ ==========
+async function loadPlayers() {
+  const users = await fetchData("users");
+  const search = document.getElementById("searchNick")?.value.toLowerCase() || "";
+  const container = document.getElementById("playersList");
+  
+  if (Object.keys(users).length === 0) {
     container.innerHTML = "<pre>📭 Гравців немає</pre>";
     return;
   }
-
-  let filtered = users;
-  if (searchTerm) {
-    filtered = {};
-    for (let key in users) {
-      if (users[key].name?.toLowerCase().includes(searchTerm) || key.toLowerCase().includes(searchTerm)) {
-        filtered[key] = users[key];
-      }
-    }
-  }
-
-  let html = ``
-    <thead>
-      <tr><th>Нікнейм</th><th>💰 Гроші</th><th>⭐ Рівень</th><th>🏆 Досягнення</th><th>📊 Ігор</th><th>🎯 Точність</th><th>📱 Telegram ID</th><th>📅 Реєстрація</th></tr>
-    </thead>
-    <tbody>`;
   
-  for (let key in filtered) {
-    const u = filtered[key];
-    const totalAnswers = (u.totalCorrect || 0) + (u.totalWrong || 0);
-    const accuracy = totalAnswers > 0 ? Math.round((u.totalCorrect / totalAnswers) * 100) : 0;
+  let html = ' <thead> <th>Нікнейм</th><th>💰 Гроші</th><th>⭐ Рівень</th><th>🏆 Досягнення</th><th>📊 Ігор</th><th>🎯 Точність</th><th>📱 Telegram ID</th> </thead><tbody>';
+  
+  for (let key in users) {
+    const u = users[key];
+    if (search && !u.name?.toLowerCase().includes(search) && !key.toLowerCase().includes(search)) continue;
+    
+    const total = (u.totalCorrect || 0) + (u.totalWrong || 0);
+    const accuracy = total > 0 ? Math.round((u.totalCorrect / total) * 100) : 0;
     const achievements = [];
     if (u.items?.vip) achievements.push('<span class="badge badge-vip">VIP</span>');
     if (u.items?.gold_frame) achievements.push('<span class="badge badge-gold">🏅</span>');
     if (u.items?.crown) achievements.push('<span class="badge badge-crown">👑</span>');
     
-    html += `<tr>
-      <td><strong>${u.name || key}</strong></td>
-      <td>${(u.points || 0).toLocaleString()} ₴</td>
-      <td>${u.lvl || 1}</td>
-      <td>${achievements.join(' ') || '—'}</td>
-      <td>${u.themeAttempts ? Object.keys(u.themeAttempts).length : 0}</td>
-      <td>${accuracy}%</td>
-      <td>${u.telegram_id ? u.telegram_id : '—'}</td>
-      <td><small>${u.registeredAt ? new Date(u.registeredAt).toLocaleDateString('uk-UA') : '—'}</small></td>
-    </tr>`;
+    html += `  
+      <tr>
+        <td><strong>${u.name || key}</strong>\\
+        <td>${(u.points || 0).toLocaleString()} ₴\\
+        <td>${u.lvl || 1}\\
+        <td>${achievements.join(' ') || '—'}\\
+        <td>${u.themeAttempts ? Object.keys(u.themeAttempts).length : 0}\\
+        <td>${accuracy}%\\
+        <td>${u.telegram_id || '—'}\\
+      `;
   }
-  html += '</tbody></table>';
+  html += '</tbody> </div>';
   container.innerHTML = html;
 }
 
-function filterPlayers() { loadPlayers(); }
-
-async function delUser() {
-  const nick = document.getElementById("nick").value.trim();
-  if (!nick) return alert("Введіть нікнейм");
-  if (!confirm(`Видалити ${nick}?`)) return;
-  await del(`users/${nick}`);
-  loadPlayers();
-  logAdminAction(`Видалив гравця: ${nick}`);
-  addConsoleMessage(`🗑️ Видалено: ${nick}`);
-}
-
 async function addMoney() {
-  const nick = document.getElementById("nick").value.trim();
+  const nick = document.getElementById("playerNick").value.trim();
   if (!nick) return alert("Введіть нік");
-  const amt = Number(prompt("Скільки додати?"));
-  if (!amt || amt <= 0) return;
-  const user = await get(`users/${nick}`);
+  const amt = prompt("Скільки додати?");
+  if (!amt || isNaN(amt)) return;
+  const user = await fetchData(`users/${nick}`);
   if (!user.name) return alert("Гравця не знайдено");
-  user.points = (user.points || 0) + amt;
-  await put(`users/${nick}`, user);
+  user.points = (user.points || 0) + Number(amt);
+  await saveData(`users/${nick}`, user);
   loadPlayers();
-  addConsoleMessage(`💰 +${amt} ₴ для ${nick}`);
+  addLog(`💰 +${amt} ₴ для ${nick}`);
 }
 
 async function subMoney() {
-  const nick = document.getElementById("nick").value.trim();
+  const nick = document.getElementById("playerNick").value.trim();
   if (!nick) return alert("Введіть нік");
-  const amt = Number(prompt("Скільки відняти?"));
-  if (!amt || amt <= 0) return;
-  const user = await get(`users/${nick}`);
+  const amt = prompt("Скільки відняти?");
+  if (!amt || isNaN(amt)) return;
+  const user = await fetchData(`users/${nick}`);
   if (!user.name) return alert("Гравця не знайдено");
-  user.points = Math.max(0, (user.points || 0) - amt);
-  await put(`users/${nick}`, user);
+  user.points = Math.max(0, (user.points || 0) - Number(amt));
+  await saveData(`users/${nick}`, user);
   loadPlayers();
-  addConsoleMessage(`💸 -${amt} ₴ у ${nick}`);
+  addLog(`💸 -${amt} ₴ у ${nick}`);
 }
 
-async function setLevel() {
-  const nick = document.getElementById("nick").value.trim();
+async function setPlayerLevel() {
+  const nick = document.getElementById("playerNick").value.trim();
   if (!nick) return alert("Введіть нік");
-  const lvl = Number(prompt("Новий рівень (1-100):"));
-  if (isNaN(lvl) || lvl < 1 || lvl > 100) return;
-  const user = await get(`users/${nick}`);
+  const lvl = prompt("Новий рівень (1-100):");
+  if (!lvl || isNaN(lvl)) return;
+  const user = await fetchData(`users/${nick}`);
   if (!user.name) return alert("Гравця не знайдено");
-  user.lvl = lvl;
-  await put(`users/${nick}`, user);
+  user.lvl = Number(lvl);
+  await saveData(`users/${nick}`, user);
   loadPlayers();
-  addConsoleMessage(`⭐ Рівень ${nick} → ${lvl}`);
+  addLog(`⭐ Рівень ${nick} → ${lvl}`);
 }
 
-async function resetPlayer() {
-  const nick = document.getElementById("nick").value.trim();
+async function resetPlayerProgress() {
+  const nick = document.getElementById("playerNick").value.trim();
   if (!nick) return alert("Введіть нік");
   if (!confirm(`Скинути прогрес ${nick}?`)) return;
-  const user = await get(`users/${nick}`);
+  const user = await fetchData(`users/${nick}`);
   if (!user.name) return alert("Гравця не знайдено");
   user.points = 0;
   user.totalCorrect = 0;
   user.totalWrong = 0;
   user.themeAttempts = {};
   user.lvl = 1;
-  await put(`users/${nick}`, user);
+  await saveData(`users/${nick}`, user);
   loadPlayers();
-  addConsoleMessage(`🔄 Скинуто прогрес ${nick}`);
+  addLog(`🔄 Скинуто ${nick}`);
 }
 
-async function giveAchievement() {
-  const nick = document.getElementById("nick").value.trim();
+async function deletePlayer() {
+  const nick = document.getElementById("playerNick").value.trim();
   if (!nick) return alert("Введіть нік");
-  const achievement = prompt("Досягнення: vip/gold_frame/crown/fire/shield");
-  if (!achievement) return;
-  const user = await get(`users/${nick}`);
+  if (!confirm(`Видалити ${nick}?`)) return;
+  await deleteData(`users/${nick}`);
+  loadPlayers();
+  addLog(`🗑️ Видалено ${nick}`);
+}
+
+async function giveAchievementToPlayer() {
+  const nick = document.getElementById("playerNick").value.trim();
+  if (!nick) return alert("Введіть нік");
+  const ach = prompt("Досягнення: vip, gold_frame, crown, fire, shield");
+  if (!ach) return;
+  const user = await fetchData(`users/${nick}`);
   if (!user.name) return alert("Гравця не знайдено");
   if (!user.items) user.items = {};
-  user.items[achievement] = true;
-  await put(`users/${nick}`, user);
+  user.items[ach] = true;
+  await saveData(`users/${nick}`, user);
   loadPlayers();
-  addConsoleMessage(`🏆 +${achievement} для ${nick}`);
+  addLog(`🏆 +${ach} для ${nick}`);
 }
 
-async function giveAllPlayersBonus() {
-  const amount = Number(prompt("Скільки грошей видати всім?"));
-  if (!amount || amount <= 0) return;
-  if (!confirm(`Видати ${amount} ₴ всім?`)) return;
-  const users = await get("users");
-  let count = 0;
-  for (let key in users) {
-    users[key].points = (users[key].points || 0) + amount;
-    await put(`users/${key}`, users[key]);
-    count++;
-  }
-  loadPlayers();
-  addConsoleMessage(`🎁 Бонус ${amount} ₴ отримали ${count} гравців`);
-}
-
-async function resetAllPlayers() {
-  if (!confirm("⚠️ СКИНУТИ ВСІХ ГРАВЦІВ?")) return;
-  const users = await get("users");
-  let count = 0;
-  for (let key in users) {
-    users[key].points = 0;
-    users[key].totalCorrect = 0;
-    users[key].totalWrong = 0;
-    users[key].themeAttempts = {};
-    users[key].lvl = 1;
-    await put(`users/${key}`, users[key]);
-    count++;
-  }
-  loadPlayers();
-  addConsoleMessage(`⚠️ Скинуто ${count} гравців`);
-}
-
-async function loadLogs() {
-  const logs = await get("user_logs");
-  const container = document.getElementById("logs");
-  const filter = document.getElementById("filterLogs")?.value.toLowerCase() || "";
-
-  if (!Object.keys(logs).length) {
-    container.innerHTML = "<pre>📭 Логів немає</pre>";
-    return;
-  }
-
-  let logsArray = Object.values(logs);
-  if (filter) {
-    logsArray = logsArray.filter(entry => entry.game_nick?.toLowerCase().includes(filter));
-  }
-  logsArray.sort((a,b) => new Date(b.time) - new Date(a.time));
-
-  let html = '';
-  logsArray.slice(0, 500).forEach(entry => {
-    const tg = entry.tg_username ? `<span class="badge">@${entry.tg_username}</span>` : '<span class="badge">web</span>';
-    html += `<div class="log-entry">[${entry.time}] ${tg} — <strong>${entry.game_nick || '—'}</strong>${entry.telegram_id ? ` (ID: ${entry.telegram_id})` : ''}</div>`;
-  });
-  container.innerHTML = html;
-}
-
-function filterLogs() { loadLogs(); }
-
-async function clearLogs() {
-  if (!confirm("Очистити логи?")) return;
-  await del("user_logs");
-  loadLogs();
-  addConsoleMessage("🗑️ Логи очищено");
-}
-
-async function exportLogs() {
-  const logs = await get("user_logs");
-  const blob = new Blob([JSON.stringify(logs, null, 2)], {type: "application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `logs_${new Date().toISOString().slice(0,19)}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-async function loadAdminLogs() {
-  const logs = await get("admin_logs");
-  const container = document.getElementById("adminLogs");
-  if (!Object.keys(logs).length) {
-    container.innerHTML = "<pre>📭 Логів адмінів немає</pre>";
-    return;
-  }
-  let html = '';
-  Object.values(logs).sort((a,b) => new Date(b.time) - new Date(a.time)).slice(0, 200).forEach(entry => {
-    html += `<div class="log-entry">[${entry.time}] 👤 ${entry.nick || '—'}: ${entry.action}</div>`;
-  });
-  container.innerHTML = html;
-}
-
-async function clearAdminLogs() {
-  if (!confirm("Очистити логи адмінів?")) return;
-  await del("admin_logs");
-  loadAdminLogs();
-}
-
-async function loadStats() {
-  const users = await get("users");
-  let count = Object.keys(users).length;
-  let totalMoney = 0, totalCorrect = 0, totalWrong = 0, playersWithVIP = 0, withTelegram = 0;
-  for (let k in users) {
-    totalMoney += users[k].points || 0;
-    totalCorrect += users[k].totalCorrect || 0;
-    totalWrong += users[k].totalWrong || 0;
-    if (users[k].items?.vip) playersWithVIP++;
-    if (users[k].telegram_id) withTelegram++;
-  }
-  const totalAnswers = totalCorrect + totalWrong;
-  const avgAccuracy = totalAnswers > 0 ? Math.round((totalCorrect / totalAnswers) * 100) : 0;
-  const avgMoney = count ? Math.floor(totalMoney / count) : 0;
-  
-  document.getElementById("stats").innerHTML = `
-    <div class="stat-card"><div class="stat-number">${count}</div><div>👥 Гравців</div></div>
-    <div class="stat-card"><div class="stat-number">${totalMoney.toLocaleString()} ₴</div><div>💰 Гроші в грі</div></div>
-    <div class="stat-card"><div class="stat-number">${avgMoney.toLocaleString()} ₴</div><div>📊 Середній баланс</div></div>
-    <div class="stat-card"><div class="stat-number">${totalCorrect}</div><div>✅ Правильних</div></div>
-    <div class="stat-card"><div class="stat-number">${totalWrong}</div><div>❌ Неправильних</div></div>
-    <div class="stat-card"><div class="stat-number">${avgAccuracy}%</div><div>🎯 Точність</div></div>
-    <div class="stat-card"><div class="stat-number">${playersWithVIP}</div><div>💎 VIP гравців</div></div>
-    <div class="stat-card"><div class="stat-number">${withTelegram}</div><div>📱 З Telegram</div></div>
-  `;
-}
-
-async function exportFullDatabase() {
-  const data = await get("");
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `ukrmova_full_${new Date().toISOString().slice(0,19)}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-async function backupDatabase() {
-  const data = await get("");
-  const backups = await get("backups") || {};
-  backups[`backup_${new Date().toISOString().slice(0,19)}`] = { date: new Date().toISOString(), data: data };
-  await put("backups", backups);
-  alert("✅ Резервна копія створена!");
-}
-
-function exportPlayersData() {
-  if (!allPlayers) return alert("Немає даних");
-  const blob = new Blob([JSON.stringify(allPlayers, null, 2)], {type: "application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `players_${new Date().toISOString().slice(0,19)}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function showImportForm() {
-  const area = document.getElementById("importArea");
-  area.style.display = area.style.display === "none" ? "block" : "none";
-}
-
-async function importData() {
-  const dataText = document.getElementById("importData").value;
-  if (!dataText) return;
-  try {
-    const data = JSON.parse(dataText);
-    if (!confirm("Імпорт перезапише дані?")) return;
-    await put("", data);
-    alert("✅ Імпорт виконано!");
-    loadPlayers();
-    loadStats();
-  } catch(e) { alert("Помилка: " + e.message); }
-}
-
-async function sendMessageToPlayer() {
-  const nick = document.getElementById("nick").value.trim();
+async function showPlayerStats() {
+  const nick = document.getElementById("playerNick").value.trim();
   if (!nick) return alert("Введіть нік");
-  const message = prompt("Текст повідомлення:");
-  if (!message) return;
-  const user = await get(`users/${nick}`);
-  if (!user.name) return alert("Гравця не знайдено");
-  if (!user.messages) user.messages = [];
-  user.messages.push({ from: "Адмін", text: message, time: new Date().toLocaleString("uk-UA"), read: false });
-  await put(`users/${nick}`, user);
-  alert("✅ Повідомлення збережено!");
-  addConsoleMessage(`📨 Повідомлення для ${nick}`);
-}
-
-async function viewPlayerStats() {
-  const nick = document.getElementById("nick").value.trim();
-  if (!nick) return alert("Введіть нік");
-  const user = await get(`users/${nick}`);
+  const user = await fetchData(`users/${nick}`);
   if (!user.name) return alert("Гравця не знайдено");
   const total = (user.totalCorrect || 0) + (user.totalWrong || 0);
   const accuracy = total > 0 ? Math.round((user.totalCorrect / total) * 100) : 0;
-  const modal = document.getElementById("playerModal");
   document.getElementById("modalStats").innerHTML = `
     <p><strong>👤 Нік:</strong> ${user.name}</p>
     <p><strong>💰 Гроші:</strong> ${(user.points || 0).toLocaleString()} ₴</p>
@@ -1025,70 +604,197 @@ async function viewPlayerStats() {
     <p><strong>🎯 Точність:</strong> ${accuracy}%</p>
     <p><strong>📱 Telegram ID:</strong> ${user.telegram_id || '—'}</p>
   `;
-  modal.style.display = "flex";
+  document.getElementById("playerModal").style.display = "flex";
 }
 
 function closeModal() {
   document.getElementById("playerModal").style.display = "none";
 }
 
+function showAddPlayer() {
+  const nick = prompt("Нікнейм:");
+  if (!nick) return;
+  const pass = prompt("Пароль:");
+  if (!pass) return;
+  createPlayer(nick, pass);
+}
+
+async function createPlayer(nick, pass) {
+  const existing = await fetchData(`users/${nick}`);
+  if (existing.name) return alert("Гравець вже існує!");
+  const newUser = {
+    name: nick,
+    pass: pass,
+    points: 500,
+    lvl: 1,
+    items: {},
+    themeAttempts: {},
+    totalCorrect: 0,
+    totalWrong: 0,
+    gameHistory: [],
+    registeredAt: new Date().toISOString()
+  };
+  await saveData(`users/${nick}`, newUser);
+  loadPlayers();
+  addLog(`✅ Створено ${nick}`);
+}
+
+async function loadLogs() {
+  const logs = await fetchData("user_logs");
+  const filter = document.getElementById("logFilter")?.value.toLowerCase() || "";
+  const container = document.getElementById("logsList");
+  
+  if (Object.keys(logs).length === 0) {
+    container.innerHTML = "<pre>📭 Логів немає</pre>";
+    return;
+  }
+  
+  let items = Object.values(logs);
+  if (filter) {
+    items = items.filter(l => l.game_nick?.toLowerCase().includes(filter));
+  }
+  items.sort((a,b) => new Date(b.time) - new Date(a.time));
+  
+  let html = "";
+  items.slice(0, 300).forEach(l => {
+    html += `<div class="log-entry">[${l.time}] <strong>${l.game_nick || '—'}</strong> ${l.tg_username ? `(@${l.tg_username})` : ''}</div>`;
+  });
+  container.innerHTML = html;
+}
+
+async function clearLogs() {
+  if (!confirm("Очистити логи?")) return;
+  await deleteData("user_logs");
+  loadLogs();
+  addLog("🗑️ Логи очищено");
+}
+
+async function loadAdminLogs() {
+  const logs = await fetchData("admin_logs");
+  const container = document.getElementById("adminLogsList");
+  
+  if (Object.keys(logs).length === 0) {
+    container.innerHTML = "<pre>📭 Логів адмінів немає</pre>";
+    return;
+  }
+  
+  let items = Object.values(logs);
+  items.sort((a,b) => new Date(b.time) - new Date(a.time));
+  
+  let html = "";
+  items.slice(0, 200).forEach(l => {
+    html += `<div class="log-entry">[${l.time}] 👤 ${l.nick || '—'}: ${l.action}</div>`;
+  });
+  container.innerHTML = html;
+}
+
+async function clearAdminLogs() {
+  if (!confirm("Очистити логи адмінів?")) return;
+  await deleteData("admin_logs");
+  loadAdminLogs();
+  addLog("🗑️ Логи адмінів очищено");
+}
+
+async function loadStats() {
+  const users = await fetchData("users");
+  let count = 0, totalMoney = 0, totalCorrect = 0, totalWrong = 0, vipCount = 0, withTelegram = 0;
+  
+  for (let key in users) {
+    const u = users[key];
+    count++;
+    totalMoney += u.points || 0;
+    totalCorrect += u.totalCorrect || 0;
+    totalWrong += u.totalWrong || 0;
+    if (u.items?.vip) vipCount++;
+    if (u.telegram_id) withTelegram++;
+  }
+  
+  const totalAnswers = totalCorrect + totalWrong;
+  const accuracy = totalAnswers > 0 ? Math.round((totalCorrect / totalAnswers) * 100) : 0;
+  const avgMoney = count ? Math.floor(totalMoney / count) : 0;
+  
+  document.getElementById("statsPanel").innerHTML = `
+    <div class="stat-card"><div class="stat-number">${count}</div><div>👥 Всього гравців</div></div>
+    <div class="stat-card"><div class="stat-number">${totalMoney.toLocaleString()} ₴</div><div>💰 Всього грошей</div></div>
+    <div class="stat-card"><div class="stat-number">${avgMoney.toLocaleString()} ₴</div><div>📊 Середній баланс</div></div>
+    <div class="stat-card"><div class="stat-number">${totalCorrect}</div><div>✅ Правильних</div></div>
+    <div class="stat-card"><div class="stat-number">${totalWrong}</div><div>❌ Неправильних</div></div>
+    <div class="stat-card"><div class="stat-number">${accuracy}%</div><div>🎯 Точність</div></div>
+    <div class="stat-card"><div class="stat-number">${vipCount}</div><div>💎 VIP гравців</div></div>
+    <div class="stat-card"><div class="stat-number">${withTelegram}</div><div>📱 З Telegram ID</div></div>
+  `;
+}
+
+async function giveAllBonus() {
+  const amt = prompt("Скільки грошей видати ВСІМ гравцям?");
+  if (!amt || isNaN(amt)) return;
+  if (!confirm(`Видати ${amt} ₴ всім гравцям?`)) return;
+  const users = await fetchData("users");
+  let count = 0;
+  for (let key in users) {
+    users[key].points = (users[key].points || 0) + Number(amt);
+    await saveData(`users/${key}`, users[key]);
+    count++;
+  }
+  loadPlayers();
+  loadStats();
+  addLog(`🎁 Бонус ${amt} ₴ отримали ${count} гравців`);
+  logAdminAction(`Видав бонус ${amt} ₴ всім ${count} гравцям`);
+}
+
+async function resetAllPlayers() {
+  if (!confirm("⚠️ СКИНУТИ ВСІХ ГРАВЦІВ? Цю дію НЕ МОЖНА СКАСУВАТИ! ⚠️")) return;
+  const users = await fetchData("users");
+  let count = 0;
+  for (let key in users) {
+    users[key].points = 0;
+    users[key].totalCorrect = 0;
+    users[key].totalWrong = 0;
+    users[key].themeAttempts = {};
+    users[key].lvl = 1;
+    await saveData(`users/${key}`, users[key]);
+    count++;
+  }
+  loadPlayers();
+  loadStats();
+  addLog(`⚠️ Скинуто всіх ${count} гравців`);
+  logAdminAction(`Скинув всіх ${count} гравців`);
+}
+
 async function showTopPlayers() {
-  const users = await get("users");
+  const users = await fetchData("users");
   let players = [];
   for (let key in users) {
     players.push({ name: users[key].name || key, points: users[key].points || 0 });
   }
   players.sort((a,b) => b.points - a.points);
   players = players.slice(0, 10);
-  let html = '<h4>🏆 ТОП-10</h4> <table><tr><th>#</th><th>Нікнейм</th><th>💰 Гроші</th></tr>';
-  players.forEach((p, i) => { html += `<tr><td>${i+1}</td><td>${p.name}</td><td>${p.points.toLocaleString()} ₴</td></tr>`; });
-  html += '</table>';
-  document.getElementById("topPlayers").innerHTML = html;
-}
-
-async function setGameSettings() {
-  const points = prompt("Грошей за правильну відповідь:", "100");
-  if (points) await put("settings/points_per_question", Number(points));
-  const penalty = prompt("Штраф за неправильну:", "30");
-  if (penalty) await put("settings/penalty", Number(penalty));
-  alert("✅ Налаштування збережено!");
-}
-
-function showAddPlayerForm() {
-  const nick = prompt("Нікнейм:");
-  if (!nick) return;
-  const pass = prompt("Пароль:");
-  if (!pass) return;
-  createNewPlayer(nick, pass);
-}
-
-async function createNewPlayer(nick, pass) {
-  const existing = await get(`users/${nick}`);
-  if (existing.name) return alert("Гравець вже існує!");
-  await put(`users/${nick}`, {
-    name: nick, pass: pass, points: 500, lvl: 1, items: {},
-    themeAttempts: {}, totalCorrect: 0, totalWrong: 0, gameHistory: [],
-    registeredAt: new Date().toISOString()
+  
+  let html = '<h4>🏆 ТОП-10 гравців за грошима</h4>  <thead> <th>#</th><th>Нікнейм</th><th>💰 Гроші</th> </thead><tbody>';
+  players.forEach((p, i) => {
+    html += `    <tr><td>${i+1}</td><td>${p.name}</td><td>${p.points.toLocaleString()} ₴</td></tr>`;
   });
-  loadPlayers();
-  addConsoleMessage(`✅ Створено гравця: ${nick}`);
+  html += '</tbody> </div>';
+  document.getElementById("topPlayersList").innerHTML = html;
+}
+
+function addLog(msg, type = "info") {
+  const consoleDiv = document.getElementById("consoleOutput");
+  const time = new Date().toLocaleTimeString("uk-UA");
+  consoleDiv.innerHTML = `<span style="color: #0f0">[${time}] ${msg}</span>\n` + consoleDiv.innerHTML;
+  if (consoleDiv.children.length > 50) consoleDiv.removeChild(consoleDiv.lastChild);
 }
 
 function logAdminAction(action) {
-  fetch(DB + "admin_logs.json", {
+  fetch(DB_URL + "admin_logs.json", {
     method: "POST",
     body: JSON.stringify({ nick: "Адмін", action: action, time: new Date().toLocaleString("uk-UA") })
   });
 }
 
-function addConsoleMessage(msg, type = "info") {
-  const consoleDiv = document.getElementById("consoleOutput");
-  const time = new Date().toLocaleTimeString("uk-UA");
-  consoleDiv.innerHTML = `<span style="color: ${type === 'error' ? '#f44' : '#0f0'}">[${time}] ${msg}</span>\n` + consoleDiv.innerHTML;
-  if (consoleDiv.children.length > 50) consoleDiv.removeChild(consoleDiv.lastChild);
-}
-
-addConsoleMessage("🟢 Адмін-панель завантажена");
+addLog("🟢 Адмін-панель завантажена");
+addLog("🔑 Пароль: 228ff");
+addLog("📢 ВСІ гравці отримають повідомлення при наступному вході в гру!");
 </script>
 </body>
 </html>

@@ -13,21 +13,38 @@ let currentCorrectAnswer = '';
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
 
+// ================================================
+// ЗАПУСК ВІДЕО
+// ================================================
 window.onload = function() {
   const splash = document.getElementById('splash');
+  const video = document.getElementById('splash-video');
   const startBtn = document.getElementById('startBtn');
   
-  startBtn.onclick = function() {
-    splash.style.display = 'none';
-    tryAutoLogin();
-  };
+  if (video) {
+    video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
+    startBtn.onclick = function() {
+      startBtn.style.display = 'none';
+      video.muted = false;
+      video.currentTime = 0;
+      video.play().catch(e => {
+        console.error("Автозапуск заблоковано:", e);
+        video.muted = false;
+        video.play().catch(()=>{});
+      });
+    };
+    video.onended = function() {
+      splash.style.display = 'none';
+      tryAutoLogin();
+    };
+  }
   
   setTimeout(() => {
     if (splash && splash.style.display !== 'none') {
       splash.style.display = 'none';
       tryAutoLogin();
     }
-  }, 5000);
+  }, 70000);
 };
 
 function tryAutoLogin() {
@@ -50,11 +67,9 @@ async function auth() {
     return;
   }
   document.getElementById('auth-error').textContent = "Завантаження...";
-
   try {
     let r = await fetch(DB + "users/" + n + ".json");
     let d = await r.json();
-
     if (d) {
       if (d.pass !== p) {
         document.getElementById('auth-error').textContent = "Неправильний пароль!";
@@ -71,13 +86,10 @@ async function auth() {
       };
       await fetch(DB + "users/" + n + ".json", {method:'PUT', body:JSON.stringify(user)});
     }
-
     localStorage.setItem('un', n);
     localStorage.setItem('up', p);
-
     const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
     await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify({game_nick:n, time:now})});
-
     items = user.items || {gold_frame:false};
     if (!user.themeResults) user.themeResults = {};
     if (!user.regDate) user.regDate = new Date().toISOString().split('T')[0];
@@ -85,10 +97,6 @@ async function auth() {
     if (!user.avatarType) user.avatarType = 'emoji';
     if (!user.friends) user.friends = [];
     if (user.notifications === undefined) user.notifications = true;
-    
-    const notifToggle = document.getElementById('notificationsToggle');
-    if (notifToggle) notifToggle.checked = user.notifications !== false;
-    
     save();
     applyItems();
     update();
@@ -114,7 +122,7 @@ function update() {
 function applyItems() {
   if (!user) return;
   let nickDisplay = user.name;
-  if(items.gold_frame) nickDisplay += ' [Золото]';
+  if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
   if(items.crown) nickDisplay += ' 👑';
   if(items.fire) nickDisplay += ' 🔥';
   if(items.shield) nickDisplay += ' 🛡️';
@@ -127,7 +135,6 @@ function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
   const screen = document.getElementById(id);
   if (screen) screen.style.display = 'flex';
-  
   if (id === 'cabinet' && user && typeof loadCabinet === 'function') {
     loadCabinet();
   }
@@ -160,7 +167,7 @@ function toggleP() {
   const btn = document.getElementById('pen-btn');
   if (btn) {
     btn.innerText = pOn ? "ШТРАФИ: ВКЛ" : "ШТРАФИ: ВИКЛ";
-    btn.style.background = pOn ? "#f44336" : "#4caf50";
+    btn.style.background = pOn ? "var(--red)" : "var(--green)";
   }
 }
 
@@ -180,8 +187,7 @@ async function edO(add) {
   let amt = prompt(add ? "Скільки додати?" : "Скільки відняти?");
   if(isNaN(amt) || amt <= 0) return alert("Невірна сума");
   amt = parseInt(amt);
-  let r = await fetch(DB+"users/"+n+".json");
-  let d = await r.json();
+  let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
   if(!d) return alert("Гравця не знайдено");
   d.points += add ? amt : -amt;
   d.points = Math.max(0, d.points);
@@ -191,9 +197,7 @@ async function edO(add) {
 }
 
 async function loadPlayers() {
-  let r = await fetch(DB + "users/.json");
-  let d = await r.json();
-  let list = document.getElementById('player-list');
+  let r = await fetch(DB + "users/.json"), d = await r.json(), list = document.getElementById('player-list');
   list.innerHTML = '';
   if (!d || !Object.keys(d).length) {
     list.innerHTML = '<div style="padding:12px;color:#aaa">Гравців немає</div>';
@@ -307,7 +311,6 @@ function loadQuestion() {
 
 function checkAnswer(selected, correct, button) {
   document.querySelectorAll('#abox .btn').forEach(b => b.disabled = true);
-
   if (selected === correct) {
     correctCount++;
     user.points += 100;
@@ -321,10 +324,8 @@ function checkAnswer(selected, correct, button) {
     document.getElementById('feedback').innerHTML = '<span class="wrong">✗ НЕПРАВИЛЬНО!</span>';
     wrongSound.play().catch(()=>{});
   }
-
   document.getElementById('mon').innerText = user.points.toLocaleString();
   save();
-
   setTimeout(() => {
     currentIndex++;
     loadQuestion();
@@ -333,8 +334,7 @@ function checkAnswer(selected, correct, button) {
 
 async function loadT() {
   show('top');
-  let r = await fetch(DB+"users/.json");
-  let d = await r.json();
+  let r = await fetch(DB+"users/.json"), d = await r.json();
   let l = document.getElementById('tlist');
   l.innerHTML = '';
   if(d) {

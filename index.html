@@ -4,675 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>UkrMova Pro</title>
-  <style>
-    :root {
-      --blue: #00a2ff;
-      --red: #ff4d4d;
-      --green: #2ecc71;
-      --gold: #f1c40f;
-      --dark: #d32f2f;
-      --purple: #9b59b6;
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
-                  url('https://file.garden/aZHnP_3ch2qR4tWj/61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat fixed;
-      color: #fff;
-      font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      min-height: 100vh;
-    }
-
-    /* SPLASH SCREEN */
-    #splash {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
-                  url('https://file.garden/aZHnP_3ch2qR4tWj/61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-    }
-
-    #splash-video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      position: absolute;
-      top: 0;
-      left: 0;
-      opacity: 1;
-    }
-
-    #startBtn {
-      position: relative;
-      z-index: 10000;
-      padding: 16px 40px;
-      font-size: 28px;
-      font-weight: bold;
-      background: linear-gradient(45deg, #FFD700, #FFEA80);
-      color: #00204A;
-      border: 3px solid #FFFFFF;
-      border-radius: 50px;
-      cursor: pointer;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-      transition: all 0.3s ease;
-      white-space: nowrap;
-    }
-
-    #startBtn:active {
-      transform: scale(0.96);
-    }
-
-    /* SCREENS */
-    .screen {
-      display: none;
-      flex-direction: column;
-      min-height: 100vh;
-      padding: 16px;
-      box-sizing: border-box;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .card {
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(10px);
-      padding: 20px;
-      border-radius: 24px;
-      border: 1px solid rgba(68,68,68,0.3);
-      margin: auto;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-      color: #000;
-    }
-
-    .btn {
-      background: var(--blue);
-      color: #fff;
-      border: none;
-      padding: 14px;
-      border-radius: 14px;
-      font-weight: 700;
-      width: 100%;
-      margin: 6px 0;
-      cursor: pointer;
-      text-transform: uppercase;
-      font-size: 15px;
-      transition: all 0.1s ease;
-    }
-
-    .btn:active {
-      transform: scale(0.97);
-    }
-
-    .btn.green {
-      background: var(--green);
-    }
-
-    .btn.danger {
-      background: var(--dark);
-    }
-
-    .btn.red {
-      background: var(--red);
-    }
-
-    .btn.theme-btn {
-      background: #9c27b0;
-      color: white;
-    }
-
-    .money {
-      font-size: 28px;
-      font-weight: 900;
-      color: var(--gold);
-      text-shadow: 0 0 8px #f1c40f;
-    }
-
-    .nickname {
-      font-size: 24px;
-      font-weight: bold;
-      margin: 10px 0;
-      cursor: pointer;
-      word-break: break-word;
-    }
-
-    .gold-nick {
-      color: var(--gold);
-      text-shadow: 0 0 8px var(--gold);
-    }
-
-    input {
-      background: #f5f5f5;
-      border: 1px solid #ccc;
-      padding: 12px;
-      border-radius: 12px;
-      color: #000;
-      width: 100%;
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
-
-    .shop-item {
-      background: #eee;
-      padding: 12px;
-      margin: 6px 0;
-      border-radius: 12px;
-      cursor: pointer;
-      text-align: center;
-      font-size: 14px;
-      transition: all 0.1s;
-    }
-
-    .shop-item:active {
-      transform: scale(0.97);
-    }
-
-    .shop-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    .log-box {
-      max-height: 200px;
-      overflow-y: auto;
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin: 10px 0;
-      background: #f8f8f8;
-      border-radius: 12px;
-      color: #000;
-      font-size: 12px;
-    }
-
-    .log-entry {
-      padding: 4px 0;
-      border-bottom: 1px solid #eee;
-    }
-
-    #admin-panel {
-      border: 2px dashed var(--red);
-      padding: 15px;
-      margin-top: 15px;
-      display: none;
-      background: rgba(255,255,255,0.95);
-      text-align: left;
-      border-radius: 16px;
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-
-    #feedback {
-      text-align: center;
-      font-size: 36px;
-      font-weight: bold;
-      margin: 15px 0;
-      min-height: 55px;
-    }
-
-    .correct {
-      color: #2ecc71;
-    }
-
-    .wrong {
-      color: #ff4d4d;
-    }
-
-    .summary {
-      font-size: 18px;
-      line-height: 1.5;
-      margin: 20px 0;
-      text-align: center;
-    }
-
-    .summary strong {
-      font-size: 22px;
-    }
-
-    #abox {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin: 15px 0;
-    }
-
-    /* CABINET */
-    .cabinet-card {
-      max-width: 400px;
-      width: 100%;
-      max-height: 85vh;
-      overflow-y: auto;
-      padding: 16px;
-    }
-
-    .cabinet-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      padding-bottom: 12px;
-      border-bottom: 2px solid var(--gold);
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .cabinet-header h2 {
-      margin: 0;
-      font-size: 18px;
-    }
-
-    .avatar-wrapper {
-      position: relative;
-      cursor: pointer;
-    }
-
-    .avatar {
-      width: 55px;
-      height: 55px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--gold), #e67e22);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-      overflow: hidden;
-    }
-
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .avatar-edit-btn {
-      position: absolute;
-      bottom: -4px;
-      right: -4px;
-      background: var(--gold);
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      font-size: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #000;
-    }
-
-    .cabinet-tabs {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
-    }
-
-    .tab-btn {
-      background: #2a2a3a;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 13px;
-      color: white;
-      transition: all 0.1s;
-    }
-
-    .tab-btn:active {
-      transform: scale(0.96);
-    }
-
-    .tab-btn.active {
-      background: var(--gold);
-      color: #000;
-    }
-
-    .cabinet-tab {
-      display: none;
-    }
-
-    .cabinet-tab.active {
-      display: block;
-    }
-
-    .cabinet-section {
-      background: rgba(255,255,255,0.9);
-      border-radius: 16px;
-      padding: 12px;
-      margin-bottom: 12px;
-      color: #000;
-    }
-
-    .cabinet-section h3 {
-      margin-bottom: 10px;
-      font-size: 15px;
-      color: #333;
-    }
-
-    .info-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 8px;
-    }
-
-    .info-item {
-      background: #f0f0f0;
-      padding: 8px;
-      border-radius: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 5px;
-      font-size: 13px;
-    }
-
-    .info-item span:first-child {
-      color: #666;
-    }
-
-    .edit-btn {
-      background: var(--gold);
-      border: none;
-      padding: 4px 8px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 11px;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-
-    .stat-card {
-      background: linear-gradient(135deg, #2c3e50, #1a2632);
-      padding: 8px;
-      border-radius: 12px;
-      text-align: center;
-      color: white;
-    }
-
-    .stat-value {
-      font-size: 18px;
-      font-weight: bold;
-      color: var(--gold);
-    }
-
-    .stat-label {
-      font-size: 9px;
-      color: #aaa;
-      margin-top: 3px;
-    }
-
-    .badges-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .badge {
-      background: linear-gradient(135deg, var(--gold), #e67e22);
-      padding: 4px 8px;
-      border-radius: 20px;
-      font-size: 10px;
-      font-weight: bold;
-      color: #000;
-    }
-
-    .badge.locked {
-      background: #555;
-      color: #aaa;
-      filter: grayscale(0.5);
-    }
-
-    .purchases-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .purchase-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px;
-      background: #f0f0f0;
-      border-radius: 10px;
-      font-size: 13px;
-    }
-
-    .history-list {
-      max-height: 150px;
-      overflow-y: auto;
-    }
-
-    .history-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px;
-      border-bottom: 1px solid #ddd;
-      font-size: 11px;
-    }
-
-    .history-percent {
-      font-weight: bold;
-      color: var(--gold);
-    }
-
-    .settings-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .btn.small {
-      padding: 8px 14px;
-      font-size: 12px;
-      width: auto;
-    }
-
-    .add-friend {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
-
-    .add-friend input {
-      flex: 1;
-      margin: 0;
-      padding: 10px;
-      font-size: 14px;
-    }
-
-    .friends-list {
-      max-height: 160px;
-      overflow-y: auto;
-    }
-
-    .friend-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .friend-info {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .friend-avatar {
-      font-size: 22px;
-    }
-
-    .friend-name {
-      font-weight: bold;
-      font-size: 13px;
-    }
-
-    .friend-points {
-      color: var(--gold);
-      font-size: 11px;
-    }
-
-    .remove-friend {
-      background: var(--red);
-      border: none;
-      padding: 4px 8px;
-      border-radius: 6px;
-      color: white;
-      font-size: 10px;
-      cursor: pointer;
-    }
-
-    .leaderboard-friends {
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .leaderboard-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .leaderboard-rank {
-      font-weight: bold;
-      color: var(--gold);
-      width: 28px;
-      font-size: 13px;
-    }
-
-    .leaderboard-name {
-      flex: 1;
-      font-size: 13px;
-    }
-
-    .leaderboard-points {
-      font-weight: bold;
-      font-size: 13px;
-    }
-
-    /* MODAL */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 2000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.9);
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-content {
-      background: #1e1e2e;
-      padding: 20px;
-      border-radius: 24px;
-      max-width: 300px;
-      width: 90%;
-      text-align: center;
-      color: white;
-    }
-
-    .modal-close {
-      float: right;
-      font-size: 24px;
-      cursor: pointer;
-      color: #aaa;
-    }
-
-    .avatar-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin: 12px 0;
-    }
-
-    .avatar-option {
-      font-size: 28px;
-      cursor: pointer;
-      padding: 6px;
-      border-radius: 50%;
-      transition: 0.1s;
-    }
-
-    .avatar-option:active {
-      background: var(--gold);
-      transform: scale(0.9);
-    }
-
-    #avatarPreview img {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    /* NOTIFICATION */
-    .notification-toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: var(--gold);
-      color: #000;
-      padding: 8px 14px;
-      border-radius: 30px;
-      font-weight: bold;
-      font-size: 12px;
-      z-index: 1500;
-      transition: transform 0.2s;
-      white-space: nowrap;
-      max-width: 90%;
-      white-space: normal;
-      text-align: center;
-    }
-
-    .notification-toast.show {
-      transform: translateX(-50%) translateY(0);
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 4px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #333;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: var(--gold);
-      border-radius: 4px;
-    }
-  </style>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -705,7 +37,7 @@
       <button class="btn" style="background:var(--purple)" onclick="show('cabinet')">📦 МОЯ СКРИНЬКА</button>
 
       <div id="admin-panel">
-        <b style="color:var(--red);cursor:pointer;font-size:16px" onclick="closeAdm()">❌ ЗАКРИТИ АДМІНКУ</b><br><br>
+        <b style="color:var(--red);cursor:pointer;font-size:18px" onclick="closeAdm()">❌ ЗАКРИТИ АДМІНКУ</b><br><br>
         <button class="btn" id="pen-btn" style="background:var(--red)" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
         <p><b>Управління гравцями</b></p>
         <input type="text" id="a-n" placeholder="Нік гравця">
@@ -792,12 +124,6 @@
   <!-- Фразеологізми -->
   <div id="frazeologizmy" class="screen">
     <div class="card">
-       <!-- Фразеологізми -->
-  <div id="frazeologizmy" class="screen">
-    <div class="card">
-       <!-- Фразеологізми -->
-  <div id="frazeologizmy" class="screen">
-    <div class="card">
       <h2>Фразеологізми</h2>
       <button class="btn theme-btn" onclick="startTheme('frazeologizmy1')">ЗАВДАННЯ 1</button>
       <button class="btn theme-btn" onclick="startTheme('frazeologizmy2')">ЗАВДАННЯ 2</button>
@@ -854,7 +180,6 @@
         <button class="tab-btn" data-tab="settings">⚙️ Налаштування</button>
       </div>
 
-      <!-- Профіль -->
       <div id="tab-profile" class="cabinet-tab active">
         <div class="cabinet-section">
           <h3>📋 Особиста інформація</h3>
@@ -877,7 +202,6 @@
         </div>
       </div>
 
-      <!-- Статистика -->
       <div id="tab-stats" class="cabinet-tab">
         <div class="cabinet-section">
           <h3>📊 Моя статистика</h3>
@@ -900,7 +224,6 @@
         </div>
       </div>
 
-      <!-- Друзі -->
       <div id="tab-friends" class="cabinet-tab">
         <div class="cabinet-section">
           <h3>👥 Мої друзі</h3>
@@ -916,7 +239,6 @@
         </div>
       </div>
 
-      <!-- Налаштування -->
       <div id="tab-settings" class="cabinet-tab">
         <div class="cabinet-section">
           <h3>⚙️ Налаштування</h3>
@@ -925,9 +247,7 @@
             <button class="btn small danger" onclick="logout()">🚪 Вийти</button>
           </div>
           <div class="settings-row" style="margin-top:12px;">
-            <label style="display:flex; align-items:center; gap:8px;">
-              <input type="checkbox" id="notificationsToggle" onchange="toggleNotifications()"> 📢 Сповіщення
-            </label>
+            <label><input type="checkbox" id="notificationsToggle" onchange="toggleNotifications()"> 📢 Сповіщення</label>
           </div>
         </div>
       </div>
@@ -936,7 +256,6 @@
     </div>
   </div>
 
-  <!-- Модальне вікно для аватарки -->
   <div id="avatarModal" class="modal">
     <div class="modal-content">
       <span class="modal-close" onclick="closeAvatarModal()">&times;</span>
@@ -953,15 +272,14 @@
         <div class="avatar-option" onclick="setAvatar('📚')">📚</div>
         <div class="avatar-option" onclick="setAvatar('🎓')">🎓</div>
       </div>
-      <hr style="margin:12px 0; border-color:#333">
+      <hr>
       <h3>Або завантажте фото</h3>
       <input type="file" id="avatarFile" accept="image/*" style="display:none">
       <button class="btn small" onclick="document.getElementById('avatarFile').click()">📷 Вибрати фото</button>
-      <div id="avatarPreview" style="margin-top:8px;"></div>
+      <div id="avatarPreview"></div>
     </div>
   </div>
 
-  <!-- Сповіщення -->
   <div id="notificationToast" class="notification-toast"></div>
 
   <script src="js/themes.js"></script>

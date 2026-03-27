@@ -1,29 +1,20 @@
 // js/cabinet.js
-// ================================================
-// МОЯ СКРИНЬКА - ЛОГІКА
-// ================================================
-
 let earnedBadges = [];
 
 function loadCabinet() {
   if (!user) return;
-
-  // Аватар
-  document.getElementById('cabinetAvatar').innerHTML = user.avatar || '👤';
   
-  // Особиста інформація
+  // Аватар
+  updateAvatarDisplay();
+  
+  // Інформація
   document.getElementById('cabNick').innerText = user.name;
   document.getElementById('cabMoney').innerText = (user.points || 0).toLocaleString();
   
   const level = calculateLevel();
   document.getElementById('cabLevel').innerText = level.name;
   document.getElementById('levelBadge').innerHTML = level.badge;
-  
-  if (!user.regDate) {
-    user.regDate = new Date().toISOString().split('T')[0];
-    save();
-  }
-  document.getElementById('regDate').innerHTML = user.regDate;
+  document.getElementById('regDate').innerHTML = user.regDate || new Date().toISOString().split('T')[0];
   
   const stats = calculateStats();
   document.getElementById('totalThemes').innerText = stats.totalThemes;
@@ -34,200 +25,149 @@ function loadCabinet() {
   document.getElementById('perfectCount').innerText = stats.perfectCount;
   
   loadBadges(stats);
-  updatePurchasesDisplay();
+  updatePurchases();
   loadHistory();
   loadFriends();
   
   const notifToggle = document.getElementById('notificationsToggle');
   if (notifToggle) notifToggle.checked = user.notifications !== false;
+  
+  // Таби
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.cabinet-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+    };
+  });
+}
+
+function updateAvatarDisplay() {
+  const avatarDiv = document.getElementById('cabinetAvatar');
+  avatarDiv.innerHTML = '';
+  if (user.avatarType === 'emoji') {
+    avatarDiv.innerHTML = user.avatar || '👤';
+  } else if (user.avatarType === 'photo' && user.avatarData) {
+    const img = document.createElement('img');
+    img.src = user.avatarData;
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    avatarDiv.appendChild(img);
+  }
 }
 
 function calculateLevel() {
   const totalCorrect = calculateStats().totalCorrect;
-  
-  if (totalCorrect < 50) {
-    return { name: 'Новачок', badge: '🌱', level: 1 };
-  } else if (totalCorrect < 200) {
-    return { name: 'Досвідчений', badge: '📚', level: 2 };
-  } else if (totalCorrect < 500) {
-    return { name: 'Майстер', badge: '🏅', level: 3 };
-  } else if (totalCorrect < 1000) {
-    return { name: 'Експерт', badge: '🎓', level: 4 };
-  } else {
-    return { name: 'Грандмайстер', badge: '👑', level: 5 };
-  }
+  if (totalCorrect < 50) return { name: 'Новачок', badge: '🌱' };
+  if (totalCorrect < 200) return { name: 'Досвідчений', badge: '📚' };
+  if (totalCorrect < 500) return { name: 'Майстер', badge: '🏅' };
+  if (totalCorrect < 1000) return { name: 'Експерт', badge: '🎓' };
+  return { name: 'Грандмайстер', badge: '👑' };
 }
 
 function calculateStats() {
-  let totalCorrect = 0;
-  let totalWrong = 0;
-  let totalThemes = 0;
-  let perfectCount = 0;
-  let bestResult = 0;
-
+  let totalCorrect = 0, totalWrong = 0, totalThemes = 0, perfectCount = 0, bestResult = 0;
   if (user.themeResults) {
     for (let theme in user.themeResults) {
-      const result = user.themeResults[theme];
-      totalCorrect += result.correct || 0;
-      totalWrong += (result.total || result.correct) - (result.correct || 0);
+      const r = user.themeResults[theme];
+      totalCorrect += r.correct || 0;
+      totalWrong += (r.total || r.correct) - (r.correct || 0);
       totalThemes++;
-      
-      if (result.percent === 100) perfectCount++;
-      if (result.percent > bestResult) bestResult = result.percent;
+      if (r.percent === 100) perfectCount++;
+      if (r.percent > bestResult) bestResult = r.percent;
     }
   }
-  
-  const avgPercent = totalCorrect + totalWrong > 0 
-    ? Math.round((totalCorrect / (totalCorrect + totalWrong)) * 100) 
-    : 0;
-  
-  return {
-    totalThemes,
-    totalCorrect,
-    totalWrong,
-    avgPercent,
-    bestResult,
-    perfectCount
-  };
+  const avgPercent = totalCorrect + totalWrong > 0 ? Math.round((totalCorrect / (totalCorrect + totalWrong)) * 100) : 0;
+  return { totalThemes, totalCorrect, totalWrong, avgPercent, bestResult, perfectCount };
 }
 
 function loadBadges(stats) {
-  const badgesContainer = document.getElementById('badgesContainer');
-  
-  const allBadges = [
-    { name: '🌱 Новачок', condition: () => stats.totalThemes >= 1, id: 'novice' },
-    { name: '📚 Досвідчений', condition: () => stats.totalThemes >= 10, id: 'experienced' },
-    { name: '🏅 Майстер', condition: () => stats.totalThemes >= 30, id: 'master' },
-    { name: '⭐ Перфекціоніст', condition: () => stats.perfectCount >= 10, id: 'perfectionist' },
-    { name: '🏃 Марафонець', condition: () => stats.totalThemes >= 50, id: 'marathon' },
-    { name: '💰 Багатій', condition: () => (user.points || 0) >= 10000, id: 'rich' },
-    { name: '🎯 Перша 100%', condition: () => stats.perfectCount >= 1, id: 'first100' },
-    { name: '⚡ Трудоголік', condition: () => getTodayThemes() >= 10, id: 'workaholic' },
-    { name: '💎 VIP', condition: () => items && items.vip, id: 'vip' },
-    { name: '👑 Легенда', condition: () => stats.totalCorrect >= 1000, id: 'legend' }
+  const badges = [
+    { name: '🌱 Новачок', cond: () => stats.totalThemes >= 1, id: 'novice' },
+    { name: '📚 Досвідчений', cond: () => stats.totalThemes >= 10, id: 'exp' },
+    { name: '🏅 Майстер', cond: () => stats.totalThemes >= 30, id: 'master' },
+    { name: '⭐ Перфекціоніст', cond: () => stats.perfectCount >= 10, id: 'perfect' },
+    { name: '🏃 Марафонець', cond: () => stats.totalThemes >= 50, id: 'marathon' },
+    { name: '💰 Багатій', cond: () => (user.points || 0) >= 10000, id: 'rich' },
+    { name: '🎯 Перша 100%', cond: () => stats.perfectCount >= 1, id: 'first100' },
+    { name: '💎 VIP', cond: () => items && items.vip, id: 'vip' },
+    { name: '👑 Легенда', cond: () => stats.totalCorrect >= 1000, id: 'legend' }
   ];
   
   if (!earnedBadges) earnedBadges = [];
-  
-  allBadges.forEach(badge => {
-    const isUnlocked = badge.condition();
-    const wasEarned = earnedBadges.includes(badge.id);
-    
-    if (isUnlocked && !wasEarned) {
-      earnedBadges.push(badge.id);
-      showNotification(`🏆 Нове досягнення: ${badge.name}!`);
+  badges.forEach(b => {
+    if (b.cond() && !earnedBadges.includes(b.id)) {
+      earnedBadges.push(b.id);
+      showNotification(`🏆 ${b.name}!`);
     }
   });
   
-  badgesContainer.innerHTML = allBadges.map(b => 
-    `<div class="badge ${b.condition() ? '' : 'locked'}">${b.name}</div>`
+  document.getElementById('badgesContainer').innerHTML = badges.map(b => 
+    `<div class="badge ${b.cond() ? '' : 'locked'}">${b.name}</div>`
   ).join('');
 }
 
-function getTodayThemes() {
-  const today = new Date().toLocaleDateString();
-  let count = 0;
-  if (user.themeResults) {
-    for (let theme in user.themeResults) {
-      const date = user.themeResults[theme].date?.split(',')[0];
-      if (date === today) count++;
-    }
-  }
-  return count;
-}
-
-function updatePurchasesDisplay() {
-  document.getElementById('purchaseGold').innerHTML = items.gold_frame ? '✅ Куплено' : '❌';
-  document.getElementById('purchaseCrown').innerHTML = items.crown ? '✅ Куплено' : '❌';
-  document.getElementById('purchaseFire').innerHTML = items.fire ? '✅ Куплено' : '❌';
-  document.getElementById('purchaseShield').innerHTML = items.shield ? '✅ Куплено' : '❌';
-  document.getElementById('purchaseVip').innerHTML = items.vip ? '✅ Куплено' : '❌';
+function updatePurchases() {
+  document.getElementById('purchaseGold').innerHTML = items.gold_frame ? '✅' : '❌';
+  document.getElementById('purchaseCrown').innerHTML = items.crown ? '✅' : '❌';
+  document.getElementById('purchaseFire').innerHTML = items.fire ? '✅' : '❌';
+  document.getElementById('purchaseShield').innerHTML = items.shield ? '✅' : '❌';
+  document.getElementById('purchaseVip').innerHTML = items.vip ? '✅' : '❌';
 }
 
 function loadHistory() {
-  const historyContainer = document.getElementById('historyList');
-  
+  const container = document.getElementById('historyList');
   if (!user.themeResults || Object.keys(user.themeResults).length === 0) {
-    historyContainer.innerHTML = '<div class="history-empty">Ще немає пройдених тем</div>';
+    container.innerHTML = 'Ще немає пройдених тем';
     return;
   }
-  
-  const recent = Object.entries(user.themeResults)
-    .sort((a, b) => new Date(b[1].date) - new Date(a[1].date))
-    .slice(0, 15);
-  
-  historyContainer.innerHTML = recent.map(([theme, data]) => `
+  const recent = Object.entries(user.themeResults).sort((a,b) => new Date(b[1].date) - new Date(a[1].date)).slice(0,15);
+  container.innerHTML = recent.map(([theme, data]) => `
     <div class="history-item">
       <span>${getThemeName(theme)}</span>
       <span class="history-percent">${data.percent}%</span>
-      <span style="font-size:0.7rem; color:#888">${data.date || '—'}</span>
+      <span style="font-size:10px">${data.date?.split(',')[0] || ''}</span>
     </div>
   `).join('');
 }
 
-function getThemeName(themeKey) {
-  const themeNames = {
-    vydminy: 'Відміни іменників',
-    orudnyi_1vidmina: 'Орудний відмінок 1 відміни',
-    prykmetnyky: 'Прикметники',
-    grupy_prykmetnykiv: 'Групи прикметників',
-    prykmetnyky_stupeni: 'Ступені порівняння',
-    prykmetnyky_stupeni_2: 'Ступені порівняння 2',
+function getThemeName(key) {
+  const names = {
+    vydminy: 'Відміни', orudnyi_1vidmina: 'Орудний відмінок',
+    prykmetnyky: 'Прикметники', grupy_prykmetnykiv: 'Групи прикметників',
+    prykmetnyky_stupeni: 'Ступені', prykmetnyky_stupeni_2: 'Ступені 2',
     ne_z_prykmetnykamy: 'НЕ з прикметниками',
-    chyslivnyky_1: 'Числівники №1',
-    chyslivnyky_2: 'Числівники №2',
-    frazeologizmy1: 'Фразеологізми 1',
-    frazeologizmy2: 'Фразеологізми 2',
-    frazeologizmy3: 'Фразеологізми 3',
-    frazeologizmy4: 'Фразеологізми 4',
-    frazeologizmy5: 'Фразеологізми 5',
-    frazeologizmy6: 'Фразеологізми 6',
-    frazeologizmy7: 'Фразеологізми 7',
-    frazeologizmy8: 'Фразеологізми 8',
-    frazeologizmy9: 'Фразеологізми 9',
-    frazeologizmy10: 'Фразеологізми 10',
-    frazeologizmy11: 'Фразеологізми 11',
-    frazeologizmy12: 'Фразеологізми 12',
-    frazeologizmy13: 'Фразеологізми 13',
-    frazeologizmy14: 'Фразеологізми 14'
+    chyslivnyky_1: 'Числівники 1', chyslivnyky_2: 'Числівники 2',
+    frazeologizmy1: 'Фразеологізми'
   };
-  return themeNames[themeKey] || themeKey;
+  return names[key] || key;
 }
 
 function editNick() {
-  const newNick = prompt('Введіть новий нікнейм:', user.name);
+  const newNick = prompt('Новий нікнейм:', user.name);
   if (!newNick || newNick === user.name) return;
-  
-  fetch(DB + "users/" + newNick + ".json")
-    .then(r => r.json())
-    .then(existing => {
-      if (existing && existing.name !== user.name) {
-        alert('Цей нікнейм вже зайнятий!');
-        return;
-      }
-      
-      const oldNick = user.name;
-      const newUser = { ...user, name: newNick };
-      
-      fetch(DB + "users/" + newNick + ".json", { method: 'PUT', body: JSON.stringify(newUser) })
-        .then(() => {
-          fetch(DB + "users/" + oldNick + ".json", { method: 'DELETE' })
-            .then(() => {
-              user = newUser;
-              localStorage.setItem('un', newNick);
-              update();
-              applyItems();
-              loadCabinet();
-              alert('Нікнейм змінено!');
-            });
-        });
-    });
+  fetch(DB + "users/" + newNick + ".json").then(r => r.json()).then(existing => {
+    if (existing && existing.name !== user.name) return alert('Зайнятий!');
+    const oldNick = user.name;
+    const newUser = { ...user, name: newNick };
+    fetch(DB + "users/" + newNick + ".json", { method: 'PUT', body: JSON.stringify(newUser) })
+      .then(() => fetch(DB + "users/" + oldNick + ".json", { method: 'DELETE' }))
+      .then(() => {
+        user = newUser;
+        localStorage.setItem('un', newNick);
+        update();
+        applyItems();
+        loadCabinet();
+        alert('Нікнейм змінено!');
+      });
+  });
 }
 
 function changePassword() {
-  const newPass = prompt('Введіть новий пароль:');
+  const newPass = prompt('Новий пароль:');
   if (!newPass) return;
-  
   user.pass = newPass;
   localStorage.setItem('up', newPass);
   save();
@@ -235,7 +175,7 @@ function changePassword() {
 }
 
 function logout() {
-  if (confirm('Ви впевнені, що хочете вийти?')) {
+  if (confirm('Вийти?')) {
     localStorage.removeItem('un');
     localStorage.removeItem('up');
     user = null;
@@ -245,43 +185,22 @@ function logout() {
 
 function saveThemeResult(theme, correct, total) {
   if (!user.themeResults) user.themeResults = {};
-  
   const percent = Math.round((correct / total) * 100);
   const date = new Date().toLocaleString('uk-UA');
-  
   const oldPercent = user.themeResults[theme]?.percent || 0;
-  
-  user.themeResults[theme] = {
-    correct: correct,
-    total: total,
-    percent: percent,
-    date: date
-  };
-  
+  user.themeResults[theme] = { correct, total, percent, date };
   save();
-  
   if (percent === 100 && oldPercent !== 100) {
-    showNotification(`🎉 Вітаємо! 100% у темі "${getThemeName(theme)}"!`);
+    showNotification(`🎉 100% у темі "${getThemeName(theme)}"!`);
   }
 }
 
-function showNotification(message) {
+function showNotification(msg) {
   if (user && user.notifications === false) return;
-  
   const toast = document.getElementById('notificationToast');
-  toast.textContent = message;
+  toast.textContent = msg;
   toast.classList.add('show');
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 3000);
-}
-
-function switchCabinetTab(tab) {
-  document.querySelectorAll('.cabinet-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  
-  document.getElementById(`cabinet-${tab}`).classList.add('active');
-  event.target.classList.add('active');
+  setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
 function openAvatarModal() {
@@ -294,10 +213,37 @@ function closeAvatarModal() {
 
 function setAvatar(emoji) {
   user.avatar = emoji;
+  user.avatarType = 'emoji';
+  user.avatarData = null;
   save();
-  document.getElementById('cabinetAvatar').innerHTML = emoji;
+  updateAvatarDisplay();
   closeAvatarModal();
 }
+
+// Фото для аватарки
+document.addEventListener('DOMContentLoaded', () => {
+  const fileInput = document.getElementById('avatarFile');
+  if (fileInput) {
+    fileInput.onchange = function(e) {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          user.avatar = ev.target.result;
+          user.avatarType = 'photo';
+          user.avatarData = ev.target.result;
+          save();
+          updateAvatarDisplay();
+          closeAvatarModal();
+          showNotification('Аватарку оновлено!');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert('Оберіть фото');
+      }
+    };
+  }
+});
 
 function toggleNotifications() {
   const enabled = document.getElementById('notificationsToggle').checked;
@@ -307,60 +253,55 @@ function toggleNotifications() {
 
 async function addFriend() {
   const friendNick = document.getElementById('friendNick').value.trim();
-  if (!friendNick) return alert('Введіть нікнейм друга');
+  if (!friendNick) return alert('Введіть нікнейм');
   if (friendNick === user.name) return alert('Не можна додати себе');
-  if (user.friends && user.friends.includes(friendNick)) return alert('Цей друг вже у списку');
+  if (user.friends?.includes(friendNick)) return alert('Вже є в друзях');
   
   const r = await fetch(DB + "users/" + friendNick + ".json");
   const friendData = await r.json();
-  
-  if (!friendData) {
-    alert('Користувача з таким нікнеймом не знайдено');
-    return;
-  }
+  if (!friendData) return alert('Користувача не знайдено');
   
   if (!user.friends) user.friends = [];
   user.friends.push(friendNick);
   save();
   document.getElementById('friendNick').value = '';
   loadFriends();
-  showNotification(`👥 ${friendNick} додано до друзів!`);
+  showNotification(`👥 ${friendNick} додано!`);
 }
 
 function loadFriends() {
-  const friendsContainer = document.getElementById('friendsList');
-  const leaderboardContainer = document.getElementById('leaderboardFriends');
+  const friendsDiv = document.getElementById('friendsList');
+  const leaderboardDiv = document.getElementById('leaderboardFriends');
   
   if (!user.friends || user.friends.length === 0) {
-    friendsContainer.innerHTML = '<div class="history-empty">У вас ще немає друзів</div>';
-    leaderboardContainer.innerHTML = '<div class="history-empty">Додайте друзів, щоб бачити таблицю</div>';
+    friendsDiv.innerHTML = 'У вас ще немає друзів';
+    leaderboardDiv.innerHTML = 'Додайте друзів';
     return;
   }
   
-  Promise.all(user.friends.map(async (friendName) => {
-    const r = await fetch(DB + "users/" + friendName + ".json");
-    const data = await r.json();
-    return data ? { name: friendName, points: data.points || 0, avatar: data.avatar || '👤' } : null;
-  })).then(friendsData => {
-    const validFriends = friendsData.filter(f => f !== null);
-    
-    friendsContainer.innerHTML = validFriends.map(f => `
+  Promise.all(user.friends.map(async f => {
+    const r = await fetch(DB + "users/" + f + ".json");
+    const d = await r.json();
+    return d ? { name: f, points: d.points || 0, avatar: d.avatar || '👤' } : null;
+  })).then(friends => {
+    const valid = friends.filter(f => f);
+    friendsDiv.innerHTML = valid.map(f => `
       <div class="friend-item">
         <div class="friend-info">
           <span class="friend-avatar">${f.avatar}</span>
           <span class="friend-name">${f.name}</span>
           <span class="friend-points">${f.points.toLocaleString()} ₴</span>
         </div>
-        <button class="remove-friend" onclick="removeFriend('${f.name}')">Видалити</button>
+        <button class="remove-friend" onclick="removeFriend('${f.name}')">❌</button>
       </div>
     `).join('');
     
-    const sortedFriends = [...validFriends, { name: user.name, points: user.points, avatar: user.avatar || '👤' }]
-      .sort((a, b) => b.points - a.points);
+    const all = [...valid, { name: user.name, points: user.points, avatar: user.avatar || '👤' }]
+      .sort((a,b) => b.points - a.points);
     
-    leaderboardContainer.innerHTML = sortedFriends.map((f, i) => `
+    leaderboardDiv.innerHTML = all.map((f, i) => `
       <div class="leaderboard-item">
-        <span class="leaderboard-rank">${i + 1}</span>
+        <span class="leaderboard-rank">${i+1}</span>
         <span class="friend-avatar">${f.avatar}</span>
         <span class="leaderboard-name">${f.name} ${f.name === user.name ? '(Ви)' : ''}</span>
         <span class="leaderboard-points">${f.points.toLocaleString()} ₴</span>
@@ -370,10 +311,10 @@ function loadFriends() {
 }
 
 function removeFriend(friendName) {
-  if (confirm(`Видалити ${friendName} з друзів?`)) {
+  if (confirm(`Видалити ${friendName}?`)) {
     user.friends = user.friends.filter(f => f !== friendName);
     save();
     loadFriends();
-    showNotification(`👥 ${friendName} видалено з друзів`);
+    showNotification(`👥 ${friendName} видалено`);
   }
 }

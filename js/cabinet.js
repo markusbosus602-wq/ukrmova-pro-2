@@ -4,10 +4,7 @@ let earnedBadges = [];
 function loadCabinet() {
   if (!user) return;
   
-  // Аватар
   updateAvatarDisplay();
-  
-  // Інформація
   document.getElementById('cabNick').innerText = user.name;
   document.getElementById('cabMoney').innerText = (user.points || 0).toLocaleString();
   
@@ -32,7 +29,6 @@ function loadCabinet() {
   const notifToggle = document.getElementById('notificationsToggle');
   if (notifToggle) notifToggle.checked = user.notifications !== false;
   
-  // Таби
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -220,7 +216,6 @@ function setAvatar(emoji) {
   closeAvatarModal();
 }
 
-// Фото для аватарки
 document.addEventListener('DOMContentLoaded', () => {
   const fileInput = document.getElementById('avatarFile');
   if (fileInput) {

@@ -36,6 +36,7 @@
       <button class="btn" onclick="show('sections')">ГРАТИ</button>
       <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
       <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
+      <button class="btn" style="background:#9b59b6" onclick="show('cabinet')">📦 МОЯ СКРИНЬКА</button>
 
       <!-- Адмін-панель -->
       <div id="admin-panel">
@@ -164,9 +165,83 @@
     </div>
   </div>
 
+  <!-- CABINET - МОЯ СКРИНЬКА -->
+  <div id="cabinet" class="screen">
+    <div class="card cabinet-card">
+      <div class="cabinet-header">
+        <h2>📦 МОЯ СКРИНЬКА</h2>
+        <div class="avatar" id="cabinetAvatar">👤</div>
+      </div>
+
+      <!-- Особиста інформація -->
+      <div class="cabinet-section">
+        <h3>📋 Особиста інформація</h3>
+        <div class="info-grid">
+          <div class="info-item"><span>Нікнейм:</span> <strong id="cabNick"></strong> <button class="edit-btn" onclick="editNick()">✏️</button></div>
+          <div class="info-item"><span>Рівень:</span> <strong id="cabLevel"></strong> <span id="levelBadge"></span></div>
+          <div class="info-item"><span>Баланс:</span> <strong id="cabMoney">0</strong> ₴</div>
+          <div class="info-item"><span>Дата реєстрації:</span> <strong id="regDate">—</strong></div>
+        </div>
+      </div>
+
+      <!-- Статистика -->
+      <div class="cabinet-section">
+        <h3>📊 Статистика</h3>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-value" id="totalThemes">0</div><div class="stat-label">Пройдено тем</div></div>
+          <div class="stat-card"><div class="stat-value" id="correctAnswers">0</div><div class="stat-label">Правильних</div></div>
+          <div class="stat-card"><div class="stat-value" id="wrongAnswers">0</div><div class="stat-label">Неправильних</div></div>
+          <div class="stat-card"><div class="stat-value" id="avgPercent">0%</div><div class="stat-label">Середній %</div></div>
+          <div class="stat-card"><div class="stat-value" id="bestResult">0%</div><div class="stat-label">Найкращий результат</div></div>
+          <div class="stat-card"><div class="stat-value" id="perfectCount">0</div><div class="stat-label">100% завершено</div></div>
+        </div>
+      </div>
+
+      <!-- Досягнення / Бейджи -->
+      <div class="cabinet-section">
+        <h3>🏆 Досягнення</h3>
+        <div class="badges-grid" id="badgesContainer">
+          <div class="badge locked">🔒 Новачок</div>
+        </div>
+      </div>
+
+      <!-- Мої покупки -->
+      <div class="cabinet-section">
+        <h3>🛍️ Мої покупки</h3>
+        <div class="purchases-grid" id="purchasesContainer">
+          <div class="purchase-item">✨ Золота рамка: <span id="purchaseGold">❌</span></div>
+          <div class="purchase-item">👑 Корона: <span id="purchaseCrown">❌</span></div>
+          <div class="purchase-item">🔥 Полум'я: <span id="purchaseFire">❌</span></div>
+          <div class="purchase-item">🛡️ Щит: <span id="purchaseShield">❌</span></div>
+          <div class="purchase-item">💎 ВІП: <span id="purchaseVip">❌</span></div>
+        </div>
+      </div>
+
+      <!-- Історія проходження -->
+      <div class="cabinet-section">
+        <h3>📜 Історія проходження</h3>
+        <div class="history-list" id="historyList">
+          <div class="history-empty">Ще немає пройдених тем</div>
+        </div>
+      </div>
+
+      <!-- Налаштування -->
+      <div class="cabinet-section">
+        <h3>⚙️ Налаштування</h3>
+        <div class="settings-row">
+          <button class="btn small" onclick="changePassword()">🔐 Змінити пароль</button>
+          <button class="btn small danger" onclick="logout()">🚪 Вийти з акаунту</button>
+        </div>
+      </div>
+
+      <button class="btn red" onclick="show('menu')">◀ НАЗАД ДО МЕНЮ</button>
+    </div>
+  </div>
+
   <!-- Підключаємо JavaScript -->
   <script src="js/themes.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/cabinet.js"></script>
 
 </body>
 </html>

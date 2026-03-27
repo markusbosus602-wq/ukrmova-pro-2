@@ -81,7 +81,7 @@ async function auth() {
       }
       user = d;
     } else {
-      user = {name:n, pass:p, points:0, items:{gold_frame:false}, themeAttempts:{}};
+      user = {name:n, pass:p, points:0, items:{gold_frame:false}, themeAttempts:{}, themeResults:{}, regDate:new Date().toISOString().split('T')[0]};
       await fetch(DB + "users/" + n + ".json", {method:'PUT', body:JSON.stringify(user)});
     }
 
@@ -92,6 +92,8 @@ async function auth() {
     await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify({game_nick:n, time:now})});
 
     items = user.items || {gold_frame:false};
+    if (!user.themeResults) user.themeResults = {};
+    if (!user.regDate) user.regDate = new Date().toISOString().split('T')[0];
     save();
     applyItems();
     update();
@@ -130,6 +132,10 @@ function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
   const screen = document.getElementById(id);
   if (screen) screen.style.display = 'flex';
+  
+  if (id === 'cabinet' && user && typeof loadCabinet === 'function') {
+    loadCabinet();
+  }
 }
 
 // Адмінка
@@ -282,6 +288,12 @@ function startTheme(theme) {
 function loadQuestion() {
   const qs = themes[currentTheme];
   if (currentIndex >= qs.length) {
+    // Зберігаємо результат теми
+    const totalQuestions = correctCount + wrongCount;
+    if (typeof saveThemeResult === 'function' && totalQuestions > 0) {
+      saveThemeResult(currentTheme, correctCount, totalQuestions);
+    }
+    
     user.themeAttempts[currentTheme] = (user.themeAttempts[currentTheme] || 0) + 1;
     save();
     document.getElementById('qtext').textContent = "Тема завершена!";

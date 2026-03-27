@@ -13,9 +13,6 @@ let currentCorrectAnswer = '';
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
 
-// ================================================
-// ЗАПУСК ВІДЕО
-// ================================================
 window.onload = function() {
   const splash = document.getElementById('splash');
   const video = document.getElementById('splash-video');
@@ -27,11 +24,7 @@ window.onload = function() {
       startBtn.style.display = 'none';
       video.muted = false;
       video.currentTime = 0;
-      video.play().catch(e => {
-        console.error("Автозапуск заблоковано:", e);
-        video.muted = false;
-        video.play().catch(()=>{});
-      });
+      video.play().catch(() => {});
     };
     video.onended = function() {
       splash.style.display = 'none';

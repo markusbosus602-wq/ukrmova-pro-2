@@ -1,4 +1,4 @@
-// js/cabinet.js - Оновлена версія з аватарами в друзях
+// js/cabinet.js - Повністю виправлена версія
 
 let earnedBadges = [];
 
@@ -42,15 +42,21 @@ function loadCabinet() {
 
 function updateAvatarDisplay() {
     const avatarDiv = document.getElementById('cabinetAvatar');
+    if (!avatarDiv) return;
     avatarDiv.innerHTML = '';
     if (user.avatarType === 'emoji') {
         avatarDiv.innerHTML = user.avatar || '👤';
+        avatarDiv.style.fontSize = '32px';
+        avatarDiv.style.display = 'flex';
+        avatarDiv.style.alignItems = 'center';
+        avatarDiv.style.justifyContent = 'center';
     } else if (user.avatarType === 'photo' && user.avatarData) {
         const img = document.createElement('img');
         img.src = user.avatarData;
         img.style.width = '100%';
         img.style.height = '100%';
         img.style.objectFit = 'cover';
+        img.style.borderRadius = '50%';
         avatarDiv.appendChild(img);
     }
 }
@@ -190,10 +196,9 @@ function saveThemeResult(theme, correct, total) {
     if (!user.themeResults) user.themeResults = {};
     const percent = Math.round((correct / total) * 100);
     const date = new Date().toLocaleString('uk-UA');
-    const oldPercent = user.themeResults[theme]?.percent || 0;
     user.themeResults[theme] = { correct, total, percent, date };
     save();
-    if (percent === 100 && oldPercent !== 100) {
+    if (percent === 100) {
         showNotification(`🎉 100% у темі "${getThemeName(theme)}"!`);
     }
 }
@@ -221,6 +226,7 @@ function setAvatar(emoji) {
     save();
     updateAvatarDisplay();
     closeAvatarModal();
+    showNotification('Аватарку змінено!');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -288,7 +294,6 @@ function loadFriends() {
     })).then(friends => {
         const valid = friends.filter(f => f);
         
-        // Відображення друзів з аватарами
         friendsDiv.innerHTML = valid.map(f => {
             let avatarHtml = '';
             if (f.avatarType === 'photo' && f.avatarData) {
@@ -300,7 +305,7 @@ function loadFriends() {
             return `
                 <div class="friend-item">
                     <div class="friend-info">
-                        <div class="friend-avatar" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;">${avatarHtml}</div>
+                        <div style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;">${avatarHtml}</div>
                         <div>
                             <div class="friend-name">${f.name}</div>
                             <div class="friend-points">${f.points.toLocaleString()} ₴</div>
@@ -311,7 +316,6 @@ function loadFriends() {
             `;
         }).join('');
         
-        // Таблиця лідерів серед друзів з аватарами
         const all = [...valid, { 
             name: user.name, 
             points: user.points, 
@@ -329,11 +333,11 @@ function loadFriends() {
             }
             
             return `
-                <div class="leaderboard-item">
-                    <span class="leaderboard-rank">${i+1}</span>
+                <div class="leaderboard-item" style="display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid #ddd;">
+                    <span class="leaderboard-rank" style="font-weight:bold;width:30px;">${i+1}</span>
                     <div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;">${avatarHtml}</div>
-                    <span class="leaderboard-name" style="flex:1;">${f.name} ${f.name === user.name ? '<span style="color:var(--gold);">(Ви)</span>' : ''}</span>
-                    <span class="leaderboard-points" style="font-weight:bold;">${f.points.toLocaleString()} ₴</span>
+                    <span style="flex:1;">${f.name} ${f.name === user.name ? '<span style="color:var(--gold);">(Ви)</span>' : ''}</span>
+                    <span style="font-weight:bold;">${f.points.toLocaleString()} ₴</span>
                 </div>
             `;
         }).join('');

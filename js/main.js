@@ -1,452 +1,509 @@
-// js/main.js - Оптимізована версія з кешуванням та покращеним завантаженням
-
+// js/main.js
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
 let user = null;
 let cC = 0;
-let pOn = true;
+let penaltyEnabled = true;
+let penaltyAmount = 30;
+let rewardAmount = 100;
+let soundEnabled = true;
 let currentTheme = '';
 let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
 let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
 let currentCorrectAnswer = '';
+let autoSaveInterval = null;
 
-const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
-const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
-
-// ====================== ФУНКЦІЇ КЕШУВАННЯ ======================
-function saveUserToCache(userData) {
-    const cacheData = {
-        data: userData,
-        timestamp: Date.now()
-    };
-    localStorage.setItem(`user_cache_${userData.name}`, JSON.stringify(cacheData));
+// Функція для безпечного відтворення звуку
+function playSound(soundUrl) {
+  if (!soundEnabled) return;
+  try {
+    const audio = new Audio(soundUrl);
+    audio.volume = 0.5;
+    audio.play().catch(e => console.log('Audio play failed:', e));
+  } catch(e) {
+    console.log('Audio not supported');
+  }
 }
 
-function getUserFromCache(nickname) {
-    const cached = localStorage.getItem(`user_cache_${nickname}`);
-    if (!cached) return null;
-    
-    try {
-        const { data, timestamp } = JSON.parse(cached);
-        // Кеш дійсний 5 хвилин (300000 мс)
-        if (Date.now() - timestamp < 300000) {
-            return data;
-        }
-    } catch (e) {
-        console.error('Помилка читання кешу:', e);
+// Показ/приховування індикатора завантаження
+function showLoading() {
+  const loader = document.getElementById('loadingIndicator');
+  if (loader) loader.style.display = 'flex';
+}
+
+function hideLoading() {
+  const loader = document.getElementById('loadingIndicator');
+  if (loader) loader.style.display = 'none';
+}
+
+// Оновлення прогресу сплеш-екрану
+function updateSplashProgress(percent) {
+  const progressBar = document.getElementById('splashProgress');
+  if (progressBar) {
+    progressBar.style.width = percent + '%';
+  }
+}
+
+// Автозбереження
+function startAutoSave() {
+  if (autoSaveInterval) clearInterval(autoSaveInterval);
+  autoSaveInterval = setInterval(() => {
+    if (user) {
+      save();
+      console.log('Автозбереження виконано');
     }
-    return null;
+  }, 30000);
 }
 
-// ====================== ЗАВАНТАЖЕННЯ ВІДЕО ======================
-function setupSplashVideo() {
-    const splash = document.getElementById('splash');
-    const startBtn = document.getElementById('startBtn');
-    
-    if (!splash || !startBtn) return;
-    
+function stopAutoSave() {
+  if (autoSaveInterval) {
+    clearInterval(autoSaveInterval);
+    autoSaveInterval = null;
+  }
+}
+
+window.onload = function() {
+  const splash = document.getElementById('splash');
+  const startBtn = document.getElementById('startBtn');
+  
+  // Симуляція завантаження
+  let progress = 0;
+  const progressInterval = setInterval(() => {
+    progress += Math.random() * 15;
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(progressInterval);
+    }
+    updateSplashProgress(Math.min(progress, 100));
+  }, 300);
+  
+  if (startBtn) {
     startBtn.onclick = function() {
-        startBtn.style.display = 'none';
-        
-        // Створюємо відео динамічно для кращого завантаження
-        const video = document.createElement('video');
-        video.id = 'splash-video';
-        video.playsInline = true;
-        video.muted = false;
-        video.preload = 'auto';
-        video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
-        
-        video.onended = function() {
-            splash.style.display = 'none';
-            tryAutoLogin();
-        };
-        
-        video.onerror = function() {
-            // Якщо відео не завантажилось, одразу переходимо до авторизації
-            splash.style.display = 'none';
-            tryAutoLogin();
-        };
-        
-        splash.prepend(video);
-        video.play().catch(() => {
-            // Якщо автовідтворення заблоковане, все одно переходимо далі
-            splash.style.display = 'none';
-            tryAutoLogin();
-        });
+      clearInterval(progressInterval);
+      updateSplashProgress(100);
+      setTimeout(() => {
+        if (splash) splash.style.display = 'none';
+        tryAutoLogin();
+      }, 500);
     };
-    
-    // Таймаут на випадок, якщо відео не запустилось
-    setTimeout(() => {
-        if (splash && splash.style.display !== 'none') {
-            splash.style.display = 'none';
-            tryAutoLogin();
-        }
-    }, 10000);
+  }
+  
+  // Запасний варіант - через 5 секунд автоматично
+  setTimeout(() => {
+    if (splash && splash.style.display !== 'none') {
+      clearInterval(progressInterval);
+      updateSplashProgress(100);
+      setTimeout(() => {
+        splash.style.display = 'none';
+        tryAutoLogin();
+      }, 500);
+    }
+  }, 5000);
+};
+
+function tryAutoLogin() {
+  const savedNick = localStorage.getItem('un');
+  const savedPass = localStorage.getItem('up');
+  if (savedNick && savedPass) {
+    document.getElementById('nick').value = savedNick;
+    document.getElementById('pass').value = savedPass;
+    auth();
+  } else {
+    show('auth-screen');
+  }
 }
 
-// ====================== АВТОРИЗАЦІЯ ======================
-async function tryAutoLogin() {
-    const savedNick = localStorage.getItem('un');
-    const savedPass = localStorage.getItem('up');
-    if (savedNick && savedPass) {
-        document.getElementById('nick').value = savedNick;
-        document.getElementById('pass').value = savedPass;
-        auth();
-    } else {
-        show('auth-screen');
-    }
+function validateNickname(nick) {
+  if (nick.length < 3) return "Нікнейм повинен мати мінімум 3 символи";
+  if (nick.length > 20) return "Нікнейм не може перевищувати 20 символів";
+  if (!/^[a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9_]+$/.test(nick)) return "Дозволені лише літери, цифри та підкреслення";
+  return null;
 }
 
 async function auth() {
-    let n = document.getElementById('nick').value.trim();
-    let p = document.getElementById('pass').value.trim();
-    if (!n || !p) {
-        document.getElementById('auth-error').textContent = "Введіть нікнейм та пароль";
+  let n = document.getElementById('nick').value.trim();
+  let p = document.getElementById('pass').value.trim();
+  if(!n || !p) {
+    document.getElementById('auth-error').textContent = "Введіть нікнейм та пароль";
+    return;
+  }
+  
+  // Валідація нікнейму
+  const validationError = validateNickname(n);
+  if (validationError && !await userExists(n)) {
+    document.getElementById('auth-error').textContent = validationError;
+    return;
+  }
+  
+  document.getElementById('auth-error').textContent = "Завантаження...";
+  showLoading();
+  
+  try {
+    let r = await fetch(DB + "users/" + n + ".json");
+    let d = await r.json();
+    if (d) {
+      if (d.pass !== p) {
+        document.getElementById('auth-error').textContent = "Неправильний пароль!";
+        hideLoading();
         return;
+      }
+      user = d;
+    } else {
+      user = {
+        name: n, pass: p, points: 0, items: {gold_frame: false},
+        themeAttempts: {}, themeResults: {},
+        regDate: new Date().toISOString().split('T')[0],
+        avatar: '👤', avatarType: 'emoji', avatarData: null,
+        friends: [], notifications: true, soundEnabled: true
+      };
+      await fetch(DB + "users/" + n + ".json", {method:'PUT', body:JSON.stringify(user)});
     }
-    document.getElementById('auth-error').textContent = "Завантаження...";
     
-    try {
-        // Спроба завантажити з кешу
-        let cachedUser = getUserFromCache(n);
-        let d = null;
-        
-        if (cachedUser && cachedUser.pass === p) {
-            d = cachedUser;
-        } else {
-            // Якщо кеш відсутній або невалідний, завантажуємо з Firebase
-            let r = await fetch(DB + "users/" + n + ".json");
-            d = await r.json();
-        }
-        
-        if (d) {
-            if (d.pass !== p) {
-                document.getElementById('auth-error').textContent = "Неправильний пароль!";
-                return;
-            }
-            user = d;
-        } else {
-            user = {
-                name: n, pass: p, points: 0, items: { gold_frame: false },
-                themeAttempts: {}, themeResults: {},
-                regDate: new Date().toISOString().split('T')[0],
-                avatar: '👤', avatarType: 'emoji', avatarData: null,
-                friends: [], notifications: true
-            };
-            await fetch(DB + "users/" + n + ".json", { method: 'PUT', body: JSON.stringify(user) });
-        }
-        
-        // Зберігаємо в кеш
-        saveUserToCache(user);
-        
-        localStorage.setItem('un', n);
-        localStorage.setItem('up', p);
-        
-        const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
-        await fetch(DB + "user_logs.json", { method: 'POST', body: JSON.stringify({ game_nick: n, time: now }) });
-        
-        items = user.items || { gold_frame: false };
-        if (!user.themeResults) user.themeResults = {};
-        if (!user.regDate) user.regDate = new Date().toISOString().split('T')[0];
-        if (!user.avatar) user.avatar = '👤';
-        if (!user.avatarType) user.avatarType = 'emoji';
-        if (!user.friends) user.friends = [];
-        if (user.notifications === undefined) user.notifications = true;
-        
-        save();
-        applyItems();
-        update();
-        show('menu');
-        document.getElementById('auth-error').textContent = "";
-    } catch (e) {
-        document.getElementById('auth-error').textContent = "Помилка підключення";
-        console.error(e);
-    }
+    localStorage.setItem('un', n);
+    localStorage.setItem('up', p);
+    
+    const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
+    await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify({game_nick:n, time:now})});
+    
+    items = user.items || {gold_frame:false};
+    if (!user.themeResults) user.themeResults = {};
+    if (!user.regDate) user.regDate = new Date().toISOString().split('T')[0];
+    if (!user.avatar) user.avatar = '👤';
+    if (!user.avatarType) user.avatarType = 'emoji';
+    if (!user.friends) user.friends = [];
+    if (user.notifications === undefined) user.notifications = true;
+    if (user.soundEnabled === undefined) user.soundEnabled = true;
+    
+    soundEnabled = user.soundEnabled;
+    
+    save();
+    applyItems();
+    update();
+    startAutoSave();
+    show('menu');
+    document.getElementById('auth-error').textContent = "";
+  } catch(e) {
+    document.getElementById('auth-error').textContent = "Помилка підключення";
+    console.error(e);
+  } finally {
+    hideLoading();
+  }
 }
 
-// ====================== ОСНОВНІ ФУНКЦІЇ ======================
+async function userExists(nick) {
+  try {
+    let r = await fetch(DB + "users/" + nick + ".json");
+    let d = await r.json();
+    return !!d;
+  } catch {
+    return false;
+  }
+}
+
 function save() {
-    if (!user) return;
-    user.items = items;
-    fetch(DB + "users/" + user.name + ".json", { method: 'PUT', body: JSON.stringify(user) })
-        .then(() => {
-            // Оновлюємо кеш після збереження
-            saveUserToCache(user);
-        })
-        .catch(e => console.error('Помилка збереження:', e));
+  if (!user) return;
+  user.items = items;
+  user.soundEnabled = soundEnabled;
+  fetch(DB + "users/" + user.name + ".json", {method:'PUT', body:JSON.stringify(user)}).catch(e => console.log('Save error:', e));
 }
 
 function update() {
-    const monEl = document.getElementById('mon');
-    if (monEl && user) monEl.innerText = user.points.toLocaleString();
+  const monEl = document.getElementById('mon');
+  if (monEl && user) monEl.innerText = user.points.toLocaleString();
 }
 
 function applyItems() {
-    if (!user) return;
-    let nickDisplay = user.name;
-    if (items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
-    if (items.crown) nickDisplay += ' 👑';
-    if (items.fire) nickDisplay += ' 🔥';
-    if (items.shield) nickDisplay += ' 🛡️';
-    if (items.vip) nickDisplay += ' 💎 VIP';
-    const nickEl = document.getElementById('playerNick');
-    if (nickEl) nickEl.innerHTML = nickDisplay;
+  if (!user) return;
+  let nickDisplay = user.name;
+  if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
+  if(items.crown) nickDisplay += ' 👑';
+  if(items.fire) nickDisplay += ' 🔥';
+  if(items.shield) nickDisplay += ' 🛡️';
+  if(items.vip) nickDisplay += ' 💎 VIP';
+  const nickEl = document.getElementById('playerNick');
+  if (nickEl) nickEl.innerHTML = nickDisplay;
 }
 
 function show(id) {
-    document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-    const screen = document.getElementById(id);
-    if (screen) screen.style.display = 'flex';
-    if (id === 'cabinet' && user && typeof loadCabinet === 'function') {
-        loadCabinet();
-    }
+  document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+  const screen = document.getElementById(id);
+  if (screen) screen.style.display = 'flex';
+  if (id === 'cabinet' && user && typeof loadCabinet === 'function') {
+    loadCabinet();
+  }
 }
 
 function admT() {
-    if (++cC >= 5) {
-        const adminPanel = document.getElementById('admin-panel');
-        if (adminPanel) adminPanel.style.display = 'block';
-        logAdminAccess();
-        loadAdminLogs();
-        loadUserLog();
-        cC = 0;
-    }
+  if(++cC >= 5) {
+    const adminPanel = document.getElementById('admin-panel');
+    if (adminPanel) adminPanel.style.display = 'block';
+    logAdminAccess();
+    loadAdminLogs();
+    loadUserLog();
+    cC = 0;
+  }
 }
 
 async function logAdminAccess() {
-    if (!user) return;
-    const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
-    await fetch(DB + "admin_logs.json", { method: 'POST', body: JSON.stringify({ nick: user.name, time: now }) });
+  if (!user) return;
+  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
+  await fetch(DB + "admin_logs.json", { method: 'POST', body: JSON.stringify({ nick: user.name, time: now }) });
 }
 
 function closeAdm() {
-    document.getElementById('admin-panel').style.display = 'none';
-    cC = 0;
+  document.getElementById('admin-panel').style.display = 'none';
+  cC = 0;
 }
 
 function toggleP() {
-    pOn = !pOn;
-    const btn = document.getElementById('pen-btn');
-    if (btn) {
-        btn.innerText = pOn ? "ШТРАФИ: ВКЛ" : "ШТРАФИ: ВИКЛ";
-        btn.style.background = pOn ? "var(--red)" : "var(--green)";
-    }
+  penaltyEnabled = !penaltyEnabled;
+  const btn = document.getElementById('pen-btn');
+  if (btn) {
+    btn.innerText = penaltyEnabled ? "ШТРАФИ: ВКЛ" : "ШТРАФИ: ВИКЛ";
+    btn.style.background = penaltyEnabled ? "var(--red)" : "var(--green)";
+  }
+  showNotification(`Штрафи ${penaltyEnabled ? 'увімкнено' : 'вимкнено'}`);
+}
+
+function setPenalty() {
+  const newAmount = prompt(`Введіть суму штрафу (зараз ${penaltyAmount} ₴):`, penaltyAmount);
+  if (newAmount && !isNaN(newAmount) && parseInt(newAmount) >= 0) {
+    penaltyAmount = parseInt(newAmount);
+    alert(`Штраф змінено на ${penaltyAmount} ₴`);
+  } else if (newAmount) {
+    alert('Введіть коректне число');
+  }
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  if (user) {
+    user.soundEnabled = soundEnabled;
+    save();
+  }
+  const soundToggle = document.getElementById('soundToggle');
+  if (soundToggle) soundToggle.checked = soundEnabled;
+  showNotification(`Звук ${soundEnabled ? 'увімкнено' : 'вимкнено'}`);
 }
 
 async function delU() {
-    let n = document.getElementById('a-n').value.trim();
-    if (!n) return alert("Введіть нікнейм");
-    if (confirm(`Видалити ${n}?`)) {
-        await fetch(DB + "users/" + n + ".json", { method: 'DELETE' });
-        alert("Видалено");
-        loadPlayers();
+  let n = document.getElementById('a-n').value.trim();
+  if(!n) return alert("Введіть нікнейм");
+  if(confirm(`⚠️ УВАГА! Ви дійсно хочете ВИДАЛИТИ гравця ${n}? Цю дію неможливо скасувати!`)) {
+    if(confirm(`Останнє підтвердження: видалити ${n}?`)) {
+      showLoading();
+      await fetch(DB+"users/"+n+".json", {method:'DELETE'});
+      alert(`Гравець ${n} видалений`);
+      loadPlayers();
+      hideLoading();
     }
+  }
 }
 
 async function edO(add) {
-    let n = document.getElementById('a-n').value.trim();
-    if (!n) return alert("Введіть ник");
-    let amt = prompt(add ? "Скільки додати?" : "Скільки відняти?");
-    if (isNaN(amt) || amt <= 0) return alert("Невірна сума");
-    amt = parseInt(amt);
-    
-    try {
-        let r = await fetch(DB + "users/" + n + ".json");
-        let d = await r.json();
-        if (!d) return alert("Гравця не знайдено");
-        d.points += add ? amt : -amt;
-        d.points = Math.max(0, d.points);
-        await fetch(DB + "users/" + n + ".json", { method: 'PUT', body: JSON.stringify(d) });
-        alert("Гроші оновлено");
-        loadPlayers();
-    } catch (e) {
-        console.error('Помилка:', e);
-        alert("Помилка оновлення");
-    }
+  let n = document.getElementById('a-n').value.trim();
+  if(!n) return alert("Введіть ник");
+  let amt = prompt(add ? "Скільки додати?" : "Скільки відняти?");
+  if(isNaN(amt) || amt <= 0) return alert("Невірна сума");
+  amt = parseInt(amt);
+  showLoading();
+  let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
+  if(!d) {
+    alert("Гравця не знайдено");
+    hideLoading();
+    return;
+  }
+  d.points += add ? amt : -amt;
+  d.points = Math.max(0, d.points);
+  await fetch(DB+"users/"+n+".json", {method:'PUT', body:JSON.stringify(d)});
+  alert("Гроші оновлено");
+  loadPlayers();
+  hideLoading();
 }
 
 async function loadPlayers() {
-    try {
-        let r = await fetch(DB + "users/.json");
-        let d = await r.json();
-        let list = document.getElementById('player-list');
-        list.innerHTML = '';
-        if (!d || !Object.keys(d).length) {
-            list.innerHTML = '<div style="padding:12px;color:#aaa">Гравців немає</div>';
-            return;
-        }
-        for (let key in d) {
-            let u = d[key];
-            list.innerHTML += `<div style="padding:8px; border-bottom:1px solid #ddd;"><strong>${u.name || key}</strong><br><small>Баланс: ${u.points || 0} ₴</small></div>`;
-        }
-    } catch (e) {
-        console.error('Помилка завантаження гравців:', e);
-        document.getElementById('player-list').innerHTML = '<div style="padding:12px;color:#aaa">Помилка завантаження</div>';
-    }
+  showLoading();
+  let r = await fetch(DB + "users/.json"), d = await r.json(), list = document.getElementById('player-list');
+  list.innerHTML = '';
+  if (!d || !Object.keys(d).length) {
+    list.innerHTML = '<div style="padding:12px;color:#aaa">Гравців немає</div>';
+    hideLoading();
+    return;
+  }
+  for (let key in d) {
+    let u = d[key];
+    list.innerHTML += `<div style="padding:8px; border-bottom:1px solid #ddd;"><strong>${u.name || key}</strong><br><small>Баланс: ${u.points || 0} ₴</small></div>`;
+  }
+  hideLoading();
 }
 
 async function loadUserLog() {
-    try {
-        let r = await fetch(DB + "user_logs.json");
-        let data = await r.json();
-        let logDiv = document.getElementById('user-log');
-        logDiv.innerHTML = '';
-        if (data) {
-            Object.values(data).reverse().slice(0, 50).forEach(entry => {
-                logDiv.innerHTML += `<div class="log-entry">${entry.time} — <b>${entry.game_nick}</b></div>`;
-            });
-        } else {
-            logDiv.innerHTML = 'Лог порожній';
-        }
-    } catch (e) {
-        console.error('Помилка завантаження логу:', e);
-        document.getElementById('user-log').innerHTML = 'Помилка завантаження';
+  try {
+    let r = await fetch(DB + "user_logs.json");
+    let data = await r.json();
+    let logDiv = document.getElementById('user-log');
+    logDiv.innerHTML = '';
+    if (data) {
+      Object.values(data).reverse().slice(0,50).forEach(entry => {
+        logDiv.innerHTML += `<div class="log-entry">${entry.time} — <b>${entry.game_nick}</b></div>`;
+      });
+    } else {
+      logDiv.innerHTML = 'Лог порожній';
     }
+  } catch (e) {
+    document.getElementById('user-log').innerHTML = 'Помилка';
+  }
 }
 
 async function clearUserLog() {
-    if (!confirm("Очистити лог?")) return;
-    await fetch(DB + "user_logs.json", { method: 'DELETE' });
-    loadUserLog();
+  if (!confirm("Очистити лог?")) return;
+  await fetch(DB + "user_logs.json", {method: 'DELETE'});
+  loadUserLog();
 }
 
 async function loadAdminLogs() {
-    try {
-        let r = await fetch(DB + "admin_logs.json");
-        let data = await r.json();
-        let logDiv = document.getElementById('admin-log');
-        logDiv.innerHTML = '';
-        if (data) {
-            Object.values(data).reverse().forEach(log => {
-                logDiv.innerHTML += `<div class="log-entry">${log.time} — <b>${log.nick}</b></div>`;
-            });
-        } else {
-            logDiv.innerHTML = 'Лог порожній';
-        }
-    } catch (e) {
-        console.error('Помилка завантаження адмін-логу:', e);
-        document.getElementById('admin-log').innerHTML = 'Помилка завантаження';
+  try {
+    let r = await fetch(DB + "admin_logs.json");
+    let data = await r.json();
+    let logDiv = document.getElementById('admin-log');
+    logDiv.innerHTML = '';
+    if (data) {
+      Object.values(data).reverse().forEach(log => {
+        logDiv.innerHTML += `<div class="log-entry">${log.time} — <b>${log.nick}</b></div>`;
+      });
+    } else {
+      logDiv.innerHTML = 'Лог порожній';
     }
+  } catch (e) {
+    document.getElementById('admin-log').innerHTML = 'Помилка';
+  }
 }
 
 async function clearAdminLogs() {
-    if (!confirm("Очистити лог адмінки?")) return;
-    await fetch(DB + "admin_logs.json", { method: 'DELETE' });
-    loadAdminLogs();
+  if (!confirm("Очистити лог адмінки?")) return;
+  await fetch(DB + "admin_logs.json", {method: 'DELETE'});
+  loadAdminLogs();
 }
 
 function startTheme(theme) {
-    currentTheme = theme;
-    currentIndex = 0;
-    correctCount = 0;
-    wrongCount = 0;
-    if (!user.themeAttempts) user.themeAttempts = {};
-    if (!user.themeAttempts[theme]) user.themeAttempts[theme] = 0;
-    show('game');
-    loadQuestion();
+  currentTheme = theme;
+  currentIndex = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  if (!user.themeAttempts) user.themeAttempts = {};
+  if (!user.themeAttempts[theme]) user.themeAttempts[theme] = 0;
+  show('game');
+  loadQuestion();
 }
 
 function loadQuestion() {
-    const qs = themes[currentTheme];
-    if (!qs || currentIndex >= qs.length) {
-        const total = correctCount + wrongCount;
-        if (typeof saveThemeResult === 'function' && total > 0) {
-            saveThemeResult(currentTheme, correctCount, total);
-        }
-        user.themeAttempts[currentTheme] = (user.themeAttempts[currentTheme] || 0) + 1;
-        save();
-        document.getElementById('qtext').textContent = "Тема завершена!";
-        document.getElementById('feedback').innerHTML = '';
-        document.getElementById('abox').innerHTML = `
-            <div class="summary">
-                <strong>Правильних:</strong> ${correctCount}<br>
-                <strong>Неправильних:</strong> ${wrongCount}<br>
-                <strong>Баланс:</strong> ${user.points.toLocaleString()} ₴
-            </div>
-            <button class="btn" onclick="show('sections')">Обрати тему</button>
-        `;
-        return;
+  const qs = themes[currentTheme];
+  if (!qs || currentIndex >= qs.length) {
+    const total = correctCount + wrongCount;
+    if (typeof saveThemeResult === 'function' && total > 0) {
+      saveThemeResult(currentTheme, correctCount, total);
     }
-
-    const q = qs[currentIndex];
-    currentCorrectAnswer = q.a;
-    document.getElementById('qtext').textContent = `${currentIndex + 1}/${qs.length}: ${q.q}`;
+    user.themeAttempts[currentTheme] = (user.themeAttempts[currentTheme] || 0) + 1;
+    save();
+    document.getElementById('qtext').textContent = "Тема завершена!";
     document.getElementById('feedback').innerHTML = '';
-    const abox = document.getElementById('abox');
-    abox.innerHTML = '';
+    document.getElementById('abox').innerHTML = `
+      <div class="summary">
+        <strong>Правильних:</strong> ${correctCount}<br>
+        <strong>Неправильних:</strong> ${wrongCount}<br>
+        <strong>Баланс:</strong> ${user.points.toLocaleString()} ₴
+      </div>
+      <button class="btn" onclick="show('sections')">Обрати тему</button>
+    `;
+    return;
+  }
 
-    let answers = [q.a, ...q.w];
-    answers.sort(() => Math.random() - 0.5);
+  const q = qs[currentIndex];
+  currentCorrectAnswer = q.a;
+  document.getElementById('qtext').textContent = `${currentIndex+1}/${qs.length}: ${q.q}`;
+  document.getElementById('feedback').innerHTML = '';
+  const abox = document.getElementById('abox');
+  abox.innerHTML = '';
 
-    answers.forEach(o => {
-        let btn = document.createElement('button');
-        btn.className = 'btn';
-        btn.innerText = o;
-        btn.onclick = () => checkAnswer(o, q.a, btn);
-        abox.appendChild(btn);
-    });
+  let answers = [q.a, ...q.w];
+  answers.sort(() => Math.random() - 0.5);
+
+  answers.forEach(o => {
+    let btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.innerText = o;
+    btn.onclick = () => checkAnswer(o, q.a, btn);
+    abox.appendChild(btn);
+  });
 }
 
 function checkAnswer(selected, correct, button) {
-    document.querySelectorAll('#abox .btn').forEach(b => b.disabled = true);
-    if (selected === correct) {
-        correctCount++;
-        user.points += 100;
-        button.style.background = '#4caf50';
-        document.getElementById('feedback').innerHTML = '<span class="correct">✓ ПРАВИЛЬНО!</span>';
-        correctSound.play().catch(() => { });
-    } else {
-        wrongCount++;
-        user.points = Math.max(0, user.points - 30);
-        button.style.background = '#f44336';
-        document.getElementById('feedback').innerHTML = '<span class="wrong">✗ НЕПРАВИЛЬНО!</span>';
-        wrongSound.play().catch(() => { });
+  document.querySelectorAll('#abox .btn').forEach(b => b.disabled = true);
+  if (selected === correct) {
+    correctCount++;
+    user.points += rewardAmount;
+    button.style.background = '#4caf50';
+    document.getElementById('feedback').innerHTML = '<span class="correct">✓ ПРАВИЛЬНО!</span>';
+    playSound("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
+  } else {
+    wrongCount++;
+    if (penaltyEnabled) {
+      user.points = Math.max(0, user.points - penaltyAmount);
     }
-    document.getElementById('mon').innerText = user.points.toLocaleString();
-    save();
-    setTimeout(() => {
-        currentIndex++;
-        loadQuestion();
-    }, 1200);
+    button.style.background = '#f44336';
+    document.getElementById('feedback').innerHTML = `<span class="wrong">✗ НЕПРАВИЛЬНО! Правильна відповідь: ${correct}</span>`;
+    playSound("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
+  }
+  document.getElementById('mon').innerText = user.points.toLocaleString();
+  save();
+  setTimeout(() => {
+    currentIndex++;
+    loadQuestion();
+  }, 1200);
 }
 
 async function loadT() {
-    show('top');
-    try {
-        let r = await fetch(DB + "users/.json");
-        let d = await r.json();
-        let l = document.getElementById('tlist');
-        l.innerHTML = '';
-        if (d) {
-            let topPlayers = Object.values(d).sort((a, b) => (b.points || 0) - (a.points || 0)).slice(0, 100);
-            topPlayers.forEach((u, i) => {
-                l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px"><span>${i + 1}. ${u.name}</span><b>${u.points || 0}</b></div>`;
-            });
-        } else {
-            l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
-        }
-    } catch (e) {
-        console.error('Помилка завантаження топу:', e);
-        document.getElementById('tlist').innerHTML = '<div style="padding:12px;color:#aaa">Помилка завантаження</div>';
-    }
+  show('top');
+  showLoading();
+  let r = await fetch(DB+"users/.json"), d = await r.json();
+  let l = document.getElementById('tlist');
+  l.innerHTML = '';
+  if(d) {
+    let topPlayers = Object.values(d).sort((a,b)=> (b.points||0) - (a.points||0)).slice(0,100);
+    topPlayers.forEach((u,i) => {
+      l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #ddd;"><span>${i+1}. ${u.name}</span><b>${(u.points||0).toLocaleString()} ₴</b></div>`;
+    });
+  } else {
+    l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
+  }
+  hideLoading();
 }
 
 function buyItem(item) {
-    const prices = { gold_frame: 1000, crown: 2000, fire: 1500, shield: 2500, vip: 5000 };
-    if (user.points >= prices[item]) {
-        user.points -= prices[item];
-        items[item] = true;
-        applyItems();
-        save();
-        update();
-        alert("Куплено!");
-    } else {
-        alert("Недостатньо грошей!");
-    }
+  const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
+  if(user.points >= prices[item]){
+    user.points -= prices[item];
+    items[item] = true;
+    applyItems();
+    save();
+    update();
+    playSound("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
+    alert("Куплено!");
+  } else {
+    playSound("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
+    alert("Недостатньо грошей!");
+  }
 }
 
-// Ініціалізація при завантаженні сторінки
-window.onload = function() {
-    setupSplashVideo();
-};
+function showNotification(msg) {
+  if (user && user.notifications === false) return;
+  const toast = document.getElementById('notificationToast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// Експорт для cabinet.js
+window.showNotification = showNotification;
+window.playSound = playSound;

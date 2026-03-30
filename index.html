@@ -10,7 +10,7 @@
 
   <!-- SPLASH SCREEN -->
   <div id="splash">
-    <video id="splash-video" playsinline preload="auto" muted></video>
+    <video id="splash-video" playsinline preload="auto" muted style="display: none;"></video>
     <button id="startBtn">ПОЧАТИ ГРУ</button>
   </div>
 
@@ -157,7 +157,7 @@
   <div id="top" class="screen">
     <div class="card">
       <h3>🏆 ТОП 1000</h3>
-      <div id="tlist">Завантаження...</div>
+      <div id="tlist" style="max-height: 500px; overflow-y: auto;">Завантаження...</div>
       <button class="btn" onclick="show('menu')">НАЗАД</button>
     </div>
   </div>
@@ -282,9 +282,11 @@
 
   <div id="notificationToast" class="notification-toast"></div>
 
+  <!-- ПІДКЛЮЧЕННЯ СКРИПТІВ - ВАЖЛИВО: ПОРЯДОК МАЄ ЗНАЧЕННЯ -->
   <script src="js/themes.js"></script>
   <script src="js/main.js"></script>
   <script src="js/cabinet.js"></script>
-
+  <!-- Якщо хочете використовувати модуль Firebase, розкоментуйте наступний рядок -->
+  <!-- <script src="js/firebase.js"></script> -->
 </body>
 </html>

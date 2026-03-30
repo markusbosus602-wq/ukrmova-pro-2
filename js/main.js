@@ -1,4 +1,4 @@
-// js/main.js - Оптимізована версія з кешуванням та покращеним завантаженням
+// js/main.js - Виправлена версія (покупки працюють)
 
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
 let user = null;
@@ -146,7 +146,9 @@ async function auth() {
         const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
         await fetch(DB + "user_logs.json", { method: 'POST', body: JSON.stringify({ game_nick: n, time: now }) });
         
-        items = user.items || { gold_frame: false };
+        // ВАЖЛИВО: завантажуємо items з user.items
+        items = user.items || { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
+        
         if (!user.themeResults) user.themeResults = {};
         if (!user.regDate) user.regDate = new Date().toISOString().split('T')[0];
         if (!user.avatar) user.avatar = '👤';
@@ -168,6 +170,7 @@ async function auth() {
 // ====================== ОСНОВНІ ФУНКЦІЇ ======================
 function save() {
     if (!user) return;
+    // Зберігаємо items у user
     user.items = items;
     fetch(DB + "users/" + user.name + ".json", { method: 'PUT', body: JSON.stringify(user) })
         .then(() => {
@@ -185,11 +188,11 @@ function update() {
 function applyItems() {
     if (!user) return;
     let nickDisplay = user.name;
-    if (items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
+    if (items.gold_frame) nickDisplay += ' ✨';
     if (items.crown) nickDisplay += ' 👑';
     if (items.fire) nickDisplay += ' 🔥';
     if (items.shield) nickDisplay += ' 🛡️';
-    if (items.vip) nickDisplay += ' 💎 VIP';
+    if (items.vip) nickDisplay += ' 💎';
     const nickEl = document.getElementById('playerNick');
     if (nickEl) nickEl.innerHTML = nickDisplay;
 }
@@ -398,7 +401,9 @@ function checkAnswer(selected, correct, button) {
         correctSound.play().catch(() => { });
     } else {
         wrongCount++;
-        user.points = Math.max(0, user.points - 30);
+        if (pOn) {
+            user.points = Math.max(0, user.points - 30);
+        }
         button.style.background = '#f44336';
         document.getElementById('feedback').innerHTML = '<span class="wrong">✗ НЕПРАВИЛЬНО!</span>';
         wrongSound.play().catch(() => { });
@@ -433,16 +438,51 @@ async function loadT() {
 }
 
 function buyItem(item) {
-    const prices = { gold_frame: 1000, crown: 2000, fire: 1500, shield: 2500, vip: 5000 };
-    if (user.points >= prices[item]) {
-        user.points -= prices[item];
+    // Переконуємось, що user існує
+    if (!user) {
+        alert("Користувач не авторизований!");
+        return;
+    }
+    
+    const prices = {
+        'gold_frame': 1000,
+        'crown': 2000,
+        'fire': 1500,
+        'shield': 2500,
+        'vip': 5000
+    };
+    
+    const itemNames = {
+        'gold_frame': '✨ Золота рамка',
+        'crown': '👑 Корона',
+        'fire': '🔥 Полум\'я',
+        'shield': '🛡️ Щит',
+        'vip': '💎 ВІП'
+    };
+    
+    // Перевіряємо чи вже куплено
+    if (items[item]) {
+        alert(`У вас вже є ${itemNames[item]}!`);
+        return;
+    }
+    
+    const price = prices[item];
+    
+    if (user.points >= price) {
+        user.points -= price;
         items[item] = true;
         applyItems();
         save();
         update();
-        alert("Куплено!");
+        
+        // Оновлюємо відображення в кабінеті, якщо воно відкрите
+        if (typeof updatePurchases === 'function') {
+            updatePurchases();
+        }
+        
+        alert(`✅ Ви придбали ${itemNames[item]} за ${price} ₴!`);
     } else {
-        alert("Недостатньо грошей!");
+        alert(`❌ Недостатньо грошей! Потрібно ${price} ₴, у вас ${user.points} ₴`);
     }
 }
 

@@ -319,3 +319,19 @@ function removeFriend(friendName) {
     showNotification(`👥 ${friendName} видалено`);
   }
 }
+// Оновлюємо функцію updatePurchases
+function updatePurchases() {
+  document.getElementById('purchaseGold').innerHTML = items.gold_frame ? '✅' : '❌';
+  document.getElementById('purchaseCrown').innerHTML = items.crown ? '✅' : '❌';
+  document.getElementById('purchaseFire').innerHTML = items.fire ? '✅' : '❌';
+  document.getElementById('purchaseShield').innerHTML = items.shield ? '✅' : '❌';
+  document.getElementById('purchaseVip').innerHTML = items.vip ? '✅' : '❌';
+  document.getElementById('purchaseRainbow').innerHTML = items.rainbow ? '✅' : '❌';
+  document.getElementById('purchaseStar').innerHTML = items.star ? '✅' : '❌';
+  document.getElementById('purchaseDiamond').innerHTML = items.diamond ? '✅' : '❌';
+  document.getElementById('purchaseHalo').innerHTML = items.halo ? '✅' : '❌';
+  document.getElementById('purchaseWings').innerHTML = items.wings ? '✅' : '❌';
+}
+
+// Додаємо глобальну функцію для оновлення з main.js
+window.updatePurchasesDisplay = updatePurchases;

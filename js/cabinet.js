@@ -56,11 +56,11 @@ function updateAvatarDisplay() {
 
 function calculateLevel() {
   const totalCorrect = calculateStats().totalCorrect;
-  if (totalCorrect < 50) return { name: 'Новачок', badge: '🌱' };
-  if (totalCorrect < 200) return { name: 'Досвідчений', badge: '📚' };
-  if (totalCorrect < 500) return { name: 'Майстер', badge: '🏅' };
-  if (totalCorrect < 1000) return { name: 'Експерт', badge: '🎓' };
-  return { name: 'Грандмайстер', badge: '👑' };
+  if (totalCorrect < 50) return { name: '🌱 Новачок', badge: '🌱' };
+  if (totalCorrect < 200) return { name: '📚 Досвідчений', badge: '📚' };
+  if (totalCorrect < 500) return { name: '🏅 Майстер', badge: '🏅' };
+  if (totalCorrect < 1000) return { name: '🎓 Експерт', badge: '🎓' };
+  return { name: '👑 Грандмайстер', badge: '👑' };
 }
 
 function calculateStats() {
@@ -111,12 +111,19 @@ function updatePurchases() {
   document.getElementById('purchaseFire').innerHTML = items.fire ? '✅' : '❌';
   document.getElementById('purchaseShield').innerHTML = items.shield ? '✅' : '❌';
   document.getElementById('purchaseVip').innerHTML = items.vip ? '✅' : '❌';
+  document.getElementById('purchaseRainbow').innerHTML = items.rainbow ? '✅' : '❌';
+  document.getElementById('purchaseStar').innerHTML = items.star ? '✅' : '❌';
+  document.getElementById('purchaseDiamond').innerHTML = items.diamond ? '✅' : '❌';
+  document.getElementById('purchaseHalo').innerHTML = items.halo ? '✅' : '❌';
+  document.getElementById('purchaseWings').innerHTML = items.wings ? '✅' : '❌';
 }
+
+window.updatePurchasesDisplay = updatePurchases;
 
 function loadHistory() {
   const container = document.getElementById('historyList');
   if (!user.themeResults || Object.keys(user.themeResults).length === 0) {
-    container.innerHTML = 'Ще немає пройдених тем';
+    container.innerHTML = '📭 Ще немає пройдених тем';
     return;
   }
   const recent = Object.entries(user.themeResults).sort((a,b) => new Date(b[1].date) - new Date(a[1].date)).slice(0,15);
@@ -124,34 +131,34 @@ function loadHistory() {
     <div class="history-item">
       <span>${getThemeName(theme)}</span>
       <span class="history-percent">${data.percent}%</span>
-      <span style="font-size:10px">${data.date?.split(',')[0] || ''}</span>
+      <span style="font-size:10px; color:#888">${data.date?.split(',')[0] || ''}</span>
     </div>
   `).join('');
 }
 
 function getThemeName(key) {
   const names = {
-    vydminy: 'Відміни', orudnyi_1vidmina: 'Орудний відмінок',
-    prykmetnyky: 'Прикметники', grupy_prykmetnykiv: 'Групи прикметників',
-    prykmetnyky_stupeni: 'Ступені', prykmetnyky_stupeni_2: 'Ступені 2',
-    ne_z_prykmetnykamy: 'НЕ з прикметниками',
-    chyslivnyky_1: 'Числівники 1', chyslivnyky_2: 'Числівники 2',
-    frazeologizmy1: 'Фразеологізми 1', frazeologizmy2: 'Фразеологізми 2',
-    frazeologizmy3: 'Фразеологізми 3', frazeologizmy4: 'Фразеологізми 4',
-    frazeologizmy5: 'Фразеологізми 5', frazeologizmy6: 'Фразеологізми 6',
-    frazeologizmy7: 'Фразеологізми 7', frazeologizmy8: 'Фразеологізми 8',
-    frazeologizmy9: 'Фразеологізми 9', frazeologizmy10: 'Фразеологізми 10',
-    frazeologizmy11: 'Фразеологізми 11', frazeologizmy12: 'Фразеологізми 12',
-    frazeologizmy13: 'Фразеологізми 13', frazeologizmy14: 'Фразеологізми 14'
+    vydminy: '📖 Відміни', orudnyi_1vidmina: '📖 Орудний відмінок',
+    prykmetnyky: '📝 Прикметники', grupy_prykmetnykiv: '📝 Групи прикметників',
+    prykmetnyky_stupeni: '📝 Ступені', prykmetnyky_stupeni_2: '📝 Ступені 2',
+    ne_z_prykmetnykamy: '📝 НЕ з прикметниками',
+    chyslivnyky_1: '🔢 Числівники 1', chyslivnyky_2: '🔢 Числівники 2',
+    frazeologizmy1: '💬 Фразеологізми 1', frazeologizmy2: '💬 Фразеологізми 2',
+    frazeologizmy3: '💬 Фразеологізми 3', frazeologizmy4: '💬 Фразеологізми 4',
+    frazeologizmy5: '💬 Фразеологізми 5', frazeologizmy6: '💬 Фразеологізми 6',
+    frazeologizmy7: '💬 Фразеологізми 7', frazeologizmy8: '💬 Фразеологізми 8',
+    frazeologizmy9: '💬 Фразеологізми 9', frazeologizmy10: '💬 Фразеологізми 10',
+    frazeologizmy11: '💬 Фразеологізми 11', frazeologizmy12: '💬 Фразеологізми 12',
+    frazeologizmy13: '💬 Фразеологізми 13', frazeologizmy14: '💬 Фразеологізми 14'
   };
   return names[key] || key;
 }
 
 function editNick() {
-  const newNick = prompt('Новий нікнейм:', user.name);
+  const newNick = prompt('📝 Новий нікнейм:', user.name);
   if (!newNick || newNick === user.name) return;
   fetch(DB + "users/" + newNick + ".json").then(r => r.json()).then(existing => {
-    if (existing && existing.name !== user.name) return alert('Зайнятий!');
+    if (existing && existing.name !== user.name) return alert('❌ Цей нікнейм вже зайнятий!');
     const oldNick = user.name;
     const newUser = { ...user, name: newNick };
     fetch(DB + "users/" + newNick + ".json", { method: 'PUT', body: JSON.stringify(newUser) })
@@ -162,22 +169,22 @@ function editNick() {
         update();
         applyItems();
         loadCabinet();
-        alert('Нікнейм змінено!');
+        alert('✅ Нікнейм змінено!');
       });
   });
 }
 
 function changePassword() {
-  const newPass = prompt('Новий пароль:');
+  const newPass = prompt('🔐 Новий пароль:');
   if (!newPass) return;
   user.pass = newPass;
   localStorage.setItem('up', newPass);
   save();
-  alert('Пароль змінено!');
+  alert('✅ Пароль змінено!');
 }
 
 function logout() {
-  if (confirm('Вийти?')) {
+  if (confirm('🚪 Вийти з акаунту?')) {
     localStorage.removeItem('un');
     localStorage.removeItem('up');
     user = null;
@@ -236,11 +243,11 @@ document.addEventListener('DOMContentLoaded', () => {
           save();
           updateAvatarDisplay();
           closeAvatarModal();
-          showNotification('Аватарку оновлено!');
+          showNotification('📸 Аватарку оновлено!');
         };
         reader.readAsDataURL(file);
       } else {
-        alert('Оберіть фото');
+        alert('❌ Оберіть фото');
       }
     };
   }
@@ -254,20 +261,20 @@ function toggleNotifications() {
 
 async function addFriend() {
   const friendNick = document.getElementById('friendNick').value.trim();
-  if (!friendNick) return alert('Введіть нікнейм');
-  if (friendNick === user.name) return alert('Не можна додати себе');
-  if (user.friends?.includes(friendNick)) return alert('Вже є в друзях');
+  if (!friendNick) return alert('📝 Введіть нікнейм друга');
+  if (friendNick === user.name) return alert('❌ Не можна додати себе');
+  if (user.friends?.includes(friendNick)) return alert('👥 Цей друг вже у списку');
   
   const r = await fetch(DB + "users/" + friendNick + ".json");
   const friendData = await r.json();
-  if (!friendData) return alert('Користувача не знайдено');
+  if (!friendData) return alert('❌ Користувача не знайдено');
   
   if (!user.friends) user.friends = [];
   user.friends.push(friendNick);
   save();
   document.getElementById('friendNick').value = '';
   loadFriends();
-  showNotification(`👥 ${friendNick} додано!`);
+  showNotification(`👥 ${friendNick} додано до друзів!`);
 }
 
 function loadFriends() {
@@ -275,8 +282,8 @@ function loadFriends() {
   const leaderboardDiv = document.getElementById('leaderboardFriends');
   
   if (!user.friends || user.friends.length === 0) {
-    friendsDiv.innerHTML = 'У вас ще немає друзів';
-    leaderboardDiv.innerHTML = 'Додайте друзів';
+    friendsDiv.innerHTML = '👥 У вас ще немає друзів';
+    leaderboardDiv.innerHTML = '➕ Додайте друзів, щоб бачити таблицю';
     return;
   }
   
@@ -291,7 +298,7 @@ function loadFriends() {
         <div class="friend-info">
           <span class="friend-avatar">${f.avatar}</span>
           <span class="friend-name">${f.name}</span>
-          <span class="friend-points">${f.points.toLocaleString()} ₴</span>
+          <span class="friend-points">💰 ${f.points.toLocaleString()} ₴</span>
         </div>
         <button class="remove-friend" onclick="removeFriend('${f.name}')">❌</button>
       </div>
@@ -305,33 +312,17 @@ function loadFriends() {
         <span class="leaderboard-rank">${i+1}</span>
         <span class="friend-avatar">${f.avatar}</span>
         <span class="leaderboard-name">${f.name} ${f.name === user.name ? '(Ви)' : ''}</span>
-        <span class="leaderboard-points">${f.points.toLocaleString()} ₴</span>
+        <span class="leaderboard-points">💰 ${f.points.toLocaleString()} ₴</span>
       </div>
     `).join('');
   });
 }
 
 function removeFriend(friendName) {
-  if (confirm(`Видалити ${friendName}?`)) {
+  if (confirm(`❌ Видалити ${friendName} з друзів?`)) {
     user.friends = user.friends.filter(f => f !== friendName);
     save();
     loadFriends();
-    showNotification(`👥 ${friendName} видалено`);
+    showNotification(`👥 ${friendName} видалено з друзів`);
   }
 }
-// Оновлюємо функцію updatePurchases
-function updatePurchases() {
-  document.getElementById('purchaseGold').innerHTML = items.gold_frame ? '✅' : '❌';
-  document.getElementById('purchaseCrown').innerHTML = items.crown ? '✅' : '❌';
-  document.getElementById('purchaseFire').innerHTML = items.fire ? '✅' : '❌';
-  document.getElementById('purchaseShield').innerHTML = items.shield ? '✅' : '❌';
-  document.getElementById('purchaseVip').innerHTML = items.vip ? '✅' : '❌';
-  document.getElementById('purchaseRainbow').innerHTML = items.rainbow ? '✅' : '❌';
-  document.getElementById('purchaseStar').innerHTML = items.star ? '✅' : '❌';
-  document.getElementById('purchaseDiamond').innerHTML = items.diamond ? '✅' : '❌';
-  document.getElementById('purchaseHalo').innerHTML = items.halo ? '✅' : '❌';
-  document.getElementById('purchaseWings').innerHTML = items.wings ? '✅' : '❌';
-}
-
-// Додаємо глобальну функцію для оновлення з main.js
-window.updatePurchasesDisplay = updatePurchases;

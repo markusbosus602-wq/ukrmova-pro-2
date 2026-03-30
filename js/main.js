@@ -29,7 +29,6 @@ function getUserFromCache(nickname) {
     
     try {
         const { data, timestamp } = JSON.parse(cached);
-        // Кеш дійсний 5 хвилин (300000 мс)
         if (Date.now() - timestamp < 300000) {
             return data;
         }
@@ -49,7 +48,6 @@ function setupSplashVideo() {
     startBtn.onclick = function() {
         startBtn.style.display = 'none';
         
-        // Створюємо відео динамічно для кращого завантаження
         const video = document.createElement('video');
         video.id = 'splash-video';
         video.playsInline = true;
@@ -63,20 +61,17 @@ function setupSplashVideo() {
         };
         
         video.onerror = function() {
-            // Якщо відео не завантажилось, одразу переходимо до авторизації
             splash.style.display = 'none';
             tryAutoLogin();
         };
         
         splash.prepend(video);
         video.play().catch(() => {
-            // Якщо автовідтворення заблоковане, все одно переходимо далі
             splash.style.display = 'none';
             tryAutoLogin();
         });
     };
     
-    // Таймаут на випадок, якщо відео не запустилось
     setTimeout(() => {
         if (splash && splash.style.display !== 'none') {
             splash.style.display = 'none';
@@ -108,14 +103,12 @@ async function auth() {
     document.getElementById('auth-error').textContent = "Завантаження...";
     
     try {
-        // Спроба завантажити з кешу
         let cachedUser = getUserFromCache(n);
         let d = null;
         
         if (cachedUser && cachedUser.pass === p) {
             d = cachedUser;
         } else {
-            // Якщо кеш відсутній або невалідний, завантажуємо з Firebase
             let r = await fetch(DB + "users/" + n + ".json");
             d = await r.json();
         }
@@ -128,7 +121,7 @@ async function auth() {
             user = d;
         } else {
             user = {
-                name: n, pass: p, points: 0, items: { gold_frame: false },
+                name: n, pass: p, points: 0, items: { gold_frame: false, crown: false, fire: false, shield: false, vip: false },
                 themeAttempts: {}, themeResults: {},
                 regDate: new Date().toISOString().split('T')[0],
                 avatar: '👤', avatarType: 'emoji', avatarData: null,
@@ -137,7 +130,6 @@ async function auth() {
             await fetch(DB + "users/" + n + ".json", { method: 'PUT', body: JSON.stringify(user) });
         }
         
-        // Зберігаємо в кеш
         saveUserToCache(user);
         
         localStorage.setItem('un', n);
@@ -146,8 +138,10 @@ async function auth() {
         const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
         await fetch(DB + "user_logs.json", { method: 'POST', body: JSON.stringify({ game_nick: n, time: now }) });
         
-        // ВАЖЛИВО: завантажуємо items з user.items
-        items = user.items || { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
+        // Важливо: завантажуємо items з user.items
+        if (user.items) {
+            items = { ...items, ...user.items };
+        }
         
         if (!user.themeResults) user.themeResults = {};
         if (!user.regDate) user.regDate = new Date().toISOString().split('T')[0];
@@ -170,11 +164,9 @@ async function auth() {
 // ====================== ОСНОВНІ ФУНКЦІЇ ======================
 function save() {
     if (!user) return;
-    // Зберігаємо items у user
     user.items = items;
     fetch(DB + "users/" + user.name + ".json", { method: 'PUT', body: JSON.stringify(user) })
         .then(() => {
-            // Оновлюємо кеш після збереження
             saveUserToCache(user);
         })
         .catch(e => console.error('Помилка збереження:', e));
@@ -426,7 +418,21 @@ async function loadT() {
         if (d) {
             let topPlayers = Object.values(d).sort((a, b) => (b.points || 0) - (a.points || 0)).slice(0, 100);
             topPlayers.forEach((u, i) => {
-                l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px"><span>${i + 1}. ${u.name}</span><b>${u.points || 0}</b></div>`;
+                // Отримуємо аватарку гравця
+                let avatar = u.avatar || '👤';
+                if (u.avatarType === 'photo' && u.avatarData) {
+                    avatar = `<img src="${u.avatarData}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">`;
+                }
+                l.innerHTML += `
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #eee;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <span style="font-weight:bold;min-width:35px;">${i + 1}.</span>
+                            <div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;">${avatar}</div>
+                            <span><strong>${u.name}</strong></span>
+                        </div>
+                        <b>${(u.points || 0).toLocaleString()} ₴</b>
+                    </div>
+                `;
             });
         } else {
             l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
@@ -438,7 +444,6 @@ async function loadT() {
 }
 
 function buyItem(item) {
-    // Переконуємось, що user існує
     if (!user) {
         alert("Користувач не авторизований!");
         return;
@@ -460,22 +465,26 @@ function buyItem(item) {
         'vip': '💎 ВІП'
     };
     
-    // Перевіряємо чи вже куплено
     if (items[item]) {
-        alert(`У вас вже є ${itemNames[item]}!`);
+        alert(`❌ У вас вже є ${itemNames[item]}!`);
         return;
     }
     
     const price = prices[item];
     
+    if (!price) {
+        alert("Помилка: товар не знайдено!");
+        return;
+    }
+    
     if (user.points >= price) {
         user.points -= price;
         items[item] = true;
+        user.items = items;
         applyItems();
         save();
         update();
         
-        // Оновлюємо відображення в кабінеті, якщо воно відкрите
         if (typeof updatePurchases === 'function') {
             updatePurchases();
         }
@@ -486,7 +495,6 @@ function buyItem(item) {
     }
 }
 
-// Ініціалізація при завантаженні сторінки
 window.onload = function() {
     setupSplashVideo();
 };

@@ -152,6 +152,8 @@
       text-align: center;
       cursor: pointer;
       transition: transform 0.1s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .shop-item:active {
@@ -606,11 +608,11 @@
     <div class="card">
       <h2>Магазин</h2>
       <div class="shop-grid">
-        <div class="shop-item" onclick="buyItem('gold_frame')">✨ Золота рамка — 1000 ₴</div>
-        <div class="shop-item" onclick="buyItem('crown')">👑 Корона — 2000 ₴</div>
-        <div class="shop-item" onclick="buyItem('fire')">🔥 Полум'я — 1500 ₴</div>
-        <div class="shop-item" onclick="buyItem('shield')">🛡️ Щит — 2500 ₴</div>
-        <div class="shop-item" onclick="buyItem('vip')">💎 ВІП — 5000 ₴</div>
+        <div class="shop-item" data-item="gold_frame">✨ Золота рамка — 1000 ₴</div>
+        <div class="shop-item" data-item="crown">👑 Корона — 2000 ₴</div>
+        <div class="shop-item" data-item="fire">🔥 Полум'я — 1500 ₴</div>
+        <div class="shop-item" data-item="shield">🛡️ Щит — 2500 ₴</div>
+        <div class="shop-item" data-item="vip">💎 ВІП — 5000 ₴</div>
       </div>
       <button class="btn" onclick="show('menu')">НАЗАД</button>
     </div>
@@ -838,6 +840,29 @@
   <script src="js/themes.js"></script>
   <script src="js/main.js"></script>
   <script src="js/cabinet.js"></script>
+
+  <script>
+    // Додатковий код для блокування переходів за посиланнями в магазині
+    document.addEventListener('DOMContentLoaded', function() {
+      // Забороняємо будь-які переходи за посиланнями з елементів магазину
+      const shopItems = document.querySelectorAll('.shop-item');
+      shopItems.forEach(function(item) {
+        // Видаляємо будь-які href атрибути
+        item.removeAttribute('href');
+        // Блокуємо подію click, щоб вона не передавалася далі
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          // Отримуємо назву товару з data-item атрибута
+          const itemName = this.getAttribute('data-item');
+          if (itemName) {
+            buyItem(itemName);
+          }
+          return false;
+        });
+      });
+    });
+  </script>
 
 </body>
 </html>

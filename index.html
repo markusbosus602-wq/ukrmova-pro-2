@@ -844,22 +844,5 @@
   <script src="js/main.js"></script>
   <script src="js/cabinet.js"></script>
 
-  <script>
-    // Обробник для кнопок магазину
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('.shop-btn').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          var itemName = this.getAttribute('data-item');
-          if (itemName && typeof buyItem === 'function') {
-            buyItem(itemName);
-          }
-          return false;
-        });
-      });
-    });
-  </script>
-
 </body>
 </html>

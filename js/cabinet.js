@@ -170,10 +170,12 @@ function editNick() {
 function changePassword() {
   const newPass = prompt('Новий пароль:');
   if (!newPass) return;
-  user.pass = newPass;
-  localStorage.setItem('up', newPass);
-  save();
-  alert('Пароль змінено!');
+  hashPassword(newPass).then(hashed => {
+    user.pass = hashed;
+    localStorage.setItem('up', newPass);
+    save();
+    alert('Пароль змінено!');
+  });
 }
 
 function logout() {
@@ -190,10 +192,17 @@ function saveThemeResult(theme, correct, total) {
   const percent = Math.round((correct / total) * 100);
   const date = new Date().toLocaleString('uk-UA');
   const oldPercent = user.themeResults[theme]?.percent || 0;
-  user.themeResults[theme] = { correct, total, percent, date };
-  save();
-  if (percent === 100 && oldPercent !== 100) {
-    showNotification(`🎉 100% у темі "${getThemeName(theme)}"!`);
+  
+  // Зберігаємо тільки якщо результат кращий
+  if (percent > oldPercent || !user.themeResults[theme]) {
+    user.themeResults[theme] = { correct, total, percent, date };
+    save();
+    if (percent === 100 && oldPercent !== 100) {
+      showNotification(`🎉 100% у темі "${getThemeName(theme)}"!`);
+    }
+    if (percent > oldPercent) {
+      showNotification(`📈 Новий результат у темі "${getThemeName(theme)}": ${percent}%!`);
+    }
   }
 }
 

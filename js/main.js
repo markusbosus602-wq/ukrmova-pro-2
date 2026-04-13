@@ -9,73 +9,36 @@ let correctCount = 0;
 let wrongCount = 0;
 let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
 let currentCorrectAnswer = '';
-let marathonQuestions = [];
-let isMarathonMode = false;
-let saveTimeout = null;
 
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
-
-// Активація звуків на першому кліку (для мобільних)
-document.addEventListener('click', function enableAudio() {
-  correctSound.volume = 0.5;
-  wrongSound.volume = 0.5;
-  document.removeEventListener('click', enableAudio);
-});
 
 window.onload = function() {
   const splash = document.getElementById('splash');
   const video = document.getElementById('splash-video');
   const startBtn = document.getElementById('startBtn');
   
-  if (video && startBtn) {
+  if (video) {
     video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
-    video.load();
-    
-    startBtn.onclick = function(e) {
-      e.preventDefault();
+    startBtn.onclick = function() {
       startBtn.style.display = 'none';
       video.muted = false;
-      video.play().then(() => {
-        console.log("Video playing");
-      }).catch(err => {
-        console.log("Video play error:", err);
-        // Якщо відео не грає, все одно переходимо далі
-        splash.style.display = 'none';
-        tryAutoLogin();
-      });
+      video.currentTime = 0;
+      video.play().catch(() => {});
     };
-    
     video.onended = function() {
-      console.log("Video ended");
-      splash.style.display = 'none';
-      tryAutoLogin();
-    };
-    
-    video.onerror = function() {
-      console.log("Video error");
       splash.style.display = 'none';
       tryAutoLogin();
     };
   }
   
-  // Запасний варіант - якщо через 15 секунд нічого не сталося
   setTimeout(() => {
     if (splash && splash.style.display !== 'none') {
-      console.log("Timeout fallback");
       splash.style.display = 'none';
       tryAutoLogin();
     }
-  }, 15000);
+  }, 70000);
 };
-
-// Функція хешування пароля
-async function hashPassword(password) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
 function tryAutoLogin() {
   const savedNick = localStorage.getItem('un');
@@ -98,23 +61,21 @@ async function auth() {
   }
   document.getElementById('auth-error').textContent = "Завантаження...";
   try {
-    const hashedPass = await hashPassword(p);
     let r = await fetch(DB + "users/" + n + ".json");
     let d = await r.json();
     if (d) {
-      if (d.pass !== hashedPass) {
+      if (d.pass !== p) {
         document.getElementById('auth-error').textContent = "Неправильний пароль!";
         return;
       }
       user = d;
     } else {
       user = {
-        name: n, pass: hashedPass, points: 0, items: {gold_frame: false},
+        name: n, pass: p, points: 0, items: {gold_frame: false},
         themeAttempts: {}, themeResults: {},
         regDate: new Date().toISOString().split('T')[0],
         avatar: '👤', avatarType: 'emoji', avatarData: null,
-        friends: [], notifications: true, isAdmin: false,
-        lastDailyBonus: null
+        friends: [], notifications: true
       };
       await fetch(DB + "users/" + n + ".json", {method:'PUT', body:JSON.stringify(user)});
     }
@@ -129,35 +90,21 @@ async function auth() {
     if (!user.avatarType) user.avatarType = 'emoji';
     if (!user.friends) user.friends = [];
     if (user.notifications === undefined) user.notifications = true;
-    if (!user.isAdmin) user.isAdmin = false;
-    if (!user.lastDailyBonus) user.lastDailyBonus = null;
     save();
     applyItems();
     update();
     show('menu');
     document.getElementById('auth-error').textContent = "";
-    checkDailyBonus();
-    checkSavedProgress();
   } catch(e) {
     document.getElementById('auth-error').textContent = "Помилка підключення";
     console.error(e);
   }
 }
 
-// Debounced save
-function debouncedSave() {
-  if (saveTimeout) clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(() => {
-    if (user) {
-      fetch(DB + "users/" + user.name + ".json", {method:'PUT', body:JSON.stringify(user)});
-    }
-  }, 2000);
-}
-
 function save() {
   if (!user) return;
   user.items = items;
-  debouncedSave();
+  fetch(DB + "users/" + user.name + ".json", {method:'PUT', body:JSON.stringify(user)});
 }
 
 function update() {
@@ -186,7 +133,6 @@ function show(id) {
   }
 }
 
-// Адмін-панель (спрощено для тесту - активується 5 кліками)
 function admT() {
   if(++cC >= 5) {
     const adminPanel = document.getElementById('admin-panel');
@@ -304,74 +250,26 @@ async function clearAdminLogs() {
   loadAdminLogs();
 }
 
-// МАРАФОН
-function startMarathon() {
-  const allQuestions = [];
-  for (let theme in themes) {
-    if (themes[theme] && Array.isArray(themes[theme])) {
-      allQuestions.push(...themes[theme]);
-    }
-  }
-  marathonQuestions = allQuestions.sort(() => 0.5 - Math.random()).slice(0, 20);
-  isMarathonMode = true;
-  currentIndex = 0;
-  correctCount = 0;
-  wrongCount = 0;
-  show('game');
-  loadQuestion();
-}
-
 function startTheme(theme) {
   currentTheme = theme;
   currentIndex = 0;
   correctCount = 0;
   wrongCount = 0;
-  isMarathonMode = false;
   if (!user.themeAttempts) user.themeAttempts = {};
   if (!user.themeAttempts[theme]) user.themeAttempts[theme] = 0;
   show('game');
   loadQuestion();
 }
 
-function updateProgress() {
-  let total = 0;
-  if (isMarathonMode) {
-    total = marathonQuestions.length;
-  } else {
-    const qs = themes[currentTheme];
-    if (qs) total = qs.length;
-  }
-  if (total > 0) {
-    const percent = ((currentIndex) / total) * 100;
-    const fill = document.getElementById('progressFill');
-    if (fill) fill.style.width = `${percent}%`;
-    const counter = document.getElementById('question-counter');
-    if (counter) counter.innerText = `${currentIndex}/${total}`;
-  }
-}
-
 function loadQuestion() {
-  let qs;
-  if (isMarathonMode) {
-    qs = marathonQuestions;
-  } else {
-    qs = themes[currentTheme];
-  }
-  
+  const qs = themes[currentTheme];
   if (!qs || currentIndex >= qs.length) {
     const total = correctCount + wrongCount;
-    if (typeof saveThemeResult === 'function' && total > 0 && !isMarathonMode) {
+    if (typeof saveThemeResult === 'function' && total > 0) {
       saveThemeResult(currentTheme, correctCount, total);
     }
-    if (isMarathonMode) {
-      const reward = correctCount * 50;
-      user.points += reward;
-      showNotification(`🏃 Марафон завершено! +${reward} ₴ за ${correctCount} правильних відповідей!`);
-      save();
-    } else {
-      user.themeAttempts[currentTheme] = (user.themeAttempts[currentTheme] || 0) + 1;
-      save();
-    }
+    user.themeAttempts[currentTheme] = (user.themeAttempts[currentTheme] || 0) + 1;
+    save();
     document.getElementById('qtext').textContent = "Тема завершена!";
     document.getElementById('feedback').innerHTML = '';
     document.getElementById('abox').innerHTML = `
@@ -382,7 +280,6 @@ function loadQuestion() {
       </div>
       <button class="btn" onclick="show('sections')">Обрати тему</button>
     `;
-    updateProgress();
     return;
   }
 
@@ -392,7 +289,6 @@ function loadQuestion() {
   document.getElementById('feedback').innerHTML = '';
   const abox = document.getElementById('abox');
   abox.innerHTML = '';
-  updateProgress();
 
   let answers = [q.a, ...q.w];
   answers.sort(() => Math.random() - 0.5);
@@ -404,14 +300,10 @@ function loadQuestion() {
     btn.onclick = () => checkAnswer(o, q.a, btn);
     abox.appendChild(btn);
   });
-  
-  const hintBtn = document.getElementById('hintBtn');
-  if (hintBtn) hintBtn.disabled = false;
 }
 
 function checkAnswer(selected, correct, button) {
   document.querySelectorAll('#abox .btn').forEach(b => b.disabled = true);
-  
   if (selected === correct) {
     correctCount++;
     user.points += 100;
@@ -420,55 +312,17 @@ function checkAnswer(selected, correct, button) {
     correctSound.play().catch(()=>{});
   } else {
     wrongCount++;
-    if (pOn) {
-      user.points = Math.max(0, user.points - 30);
-    }
+    user.points = Math.max(0, user.points - 30);
     button.style.background = '#f44336';
     document.getElementById('feedback').innerHTML = '<span class="wrong">✗ НЕПРАВИЛЬНО!</span>';
     wrongSound.play().catch(()=>{});
-    
-    // Показати правильну відповідь
-    const correctButtons = document.querySelectorAll('#abox .btn');
-    correctButtons.forEach(btn => {
-      if (btn.innerText === correct) {
-        btn.style.background = '#4caf50';
-      }
-    });
   }
-  
   document.getElementById('mon').innerText = user.points.toLocaleString();
   save();
-  
   setTimeout(() => {
     currentIndex++;
     loadQuestion();
-  }, 1500);
-}
-
-// ПІДКАЗКА
-function useHint() {
-  if (!user || user.points < 50) {
-    showNotification("❌ Недостатньо грошей для підказки! (50₴)");
-    return;
-  }
-  
-  const buttons = document.querySelectorAll('#abox .btn');
-  let correctButton = null;
-  
-  buttons.forEach(btn => {
-    if (btn.innerText === currentCorrectAnswer) {
-      correctButton = btn;
-    }
-  });
-  
-  if (correctButton) {
-    user.points -= 50;
-    correctButton.style.background = '#ffd700';
-    correctButton.style.color = '#000';
-    document.getElementById('mon').innerText = user.points.toLocaleString();
-    save();
-    showNotification(`💡 Підказка: правильна відповідь виділена! -50₴`);
-  }
+  }, 1200);
 }
 
 async function loadT() {
@@ -479,7 +333,7 @@ async function loadT() {
   if(d) {
     let topPlayers = Object.values(d).sort((a,b)=> (b.points||0) - (a.points||0)).slice(0,100);
     topPlayers.forEach((u,i) => {
-      l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${u.name}</span><b>${u.points||0} ₴</b></div>`;
+      l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${u.name}</span><b>${u.points||0}</b></div>`;
     });
   } else {
     l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
@@ -491,142 +345,11 @@ function buyItem(item) {
   if(user.points >= prices[item]){
     user.points -= prices[item];
     items[item] = true;
-    user.items = items;
     applyItems();
     save();
     update();
-    showNotification(`✅ Куплено!`);
+    alert("Куплено!");
   } else {
-    showNotification("❌ Недостатньо грошей!");
+    alert("Недостатньо грошей!");
   }
-}
-
-// ЩОДЕННИЙ БОНУС
-function checkDailyBonus() {
-  const today = new Date().toDateString();
-  if (user.lastDailyBonus !== today) {
-    showNotification("🎁 Натисніть кнопку 'ДЕНЬ' у меню, щоб отримати щоденний бонус!");
-  }
-}
-
-function claimDailyBonus() {
-  const today = new Date().toDateString();
-  if (user.lastDailyBonus === today) {
-    showNotification("❌ Ви вже отримали бонус сьогодні!");
-    return;
-  }
-  
-  user.lastDailyBonus = today;
-  user.points += 200;
-  save();
-  update();
-  showNotification("🎁 Щоденний бонус: +200 ₴!");
-}
-
-// ЕКСПОРТ/ІМПОРТ ПРОГРЕСУ
-function exportProgress() {
-  const data = {
-    name: user.name,
-    points: user.points,
-    themeResults: user.themeResults,
-    items: user.items,
-    friends: user.friends,
-    avatar: user.avatar,
-    avatarType: user.avatarType,
-    avatarData: user.avatarData
-  };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `ukrmova_${user.name}_backup_${new Date().toISOString().split('T')[0]}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showNotification("💾 Прогрес експортовано!");
-}
-
-function importProgress() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'application/json';
-  input.onchange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      try {
-        const imported = JSON.parse(ev.target.result);
-        if (imported.name !== user.name) {
-          if (!confirm(`Увага! Імпорт даних для іншого ніка "${imported.name}". Продовжити?`)) return;
-        }
-        
-        user.points = imported.points || user.points;
-        user.themeResults = imported.themeResults || user.themeResults;
-        user.items = imported.items || user.items;
-        user.friends = imported.friends || user.friends;
-        if (imported.avatar) user.avatar = imported.avatar;
-        if (imported.avatarType) user.avatarType = imported.avatarType;
-        if (imported.avatarData) user.avatarData = imported.avatarData;
-        items = user.items;
-        
-        save();
-        update();
-        applyItems();
-        if (typeof loadCabinet === 'function') loadCabinet();
-        showNotification("📥 Прогрес імпортовано!");
-      } catch (err) {
-        alert("Помилка імпорту: невірний формат файлу");
-      }
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-
-// ЗБЕРЕЖЕННЯ ПРОГРЕСУ ГРИ
-function saveGameProgress() {
-  if (currentTheme && currentIndex > 0 && !isMarathonMode) {
-    localStorage.setItem('game_progress', JSON.stringify({
-      theme: currentTheme,
-      index: currentIndex,
-      correct: correctCount,
-      wrong: wrongCount
-    }));
-  }
-}
-
-function checkSavedProgress() {
-  const saved = localStorage.getItem('game_progress');
-  if (saved) {
-    try {
-      const progress = JSON.parse(saved);
-      if (confirm(`У вас є збережений прогрес у темі. Продовжити?`)) {
-        currentTheme = progress.theme;
-        currentIndex = progress.index;
-        correctCount = progress.correct;
-        wrongCount = progress.wrong;
-        isMarathonMode = false;
-        show('game');
-        loadQuestion();
-        localStorage.removeItem('game_progress');
-      } else {
-        localStorage.removeItem('game_progress');
-      }
-    } catch(e) {}
-  }
-}
-
-window.addEventListener('beforeunload', () => {
-  if (currentTheme && currentIndex > 0 && !isMarathonMode && user) {
-    saveGameProgress();
-  }
-});
-
-function showNotification(msg) {
-  if (user && user.notifications === false) return;
-  const toast = document.getElementById('notificationToast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
 }

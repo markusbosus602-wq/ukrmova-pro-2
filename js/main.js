@@ -71,7 +71,7 @@ async function auth() {
       user = d;
     } else {
       user = {
-        name: n, pass: p, points: 0, items: {gold_frame: false, crown: false, fire: false, shield: false, vip: false},
+        name: n, pass: p, points: 0, items: {gold_frame: false},
         themeAttempts: {}, themeResults: {},
         regDate: new Date().toISOString().split('T')[0],
         avatar: '👤', avatarType: 'emoji', avatarData: null,
@@ -83,8 +83,7 @@ async function auth() {
     localStorage.setItem('up', p);
     const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
     await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify({game_nick:n, time:now})});
-    
-    items = user.items || { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
+    items = user.items || {gold_frame:false};
     if (!user.themeResults) user.themeResults = {};
     if (!user.regDate) user.regDate = new Date().toISOString().split('T')[0];
     if (!user.avatar) user.avatar = '👤';
@@ -116,11 +115,11 @@ function update() {
 function applyItems() {
   if (!user) return;
   let nickDisplay = user.name;
-  if(items.gold_frame) nickDisplay += ' ✨';
+  if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
   if(items.crown) nickDisplay += ' 👑';
   if(items.fire) nickDisplay += ' 🔥';
   if(items.shield) nickDisplay += ' 🛡️';
-  if(items.vip) nickDisplay += ' 💎';
+  if(items.vip) nickDisplay += ' 💎 VIP';
   const nickEl = document.getElementById('playerNick');
   if (nickEl) nickEl.innerHTML = nickDisplay;
 }
@@ -281,21 +280,28 @@ function loadQuestion() {
       </div>
       <button class="btn" onclick="show('sections')">Обрати тему</button>
     `;
+    // Сховати прогрес-бар після завершення
+    document.getElementById('progressFill').style.width = '0%';
+    document.getElementById('question-counter').textContent = '';
     return;
   }
 
   const q = qs[currentIndex];
+  const total = qs.length;
   currentCorrectAnswer = q.a;
-  document.getElementById('qtext').textContent = `${currentIndex+1}/${qs.length}: ${q.q}`;
+  document.getElementById('qtext').textContent = `${currentIndex+1}/${total}: ${q.q}`;
   document.getElementById('feedback').innerHTML = '';
+  
+  // Оновлення прогрес-бару
+  const percent = ((currentIndex) / total) * 100;
+  document.getElementById('progressFill').style.width = percent + '%';
+  document.getElementById('question-counter').textContent = `Питання ${currentIndex+1} з ${total}`;
+  
   const abox = document.getElementById('abox');
   abox.innerHTML = '';
 
   let answers = [q.a, ...q.w];
-  for(let i = answers.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [answers[i], answers[j]] = [answers[j], answers[i]];
-  }
+  answers.sort(() => Math.random() - 0.5);
 
   answers.forEach(o => {
     let btn = document.createElement('button');
@@ -345,32 +351,15 @@ async function loadT() {
 }
 
 function buyItem(item) {
-  const prices = {
-    gold_frame: 1000,
-    crown: 2000,
-    fire: 1500,
-    shield: 2500,
-    vip: 5000
-  };
-  
-  if(!prices[item]) {
-    alert("Товар не знайдено!");
-    return;
-  }
-  
-  if(items[item]) {
-    alert("Ви вже купили цей предмет!");
-    return;
-  }
-  
+  const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
   if(user.points >= prices[item]){
     user.points -= prices[item];
     items[item] = true;
     applyItems();
     save();
     update();
-    alert("✅ Куплено!");
+    showNotification("Куплено!");
   } else {
-    alert("❌ Недостатньо грошей!");
+    alert("Недостатньо грошей!");
   }
 }

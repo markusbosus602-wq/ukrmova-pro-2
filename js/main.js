@@ -13,6 +13,27 @@ let currentCorrectAnswer = '';
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
 
+// Кастомне сповіщення замість alert
+function showCustomMessage(msg, isError = false) {
+  const toast = document.getElementById('notificationToast');
+  if (toast) {
+    toast.textContent = msg;
+    toast.style.background = isError ? "var(--red)" : "var(--gold)";
+    toast.style.color = isError ? "white" : "#000";
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        toast.style.background = "var(--gold)";
+        toast.style.color = "#000";
+      }, 300);
+    }, 2500);
+  } else {
+    // fallback якщо toast немає
+    console.log(msg);
+  }
+}
+
 window.onload = function() {
   const splash = document.getElementById('splash');
   const video = document.getElementById('splash-video');
@@ -56,16 +77,16 @@ async function auth() {
   let n = document.getElementById('nick').value.trim();
   let p = document.getElementById('pass').value.trim();
   if(!n || !p) {
-    document.getElementById('auth-error').textContent = "Введіть нікнейм та пароль";
+    showCustomMessage("Введіть нікнейм та пароль", true);
     return;
   }
-  document.getElementById('auth-error').textContent = "Завантаження...";
+  showCustomMessage("Завантаження...");
   try {
     let r = await fetch(DB + "users/" + n + ".json");
     let d = await r.json();
     if (d) {
       if (d.pass !== p) {
-        document.getElementById('auth-error').textContent = "Неправильний пароль!";
+        showCustomMessage("Неправильний пароль!", true);
         return;
       }
       user = d;
@@ -94,9 +115,8 @@ async function auth() {
     applyItems();
     update();
     show('menu');
-    document.getElementById('auth-error').textContent = "";
   } catch(e) {
-    document.getElementById('auth-error').textContent = "Помилка підключення";
+    showCustomMessage("Помилка підключення", true);
     console.error(e);
   }
 }
@@ -166,26 +186,38 @@ function toggleP() {
 
 async function delU() {
   let n = document.getElementById('a-n').value.trim();
-  if(!n) return alert("Введіть нікнейм");
+  if(!n) {
+    showCustomMessage("Введіть нікнейм", true);
+    return;
+  }
   if(confirm(`Видалити ${n}?`)) {
     await fetch(DB+"users/"+n+".json", {method:'DELETE'});
-    alert("Видалено");
+    showCustomMessage("Видалено");
     loadPlayers();
   }
 }
 
 async function edO(add) {
   let n = document.getElementById('a-n').value.trim();
-  if(!n) return alert("Введіть ник");
+  if(!n) {
+    showCustomMessage("Введіть ник", true);
+    return;
+  }
   let amt = prompt(add ? "Скільки додати?" : "Скільки відняти?");
-  if(isNaN(amt) || amt <= 0) return alert("Невірна сума");
+  if(isNaN(amt) || amt <= 0) {
+    showCustomMessage("Невірна сума", true);
+    return;
+  }
   amt = parseInt(amt);
   let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
-  if(!d) return alert("Гравця не знайдено");
+  if(!d) {
+    showCustomMessage("Гравця не знайдено", true);
+    return;
+  }
   d.points += add ? amt : -amt;
   d.points = Math.max(0, d.points);
   await fetch(DB+"users/"+n+".json", {method:'PUT', body:JSON.stringify(d)});
-  alert("Гроші оновлено");
+  showCustomMessage("Гроші оновлено");
   loadPlayers();
 }
 
@@ -280,7 +312,6 @@ function loadQuestion() {
       </div>
       <button class="btn" onclick="show('sections')">Обрати тему</button>
     `;
-    // Сховати прогрес-бар після завершення
     document.getElementById('progressFill').style.width = '0%';
     document.getElementById('question-counter').textContent = '';
     return;
@@ -292,7 +323,6 @@ function loadQuestion() {
   document.getElementById('qtext').textContent = `${currentIndex+1}/${total}: ${q.q}`;
   document.getElementById('feedback').innerHTML = '';
   
-  // Оновлення прогрес-бару
   const percent = ((currentIndex) / total) * 100;
   document.getElementById('progressFill').style.width = percent + '%';
   document.getElementById('question-counter').textContent = `Питання ${currentIndex+1} з ${total}`;
@@ -358,8 +388,8 @@ function buyItem(item) {
     applyItems();
     save();
     update();
-    showNotification("Куплено!");
+    showCustomMessage("✨ Куплено! ✨");
   } else {
-    alert("Недостатньо грошей!");
+    showCustomMessage("❌ Недостатньо грошей! ❌", true);
   }
 }

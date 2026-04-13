@@ -145,18 +145,21 @@
       margin: 15px 0;
     }
 
-    .shop-item {
+    .shop-btn {
       background: #eee;
+      border: none;
       padding: 12px;
       border-radius: 12px;
       text-align: center;
       cursor: pointer;
       transition: transform 0.1s;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
+      font-size: 14px;
+      font-weight: bold;
+      color: #000;
+      width: 100%;
     }
 
-    .shop-item:active {
+    .shop-btn:active {
       transform: scale(0.95);
     }
 
@@ -608,11 +611,11 @@
     <div class="card">
       <h2>Магазин</h2>
       <div class="shop-grid">
-        <div class="shop-item" data-item="gold_frame">✨ Золота рамка — 1000 ₴</div>
-        <div class="shop-item" data-item="crown">👑 Корона — 2000 ₴</div>
-        <div class="shop-item" data-item="fire">🔥 Полум'я — 1500 ₴</div>
-        <div class="shop-item" data-item="shield">🛡️ Щит — 2500 ₴</div>
-        <div class="shop-item" data-item="vip">💎 ВІП — 5000 ₴</div>
+        <button class="shop-btn" data-item="gold_frame">✨ Золота рамка — 1000 ₴</button>
+        <button class="shop-btn" data-item="crown">👑 Корона — 2000 ₴</button>
+        <button class="shop-btn" data-item="fire">🔥 Полум'я — 1500 ₴</button>
+        <button class="shop-btn" data-item="shield">🛡️ Щит — 2500 ₴</button>
+        <button class="shop-btn" data-item="vip">💎 ВІП — 5000 ₴</button>
       </div>
       <button class="btn" onclick="show('menu')">НАЗАД</button>
     </div>
@@ -842,42 +845,17 @@
   <script src="js/cabinet.js"></script>
 
   <script>
-    // Повне блокування будь-яких переходів за посиланнями
+    // Обробник для кнопок магазину
     document.addEventListener('DOMContentLoaded', function() {
-      // Забороняємо перетягування посилань
-      window.addEventListener('dragstart', function(e) {
-        if (e.target.closest('.shop-item')) {
-          e.preventDefault();
-          return false;
-        }
-      });
-      
-      // Забороняємо контекстне меню на елементах магазину
-      document.querySelectorAll('.shop-item').forEach(function(item) {
-        item.addEventListener('contextmenu', function(e) {
-          e.preventDefault();
-          return false;
-        });
-        
-        // Основний обробник кліку
-        item.addEventListener('click', function(e) {
+      document.querySelectorAll('.shop-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
           e.preventDefault();
           e.stopPropagation();
-          const itemName = this.getAttribute('data-item');
+          var itemName = this.getAttribute('data-item');
           if (itemName && typeof buyItem === 'function') {
             buyItem(itemName);
           }
           return false;
-        });
-        
-        // Додатковий захист від mousedown
-        item.addEventListener('mousedown', function(e) {
-          e.preventDefault();
-        });
-        
-        // Захист від будь-яких інших подій, що можуть викликати перехід
-        item.addEventListener('mouseup', function(e) {
-          e.preventDefault();
         });
       });
     });

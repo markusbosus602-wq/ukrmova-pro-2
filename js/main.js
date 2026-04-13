@@ -71,7 +71,7 @@ async function auth() {
       user = d;
     } else {
       user = {
-        name: n, pass: p, points: 0, items: {gold_frame: false},
+        name: n, pass: p, points: 0, items: {gold_frame: false, crown: false, fire: false, shield: false, vip: false},
         themeAttempts: {}, themeResults: {},
         regDate: new Date().toISOString().split('T')[0],
         avatar: '👤', avatarType: 'emoji', avatarData: null,
@@ -83,7 +83,8 @@ async function auth() {
     localStorage.setItem('up', p);
     const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
     await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify({game_nick:n, time:now})});
-    items = user.items || {gold_frame:false};
+    
+    items = user.items || { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
     if (!user.themeResults) user.themeResults = {};
     if (!user.regDate) user.regDate = new Date().toISOString().split('T')[0];
     if (!user.avatar) user.avatar = '👤';
@@ -115,11 +116,11 @@ function update() {
 function applyItems() {
   if (!user) return;
   let nickDisplay = user.name;
-  if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
+  if(items.gold_frame) nickDisplay += ' ✨';
   if(items.crown) nickDisplay += ' 👑';
   if(items.fire) nickDisplay += ' 🔥';
   if(items.shield) nickDisplay += ' 🛡️';
-  if(items.vip) nickDisplay += ' 💎 VIP';
+  if(items.vip) nickDisplay += ' 💎';
   const nickEl = document.getElementById('playerNick');
   if (nickEl) nickEl.innerHTML = nickDisplay;
 }
@@ -291,7 +292,10 @@ function loadQuestion() {
   abox.innerHTML = '';
 
   let answers = [q.a, ...q.w];
-  answers.sort(() => Math.random() - 0.5);
+  for(let i = answers.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [answers[i], answers[j]] = [answers[j], answers[i]];
+  }
 
   answers.forEach(o => {
     let btn = document.createElement('button');
@@ -312,7 +316,7 @@ function checkAnswer(selected, correct, button) {
     correctSound.play().catch(()=>{});
   } else {
     wrongCount++;
-    user.points = Math.max(0, user.points - 30);
+    if(pOn) user.points = Math.max(0, user.points - 30);
     button.style.background = '#f44336';
     document.getElementById('feedback').innerHTML = '<span class="wrong">✗ НЕПРАВИЛЬНО!</span>';
     wrongSound.play().catch(()=>{});
@@ -341,15 +345,32 @@ async function loadT() {
 }
 
 function buyItem(item) {
-  const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
+  const prices = {
+    gold_frame: 1000,
+    crown: 2000,
+    fire: 1500,
+    shield: 2500,
+    vip: 5000
+  };
+  
+  if(!prices[item]) {
+    alert("Товар не знайдено!");
+    return;
+  }
+  
+  if(items[item]) {
+    alert("Ви вже купили цей предмет!");
+    return;
+  }
+  
   if(user.points >= prices[item]){
     user.points -= prices[item];
     items[item] = true;
     applyItems();
     save();
     update();
-    alert("Куплено!");
+    alert("✅ Куплено!");
   } else {
-    alert("Недостатньо грошей!");
+    alert("❌ Недостатньо грошей!");
   }
 }

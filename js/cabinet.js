@@ -100,21 +100,32 @@ function loadBadges(stats) {
     }
   });
   
-  document.getElementById('badgesContainer').innerHTML = badges.map(b => 
-    `<div class="badge ${b.cond() ? '' : 'locked'}">${b.name}</div>`
-  ).join('');
+  const container = document.getElementById('badgesContainer');
+  if(container) {
+    container.innerHTML = badges.map(b => 
+      `<div class="badge ${b.cond() ? '' : 'locked'}">${b.name}</div>`
+    ).join('');
+  }
 }
 
 function updatePurchases() {
-  document.getElementById('purchaseGold').innerHTML = items.gold_frame ? '✅' : '❌';
-  document.getElementById('purchaseCrown').innerHTML = items.crown ? '✅' : '❌';
-  document.getElementById('purchaseFire').innerHTML = items.fire ? '✅' : '❌';
-  document.getElementById('purchaseShield').innerHTML = items.shield ? '✅' : '❌';
-  document.getElementById('purchaseVip').innerHTML = items.vip ? '✅' : '❌';
+  const purchases = {
+    purchaseGold: items.gold_frame,
+    purchaseCrown: items.crown,
+    purchaseFire: items.fire,
+    purchaseShield: items.shield,
+    purchaseVip: items.vip
+  };
+  
+  for(let [id, owned] of Object.entries(purchases)) {
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = owned ? '✅' : '❌';
+  }
 }
 
 function loadHistory() {
   const container = document.getElementById('historyList');
+  if (!container) return;
   if (!user.themeResults || Object.keys(user.themeResults).length === 0) {
     container.innerHTML = 'Ще немає пройдених тем';
     return;
@@ -151,7 +162,7 @@ function editNick() {
   const newNick = prompt('Новий нікнейм:', user.name);
   if (!newNick || newNick === user.name) return;
   fetch(DB + "users/" + newNick + ".json").then(r => r.json()).then(existing => {
-    if (existing && existing.name !== user.name) return alert('Зайнятий!');
+    if (existing && existing.name !== user.name) return alert('❌ Нікнейм зайнятий!');
     const oldNick = user.name;
     const newUser = { ...user, name: newNick };
     fetch(DB + "users/" + newNick + ".json", { method: 'PUT', body: JSON.stringify(newUser) })
@@ -162,7 +173,7 @@ function editNick() {
         update();
         applyItems();
         loadCabinet();
-        alert('Нікнейм змінено!');
+        alert('✅ Нікнейм змінено!');
       });
   });
 }
@@ -173,7 +184,7 @@ function changePassword() {
   user.pass = newPass;
   localStorage.setItem('up', newPass);
   save();
-  alert('Пароль змінено!');
+  alert('✅ Пароль змінено!');
 }
 
 function logout() {
@@ -200,17 +211,20 @@ function saveThemeResult(theme, correct, total) {
 function showNotification(msg) {
   if (user && user.notifications === false) return;
   const toast = document.getElementById('notificationToast');
+  if(!toast) return;
   toast.textContent = msg;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
 function openAvatarModal() {
-  document.getElementById('avatarModal').style.display = 'flex';
+  const modal = document.getElementById('avatarModal');
+  if(modal) modal.style.display = 'flex';
 }
 
 function closeAvatarModal() {
-  document.getElementById('avatarModal').style.display = 'none';
+  const modal = document.getElementById('avatarModal');
+  if(modal) modal.style.display = 'none';
 }
 
 function setAvatar(emoji) {
@@ -220,6 +234,7 @@ function setAvatar(emoji) {
   save();
   updateAvatarDisplay();
   closeAvatarModal();
+  showNotification('✅ Аватарку оновлено!');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -236,11 +251,11 @@ document.addEventListener('DOMContentLoaded', () => {
           save();
           updateAvatarDisplay();
           closeAvatarModal();
-          showNotification('Аватарку оновлено!');
+          showNotification('✅ Аватарку оновлено!');
         };
         reader.readAsDataURL(file);
       } else {
-        alert('Оберіть фото');
+        alert('❌ Оберіть фото');
       }
     };
   }
@@ -254,13 +269,13 @@ function toggleNotifications() {
 
 async function addFriend() {
   const friendNick = document.getElementById('friendNick').value.trim();
-  if (!friendNick) return alert('Введіть нікнейм');
-  if (friendNick === user.name) return alert('Не можна додати себе');
-  if (user.friends?.includes(friendNick)) return alert('Вже є в друзях');
+  if (!friendNick) return alert('❌ Введіть нікнейм');
+  if (friendNick === user.name) return alert('❌ Не можна додати себе');
+  if (user.friends?.includes(friendNick)) return alert('❌ Вже є в друзях');
   
   const r = await fetch(DB + "users/" + friendNick + ".json");
   const friendData = await r.json();
-  if (!friendData) return alert('Користувача не знайдено');
+  if (!friendData) return alert('❌ Користувача не знайдено');
   
   if (!user.friends) user.friends = [];
   user.friends.push(friendNick);
@@ -273,6 +288,8 @@ async function addFriend() {
 function loadFriends() {
   const friendsDiv = document.getElementById('friendsList');
   const leaderboardDiv = document.getElementById('leaderboardFriends');
+  
+  if (!friendsDiv || !leaderboardDiv) return;
   
   if (!user.friends || user.friends.length === 0) {
     friendsDiv.innerHTML = 'У вас ще немає друзів';
@@ -297,7 +314,7 @@ function loadFriends() {
       </div>
     `).join('');
     
-    const all = [...valid, { name: user.name, points: user.points, avatar: user.avatar || '👤' }]
+    const all = [...valid, { name: user.name, points: user.points || 0, avatar: user.avatar || '👤' }]
       .sort((a,b) => b.points - a.points);
     
     leaderboardDiv.innerHTML = all.map((f, i) => `

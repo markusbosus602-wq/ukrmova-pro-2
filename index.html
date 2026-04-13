@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>UkrMova Pro</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- SPLASH SCREEN -->
+  <div id="splash">
+    <video id="splash-video" playsinline preload="auto" muted></video>
+    <button id="startBtn">ПОЧАТИ ГРУ</button>
+  </div>
+
+  <!-- AUTH SCREEN -->
+  <div id="auth-screen" class="screen">
+    <div class="card">
+      <h2 style="color:var(--gold)">UKRMOVA PRO</h2>
+      <input type="text" id="nick" placeholder="Нікнейм" autocomplete="off">
+      <input type="password" id="pass" placeholder="Пароль" autocomplete="off">
+      <button class="btn" onclick="auth()">УВІЙТИ / ЗАРЕЄСТРУВАТИСЯ</button>
+      <p id="auth-error" style="color:red; margin-top:10px; min-height:24px;"></p>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <div id="menu" class="screen">
+    <div class="card">
+      <h3 onclick="admT()" style="cursor:pointer">МЕНЮ</h3>
+      <div class="nickname" id="playerNick"></div>
+      <div class="money"><span id="mon">0</span> ₴</div>
+      <button class="btn" onclick="show('sections')">ГРАТИ</button>
+      <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
+      <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
+      <button class="btn" style="background:var(--purple)" onclick="show('cabinet')">📦 МОЯ СКРИНЬКА</button>
+
+      <div id="admin-panel">
+        <b style="color:var(--red);cursor:pointer;font-size:18px" onclick="closeAdm()">❌ ЗАКРИТИ АДМІНКУ</b><br><br>
+        <button class="btn" id="pen-btn" style="background:var(--red)" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
+        <p><b>Управління гравцями</b></p>
+        <input type="text" id="a-n" placeholder="Нік гравця">
+        <button class="btn" style="background:var(--green);color:#000" onclick="edO(true)">+ ГРОШІ</button>
+        <button class="btn" style="background:var(--red)" onclick="edO(false)">- ГРОШІ</button>
+        <button class="btn danger" onclick="delU()">ВИДАЛИТИ ЗА НІКОМ</button>
+        <br><br>
+        <button class="btn" style="background:var(--blue);width:100%" onclick="loadPlayers()">ПОКАЗАТИ ВСІХ ГРАВЦІВ</button>
+        <div id="player-list"></div>
+        <br><br>
+        <h4 style="color:var(--blue)">Лог входів</h4>
+        <div id="user-log" class="log-box">Завантаження...</div>
+        <button class="btn" style="background:#ff9800;margin-top:8px;width:48%;margin-right:4%" onclick="loadUserLog()">Оновити</button>
+        <button class="btn danger" style="margin-top:8px;width:48%" onclick="clearUserLog()">Очистити</button>
+        <br><br>
+        <h4 style="color:var(--blue)">Лог адмінки</h4>
+        <div id="admin-log" class="log-box">Завантаження...</div>
+        <button class="btn" style="background:#ff9800;margin-top:8px;width:48%;margin-right:4%" onclick="loadAdminLogs()">Оновити</button>
+        <button class="btn danger" style="margin-top:8px;width:48%" onclick="clearAdminLogs()">Очистити</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOP -->
+  <div id="shop" class="screen">
+    <div class="card">
+      <h2>Магазин</h2>
+      <div class="shop-grid">
+        <div class="shop-item" onclick="buyItem('gold_frame')">✨ Золота рамка — 1000 ₴</div>
+        <div class="shop-item" onclick="buyItem('crown')">👑 Корона — 2000 ₴</div>
+        <div class="shop-item" onclick="buyItem('fire')">🔥 Полум'я — 1500 ₴</div>
+        <div class="shop-item" onclick="buyItem('shield')">🛡️ Щит — 2500 ₴</div>
+        <div class="shop-item" onclick="buyItem('vip')">💎 ВІП — 5000 ₴</div>
+      </div>
+      <button class="btn" onclick="show('menu')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- SECTIONS -->
+  <div id="sections" class="screen">
+    <div class="card">
+      <h2>Обери розділ</h2>
+      <button class="btn theme-btn" onclick="show('imennyky')">📖 Іменники</button>
+      <button class="btn theme-btn" onclick="show('prykmetnyky')">📝 Прикметники</button>
+      <button class="btn theme-btn" onclick="show('chyslivnyky')">🔢 Числівники</button>
+      <button class="btn theme-btn" onclick="show('frazeologizmy')">💬 Фразеологізми</button>
+      <button class="btn red" onclick="show('menu')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ІМЕННИКИ -->
+  <div id="imennyky" class="screen">
+    <div class="card">
+      <h2>Іменники</h2>
+      <button class="btn theme-btn" onclick="startTheme('vydminy')">Відміни іменників</button>
+      <button class="btn theme-btn" onclick="startTheme('orudnyi_1vidmina')">Орудний відмінок 1 відміни</button>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ПРИКМЕТНИКИ -->
+  <div id="prykmetnyky" class="screen">
+    <div class="card">
+      <h2>Прикметники</h2>
+      <button class="btn theme-btn" onclick="startTheme('prykmetnyky')">Прикметники</button>
+      <button class="btn theme-btn" onclick="startTheme('grupy_prykmetnykiv')">Групи за значенням</button>
+      <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni')">Ступені порівняння</button>
+      <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni_2')">Ступені порівняння 2</button>
+      <button class="btn theme-btn" onclick="startTheme('ne_z_prykmetnykamy')">Правопис НЕ</button>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ЧИСЛІВНИКИ -->
+  <div id="chyslivnyky" class="screen">
+    <div class="card">
+      <h2>Числівники</h2>
+      <button class="btn theme-btn" onclick="startTheme('chyslivnyky_1')">Числівники №1</button>
+      <button class="btn theme-btn" onclick="startTheme('chyslivnyky_2')">Числівники №2</button>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ФРАЗЕОЛОГІЗМИ - ВСІ 14 ЗАВДАНЬ -->
+  <div id="frazeologizmy" class="screen">
+    <div class="card">
+      <h2>Фразеологізми</h2>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy1')">ЗАВДАННЯ 1</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy2')">ЗАВДАННЯ 2</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy3')">ЗАВДАННЯ 3</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy4')">ЗАВДАННЯ 4</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy5')">ЗАВДАННЯ 5</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy6')">ЗАВДАННЯ 6</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy7')">ЗАВДАННЯ 7</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy8')">ЗАВДАННЯ 8</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy9')">ЗАВДАННЯ 9</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy10')">ЗАВДАННЯ 10</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy11')">ЗАВДАННЯ 11</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy12')">ЗАВДАННЯ 12</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy13')">ЗАВДАННЯ 13</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy14')">ЗАВДАННЯ 14</button>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="game" class="screen">
+    <div class="card">
+      <h3 id="qtext"></h3>
+      <div id="feedback"></div>
+      <div id="abox"></div>
+      <button class="btn red" style="margin-top:20px;" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- TOP -->
+  <div id="top" class="screen">
+    <div class="card">
+      <h3>🏆 ТОП 1000</h3>
+      <div id="tlist">Завантаження...</div>
+      <button class="btn" onclick="show('menu')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- CABINET -->
+  <div id="cabinet" class="screen">
+    <div class="card cabinet-card">
+      <div class="cabinet-header">
+        <h2>📦 МОЯ СКРИНЬКА</h2>
+        <div class="avatar-wrapper" onclick="openAvatarModal()">
+          <div class="avatar" id="cabinetAvatar">👤</div>
+          <div class="avatar-edit-btn">📷</div>
+        </div>
+      </div>
+
+      <div class="cabinet-tabs">
+        <button class="tab-btn active" data-tab="profile">📋 Профіль</button>
+        <button class="tab-btn" data-tab="stats">📊 Статистика</button>
+        <button class="tab-btn" data-tab="friends">👥 Друзі</button>
+        <button class="tab-btn" data-tab="settings">⚙️ Налаштування</button>
+      </div>
+
+      <div id="tab-profile" class="cabinet-tab active">
+        <div class="cabinet-section">
+          <h3>📋 Особиста інформація</h3>
+          <div class="info-grid">
+            <div class="info-item"><span>Нікнейм:</span> <strong id="cabNick"></strong> <button class="edit-btn" onclick="editNick()">✏️</button></div>
+            <div class="info-item"><span>Рівень:</span> <strong id="cabLevel"></strong> <span id="levelBadge"></span></div>
+            <div class="info-item"><span>Баланс:</span> <strong id="cabMoney">0</strong> ₴</div>
+            <div class="info-item"><span>Реєстрація:</span> <strong id="regDate">—</strong></div>
+          </div>
+        </div>
+        <div class="cabinet-section">
+          <h3>🛍️ Мої покупки</h3>
+          <div class="purchases-grid">
+            <div class="purchase-item">✨ Золота рамка: <span id="purchaseGold">❌</span></div>
+            <div class="purchase-item">👑 Корона: <span id="purchaseCrown">❌</span></div>
+            <div class="purchase-item">🔥 Полум'я: <span id="purchaseFire">❌</span></div>
+            <div class="purchase-item">🛡️ Щит: <span id="purchaseShield">❌</span></div>
+            <div class="purchase-item">💎 ВІП: <span id="purchaseVip">❌</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-stats" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>📊 Моя статистика</h3>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="totalThemes">0</div><div class="stat-label">Пройдено тем</div></div>
+            <div class="stat-card"><div class="stat-value" id="correctAnswers">0</div><div class="stat-label">Правильних</div></div>
+            <div class="stat-card"><div class="stat-value" id="wrongAnswers">0</div><div class="stat-label">Неправильних</div></div>
+            <div class="stat-card"><div class="stat-value" id="avgPercent">0%</div><div class="stat-label">Середній %</div></div>
+            <div class="stat-card"><div class="stat-value" id="bestResult">0%</div><div class="stat-label">Найкращий</div></div>
+            <div class="stat-card"><div class="stat-value" id="perfectCount">0</div><div class="stat-label">100% тем</div></div>
+          </div>
+        </div>
+        <div class="cabinet-section">
+          <h3>📜 Історія проходження</h3>
+          <div class="history-list" id="historyList">Ще немає пройдених тем</div>
+        </div>
+        <div class="cabinet-section">
+          <h3>🏆 Досягнення</h3>
+          <div class="badges-grid" id="badgesContainer"></div>
+        </div>
+      </div>
+
+      <div id="tab-friends" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>👥 Мої друзі</h3>
+          <div class="add-friend">
+            <input type="text" id="friendNick" placeholder="Нікнейм друга">
+            <button class="btn small" onclick="addFriend()">➕ Додати</button>
+          </div>
+          <div class="friends-list" id="friendsList">У вас ще немає друзів</div>
+        </div>
+        <div class="cabinet-section">
+          <h3>🏆 Таблиця лідерів</h3>
+          <div class="leaderboard-friends" id="leaderboardFriends">Додайте друзів</div>
+        </div>
+      </div>
+
+      <div id="tab-settings" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>⚙️ Налаштування</h3>
+          <div class="settings-row">
+            <button class="btn small" onclick="changePassword()">🔐 Змінити пароль</button>
+            <button class="btn small danger" onclick="logout()">🚪 Вийти</button>
+          </div>
+          <div class="settings-row" style="margin-top:12px;">
+            <label><input type="checkbox" id="notificationsToggle" onchange="toggleNotifications()"> 📢 Сповіщення</label>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn red" onclick="show('menu')">◀ НАЗАД</button>
+    </div>
+  </div>
+
+  <div id="avatarModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeAvatarModal()">&times;</span>
+      <h3>Виберіть аватарку</h3>
+      <div class="avatar-options">
+        <div class="avatar-option" onclick="setAvatar('👤')">👤</div>
+        <div class="avatar-option" onclick="setAvatar('😀')">😀</div>
+        <div class="avatar-option" onclick="setAvatar('🎮')">🎮</div>
+        <div class="avatar-option" onclick="setAvatar('🏆')">🏆</div>
+        <div class="avatar-option" onclick="setAvatar('⭐')">⭐</div>
+        <div class="avatar-option" onclick="setAvatar('🔥')">🔥</div>
+        <div class="avatar-option" onclick="setAvatar('💎')">💎</div>
+        <div class="avatar-option" onclick="setAvatar('👑')">👑</div>
+        <div class="avatar-option" onclick="setAvatar('📚')">📚</div>
+        <div class="avatar-option" onclick="setAvatar('🎓')">🎓</div>
+      </div>
+      <hr>
+      <h3>Або завантажте фото</h3>
+      <input type="file" id="avatarFile" accept="image/*" style="display:none">
+      <button class="btn small" onclick="document.getElementById('avatarFile').click()">📷 Вибрати фото</button>
+      <div id="avatarPreview"></div>
+    </div>
+  </div>
+
+  <div id="notificationToast" class="notification-toast"></div>
+
+  <script src="js/themes.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/cabinet.js"></script>
+
+</body>
+</html>

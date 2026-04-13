@@ -178,28 +178,10 @@ input {
 
 .correct { 
   color: #2ecc71;
-  animation: bounce 0.5s ease;
 }
 
 .wrong { 
   color: #ff4d4d;
-  animation: shake 0.3s ease;
-}
-
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.8; }
 }
 
 #abox {
@@ -556,9 +538,4 @@ input {
 
 .notification-toast.show {
   transform: translateX(-50%) translateY(0);
-}
-
-/* Hint button animation */
-#hintBtn.pulse {
-  animation: pulse 0.5s ease;
 }

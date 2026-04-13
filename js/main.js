@@ -28,26 +28,47 @@ window.onload = function() {
   const video = document.getElementById('splash-video');
   const startBtn = document.getElementById('startBtn');
   
-  if (video) {
+  if (video && startBtn) {
     video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
-    startBtn.onclick = function() {
+    video.load();
+    
+    startBtn.onclick = function(e) {
+      e.preventDefault();
       startBtn.style.display = 'none';
       video.muted = false;
-      video.currentTime = 0;
-      video.play().catch(() => {});
+      video.play().then(() => {
+        console.log("Video playing");
+      }).catch(err => {
+        console.log("Video play error:", err);
+        // Якщо відео не грає, все одно переходимо далі через 2 секунди
+        setTimeout(() => {
+          splash.style.display = 'none';
+          tryAutoLogin();
+        }, 2000);
+      });
     };
+    
     video.onended = function() {
+      console.log("Video ended");
+      splash.style.display = 'none';
+      tryAutoLogin();
+    };
+    
+    video.onerror = function() {
+      console.log("Video error");
       splash.style.display = 'none';
       tryAutoLogin();
     };
   }
   
+  // Запасний варіант - якщо через 10 секунд відео все ще не закінчилося
   setTimeout(() => {
     if (splash && splash.style.display !== 'none') {
+      console.log("Timeout fallback");
       splash.style.display = 'none';
       tryAutoLogin();
     }
-  }, 70000);
+  }, 10000);
 };
 
 // Функція хешування пароля

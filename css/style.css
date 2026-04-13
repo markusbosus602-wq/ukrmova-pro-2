@@ -54,6 +54,7 @@ body {
   border-radius: 50px;
   cursor: pointer;
   box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  transition: transform 0.1s;
 }
 
 #startBtn:active {
@@ -90,6 +91,7 @@ body {
   margin: 6px 0;
   cursor: pointer;
   font-size: 15px;
+  transition: transform 0.1s;
 }
 
 .btn:active {
@@ -100,6 +102,11 @@ body {
 .btn.red { background: var(--red); }
 .btn.danger { background: var(--dark); }
 .btn.theme-btn { background: #9c27b0; color: white; }
+.btn.small {
+  padding: 8px 14px;
+  font-size: 12px;
+  width: auto;
+}
 
 .money {
   font-size: 28px;
@@ -137,6 +144,11 @@ input {
   border-radius: 12px;
   text-align: center;
   cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.shop-item:active {
+  transform: scale(0.95);
 }
 
 .log-box {
@@ -164,14 +176,62 @@ input {
   margin: 15px 0;
 }
 
-.correct { color: #2ecc71; }
-.wrong { color: #ff4d4d; }
+.correct { 
+  color: #2ecc71;
+  animation: bounce 0.5s ease;
+}
+
+.wrong { 
+  color: #ff4d4d;
+  animation: shake 0.3s ease;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+}
 
 #abox {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin: 15px 0;
+}
+
+/* PROGRESS BAR */
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--gold));
+  width: 0%;
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+#question-counter {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  margin-bottom: 10px;
 }
 
 /* CABINET */
@@ -381,12 +441,6 @@ input {
   flex-wrap: wrap;
 }
 
-.btn.small {
-  padding: 8px 14px;
-  font-size: 12px;
-  width: auto;
-}
-
 .add-friend {
   display: flex;
   gap: 8px;
@@ -502,4 +556,9 @@ input {
 
 .notification-toast.show {
   transform: translateX(-50%) translateY(0);
+}
+
+/* Hint button animation */
+#hintBtn.pulse {
+  animation: pulse 0.5s ease;
 }

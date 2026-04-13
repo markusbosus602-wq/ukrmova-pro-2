@@ -3,9 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="description" content="Інтерактивна гра для вивчення української мови. Іменники, прикметники, фразеологізми, числівники. Змагайтеся з друзями!">
-  <meta name="keywords" content="українська мова, гра, іменники, прикметники, фразеологізми, навчання">
-  <meta name="author" content="UkrMova Pro">
   <title>UkrMova Pro</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -14,7 +11,7 @@
   <!-- SPLASH SCREEN -->
   <div id="splash">
     <video id="splash-video" playsinline preload="auto" muted></video>
-    <button id="startBtn" aria-label="Почати гру">ПОЧАТИ ГРУ</button>
+    <button id="startBtn">ПОЧАТИ ГРУ</button>
   </div>
 
   <!-- AUTH SCREEN -->
@@ -38,7 +35,6 @@
       <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
       <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
       <button class="btn" style="background:var(--purple)" onclick="show('cabinet')">📦 МОЯ СКРИНЬКА</button>
-      <button class="btn" style="background:var(--gold); color:#000" onclick="claimDailyBonus()">🎁 ДЕНЬ</button>
 
       <div id="admin-panel">
         <b style="color:var(--red);cursor:pointer;font-size:18px" onclick="closeAdm()">❌ ЗАКРИТИ АДМІНКУ</b><br><br>
@@ -84,11 +80,10 @@
   <div id="sections" class="screen">
     <div class="card">
       <h2>Обери розділ</h2>
-      <button class="btn theme-btn" onclick="startTheme('imennyky')">📖 Іменники</button>
-      <button class="btn theme-btn" onclick="startTheme('prykmetnyky')">📝 Прикметники</button>
-      <button class="btn theme-btn" onclick="startTheme('chyslivnyky')">🔢 Числівники</button>
-      <button class="btn theme-btn" onclick="startTheme('frazeologizmy')">💬 Фразеологізми</button>
-      <button class="btn theme-btn" onclick="startMarathon()">🏃 МАРАФОН (20 запитань)</button>
+      <button class="btn theme-btn" onclick="show('imennyky')">📖 Іменники</button>
+      <button class="btn theme-btn" onclick="show('prykmetnyky')">📝 Прикметники</button>
+      <button class="btn theme-btn" onclick="show('chyslivnyky')">🔢 Числівники</button>
+      <button class="btn theme-btn" onclick="show('frazeologizmy')">💬 Фразеологізми</button>
       <button class="btn red" onclick="show('menu')">НАЗАД</button>
     </div>
   </div>
@@ -126,7 +121,7 @@
     </div>
   </div>
 
-  <!-- ФРАЗЕОЛОГІЗМИ -->
+  <!-- ФРАЗЕОЛОГІЗМИ - ВСІ 14 ЗАВДАНЬ -->
   <div id="frazeologizmy" class="screen">
     <div class="card">
       <h2>Фразеологізми</h2>
@@ -151,14 +146,9 @@
   <!-- GAME SCREEN -->
   <div id="game" class="screen">
     <div class="card">
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-      <div id="question-counter"></div>
       <h3 id="qtext"></h3>
       <div id="feedback"></div>
       <div id="abox"></div>
-      <button class="btn" style="background:var(--gold); color:#000; margin-top:10px;" onclick="useHint()" id="hintBtn">💡 ПІДКАЗКА (50₴)</button>
       <button class="btn red" style="margin-top:20px;" onclick="show('sections')">НАЗАД</button>
     </div>
   </div>
@@ -209,10 +199,6 @@
             <div class="purchase-item">🛡️ Щит: <span id="purchaseShield">❌</span></div>
             <div class="purchase-item">💎 ВІП: <span id="purchaseVip">❌</span></div>
           </div>
-        </div>
-        <div class="cabinet-section">
-          <button class="btn small" onclick="exportProgress()">💾 Експорт прогресу</button>
-          <button class="btn small" onclick="importProgress()">📥 Імпорт прогресу</button>
         </div>
       </div>
 

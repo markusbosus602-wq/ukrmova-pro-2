@@ -842,23 +842,42 @@
   <script src="js/cabinet.js"></script>
 
   <script>
-    // Додатковий код для блокування переходів за посиланнями в магазині
+    // Повне блокування будь-яких переходів за посиланнями
     document.addEventListener('DOMContentLoaded', function() {
-      // Забороняємо будь-які переходи за посиланнями з елементів магазину
-      const shopItems = document.querySelectorAll('.shop-item');
-      shopItems.forEach(function(item) {
-        // Видаляємо будь-які href атрибути
-        item.removeAttribute('href');
-        // Блокуємо подію click, щоб вона не передавалася далі
+      // Забороняємо перетягування посилань
+      window.addEventListener('dragstart', function(e) {
+        if (e.target.closest('.shop-item')) {
+          e.preventDefault();
+          return false;
+        }
+      });
+      
+      // Забороняємо контекстне меню на елементах магазину
+      document.querySelectorAll('.shop-item').forEach(function(item) {
+        item.addEventListener('contextmenu', function(e) {
+          e.preventDefault();
+          return false;
+        });
+        
+        // Основний обробник кліку
         item.addEventListener('click', function(e) {
           e.preventDefault();
           e.stopPropagation();
-          // Отримуємо назву товару з data-item атрибута
           const itemName = this.getAttribute('data-item');
-          if (itemName) {
+          if (itemName && typeof buyItem === 'function') {
             buyItem(itemName);
           }
           return false;
+        });
+        
+        // Додатковий захист від mousedown
+        item.addEventListener('mousedown', function(e) {
+          e.preventDefault();
+        });
+        
+        // Захист від будь-яких інших подій, що можуть викликати перехід
+        item.addEventListener('mouseup', function(e) {
+          e.preventDefault();
         });
       });
     });

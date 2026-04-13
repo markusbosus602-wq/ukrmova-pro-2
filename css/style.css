@@ -27,6 +27,28 @@ body {
   z-index: 9999;
   background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
               url('https://file.garden/aZHnP_3ch2qR4tWj/61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat;
+  /* Додати в кінець style.css */
+.shop-item {
+  background: linear-gradient(135deg, #2c3e50, #1a2632);
+  color: white;
+  padding: 12px;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.1s;
+  font-weight: bold;
+}
+
+.shop-item:active {
+  transform: scale(0.96);
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 15px 0;
+}
   display: flex;
   align-items: center;
   justify-content: center;

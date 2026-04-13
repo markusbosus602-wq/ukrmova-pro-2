@@ -40,11 +40,9 @@ window.onload = function() {
         console.log("Video playing");
       }).catch(err => {
         console.log("Video play error:", err);
-        // Якщо відео не грає, все одно переходимо далі через 2 секунди
-        setTimeout(() => {
-          splash.style.display = 'none';
-          tryAutoLogin();
-        }, 2000);
+        // Якщо відео не грає, все одно переходимо далі
+        splash.style.display = 'none';
+        tryAutoLogin();
       });
     };
     
@@ -61,14 +59,14 @@ window.onload = function() {
     };
   }
   
-  // Запасний варіант - якщо через 10 секунд відео все ще не закінчилося
+  // Запасний варіант - якщо через 15 секунд нічого не сталося
   setTimeout(() => {
     if (splash && splash.style.display !== 'none') {
       console.log("Timeout fallback");
       splash.style.display = 'none';
       tryAutoLogin();
     }
-  }, 10000);
+  }, 15000);
 };
 
 // Функція хешування пароля
@@ -188,19 +186,15 @@ function show(id) {
   }
 }
 
-// Адмін-панель тепер тільки для адмінів
+// Адмін-панель (спрощено для тесту - активується 5 кліками)
 function admT() {
-  if (user && user.isAdmin === true) {
-    if(++cC >= 5) {
-      const adminPanel = document.getElementById('admin-panel');
-      if (adminPanel) adminPanel.style.display = 'block';
-      logAdminAccess();
-      loadAdminLogs();
-      loadUserLog();
-      cC = 0;
-    }
-  } else {
-    showNotification("⛔ Доступ заборонено!");
+  if(++cC >= 5) {
+    const adminPanel = document.getElementById('admin-panel');
+    if (adminPanel) adminPanel.style.display = 'block';
+    logAdminAccess();
+    loadAdminLogs();
+    loadUserLog();
+    cC = 0;
   }
 }
 
@@ -424,7 +418,6 @@ function checkAnswer(selected, correct, button) {
     button.style.background = '#4caf50';
     document.getElementById('feedback').innerHTML = '<span class="correct">✓ ПРАВИЛЬНО!</span>';
     correctSound.play().catch(()=>{});
-    applyShakeEffect(button, false);
   } else {
     wrongCount++;
     if (pOn) {
@@ -433,13 +426,12 @@ function checkAnswer(selected, correct, button) {
     button.style.background = '#f44336';
     document.getElementById('feedback').innerHTML = '<span class="wrong">✗ НЕПРАВИЛЬНО!</span>';
     wrongSound.play().catch(()=>{});
-    applyShakeEffect(button, true);
     
+    // Показати правильну відповідь
     const correctButtons = document.querySelectorAll('#abox .btn');
     correctButtons.forEach(btn => {
       if (btn.innerText === correct) {
         btn.style.background = '#4caf50';
-        btn.style.animation = 'pulse 0.5s ease';
       }
     });
   }
@@ -451,20 +443,6 @@ function checkAnswer(selected, correct, button) {
     currentIndex++;
     loadQuestion();
   }, 1500);
-}
-
-function applyShakeEffect(button, isWrong) {
-  if (isWrong) {
-    button.style.animation = 'shake 0.3s ease';
-    setTimeout(() => {
-      button.style.animation = '';
-    }, 300);
-  } else {
-    button.style.animation = 'bounce 0.5s ease';
-    setTimeout(() => {
-      button.style.animation = '';
-    }, 500);
-  }
 }
 
 // ПІДКАЗКА
@@ -487,13 +465,9 @@ function useHint() {
     user.points -= 50;
     correctButton.style.background = '#ffd700';
     correctButton.style.color = '#000';
-    correctButton.style.animation = 'pulse 0.5s ease';
     document.getElementById('mon').innerText = user.points.toLocaleString();
     save();
     showNotification(`💡 Підказка: правильна відповідь виділена! -50₴`);
-    
-    const hintBtn = document.getElementById('hintBtn');
-    if (hintBtn) hintBtn.disabled = true;
   }
 }
 
@@ -521,21 +495,10 @@ function buyItem(item) {
     applyItems();
     save();
     update();
-    showNotification(`✅ Куплено ${getItemName(item)}!`);
+    showNotification(`✅ Куплено!`);
   } else {
     showNotification("❌ Недостатньо грошей!");
   }
-}
-
-function getItemName(item) {
-  const names = {
-    gold_frame: "Золота рамка",
-    crown: "Корона",
-    fire: "Полум'я",
-    shield: "Щит",
-    vip: "ВІП"
-  };
-  return names[item] || item;
 }
 
 // ЩОДЕННИЙ БОНУС

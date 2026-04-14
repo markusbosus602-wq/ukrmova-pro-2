@@ -102,6 +102,7 @@ function loadCabinet() {
   loadHistory();
   loadFriends();
   loadAchievements();
+  loadStickers();
   
   const notifToggle = document.getElementById('notificationsToggle');
   if (notifToggle) notifToggle.checked = user.notifications !== false;
@@ -124,9 +125,7 @@ function loadAchievements() {
   const achievements = [
     { id: 'firstThousand', name: '💰 Перші 1000 ₴', reward: '+100 ₴' },
     { id: 'fiveThemes', name: '📚 5 тем пройдено', reward: '+500 ₴' },
-    { id: 'tenThemes', name: '🎓 10 тем пройдено', reward: '+1000 ₴ + значок' },
-    { id: 'threePerfect', name: '⭐ 100% у 3 темах', reward: '+1500 ₴ + значок' },
-    { id: 'streak50', name: '🔥 50 правильних поспіль', reward: '+2000 ₴ + значок' },
+    { id: 'tenThemes', name: '🎓 10 тем пройдено', reward: '+1000 ₴' },
     { id: 'firstFriend', name: '👥 Перший друг', reward: '+500 ₴' },
     { id: 'fiveFriends', name: '🌟 5 друзів', reward: '+2000 ₴' }
   ];
@@ -138,6 +137,38 @@ function loadAchievements() {
         <span class="achievement-name">${ach.name}</span>
         <span class="achievement-reward">${ach.reward}</span>
         <span class="achievement-status">${earned ? '✅' : '🔒'}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+// Завантаження стікерів письменників
+function loadStickers() {
+  const stickersContainer = document.getElementById('stickersContainer');
+  if (!stickersContainer) return;
+  
+  const stickersList = [
+    { id: 'shevchenko', name: 'Тарас Шевченко', emoji: '🖋️', desc: '100% у темі "Відміни"', price: 5000 },
+    { id: 'lesia', name: 'Леся Українка', emoji: '📖', desc: '100% у темі "Прикметники"', price: 5000 },
+    { id: 'franko', name: 'Іван Франко', emoji: '🎭', desc: '100% у темі "Займенники"', price: 5000 },
+    { id: 'kotsiubynsky', name: 'Михайло Коцюбинський', emoji: '🌾', desc: '100% у темі "Числівники"', price: 5000 },
+    { id: 'hohol', name: 'Микола Гоголь', emoji: '🏰', desc: '100% у будь-якому фразеологізмі', price: 5000 },
+    { id: 'dovzhenko', name: 'Олександр Довженко', emoji: '🌊', desc: '100% у 5 темах', price: 8000 },
+    { id: 'skovoroda', name: 'Григорій Сковорода', emoji: '🎻', desc: '100% у 10 темах', price: 10000 },
+    { id: 'kostenko', name: 'Ліна Костенко', emoji: '👑', desc: '100% у всіх темах', price: null },
+    { id: 'stus', name: 'Василь Стус', emoji: '⚡', desc: 'Серія 50 правильних', price: 7000 },
+    { id: 'teliha', name: 'Олена Теліга', emoji: '🔥', desc: '1000 правильних відповідей', price: 12000 }
+  ];
+  
+  stickersContainer.innerHTML = stickersList.map(s => {
+    const owned = user.stickers?.[s.id];
+    return `
+      <div class="sticker-item ${owned ? 'owned' : 'locked'}">
+        <div class="sticker-emoji">${s.emoji}</div>
+        <div class="sticker-name">${s.name}</div>
+        <div class="sticker-desc">${s.desc}</div>
+        <div class="sticker-status">${owned ? '✅ Отримано' : (s.price ? `🔒 ${s.price} ₴` : '🔒 Особливий')}</div>
+        ${!owned && s.price ? `<button class="btn small sticker-buy" onclick="buyItem('sticker_${s.id}')">Купити</button>` : ''}
       </div>
     `;
   }).join('');
@@ -164,6 +195,12 @@ function updateAvatarDisplay() {
   } else {
     avatarDiv.style.border = 'none';
     avatarDiv.style.boxShadow = 'none';
+  }
+  
+  // Вишиванка для аватара
+  if (items.vyshyvanka) {
+    avatarDiv.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+    avatarDiv.style.color = 'white';
   }
 }
 
@@ -219,6 +256,11 @@ function updatePurchases() {
   document.getElementById('purchaseSparkles').innerHTML = items.sparkles ? '✅' : '❌';
   document.getElementById('purchaseAvatarFrame').innerHTML = items.avatar_frame ? '✅' : '❌';
   document.getElementById('purchaseAnimated').innerHTML = items.animated_nick ? '✅' : '❌';
+  document.getElementById('purchaseVyshyvanka').innerHTML = items.vyshyvanka ? '✅' : '❌';
+  document.getElementById('purchaseKobza').innerHTML = items.kobza ? '✅' : '❌';
+  document.getElementById('purchaseSunflowers').innerHTML = items.sunflowers ? '✅' : '❌';
+  document.getElementById('purchaseBookshelf').innerHTML = items.bookshelf ? '✅' : '❌';
+  document.getElementById('purchaseTheaterMask').innerHTML = items.theater_mask ? '✅' : '❌';
 }
 
 function loadHistory() {
@@ -284,8 +326,8 @@ function editNick() {
         .then(() => {
           user = newUser;
           localStorage.setItem('un', newNick);
-          update();
-          applyItems();
+          if (typeof update === 'function') update();
+          if (typeof applyItems === 'function') applyItems();
           loadCabinet();
           showNotification('✅ Нікнейм змінено!');
         });
@@ -298,7 +340,7 @@ function changePassword() {
     if (!newPass) return;
     user.pass = newPass;
     localStorage.setItem('up', newPass);
-    save();
+    if (typeof save === 'function') save();
     showNotification('✅ Пароль змінено!');
   });
 }
@@ -309,7 +351,7 @@ function logout() {
       localStorage.removeItem('un');
       localStorage.removeItem('up');
       user = null;
-      show('auth-screen');
+      if (typeof show === 'function') show('auth-screen');
     }
   });
 }
@@ -320,7 +362,7 @@ function saveThemeResult(theme, correct, total) {
   const date = new Date().toLocaleString('uk-UA');
   const oldPercent = user.themeResults[theme]?.percent || 0;
   user.themeResults[theme] = { correct, total, percent, date };
-  save();
+  if (typeof save === 'function') save();
   if (percent === 100 && oldPercent !== 100) {
     showNotification(`🎉 100% у темі "${getThemeName(theme)}"!`);
   }
@@ -356,7 +398,7 @@ function setAvatar(emoji) {
   user.avatar = emoji;
   user.avatarType = 'emoji';
   user.avatarData = null;
-  save();
+  if (typeof save === 'function') save();
   updateAvatarDisplay();
   closeAvatarModal();
 }
@@ -372,7 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
           user.avatar = ev.target.result;
           user.avatarType = 'photo';
           user.avatarData = ev.target.result;
-          save();
+          if (typeof save === 'function') save();
           updateAvatarDisplay();
           closeAvatarModal();
           showNotification('✅ Аватарку оновлено!');
@@ -388,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function toggleNotifications() {
   const enabled = document.getElementById('notificationsToggle').checked;
   user.notifications = enabled;
-  save();
+  if (typeof save === 'function') save();
 }
 
 async function addFriend() {
@@ -415,12 +457,11 @@ async function addFriend() {
   
   if (!user.friends) user.friends = [];
   user.friends.push(friendNick);
-  save();
+  if (typeof save === 'function') save();
   document.getElementById('friendNick').value = '';
   loadFriends();
   showNotification(`👥 ${friendNick} додано!`);
   
-  // Перевірка досягнень після додавання друга
   if (typeof checkAchievements === 'function') checkAchievements();
 }
 
@@ -476,7 +517,7 @@ function removeFriend(friendName) {
   showCustomConfirm(`Видалити ${friendName} з друзів?`, (confirmed) => {
     if (confirmed) {
       user.friends = user.friends.filter(f => f !== friendName);
-      save();
+      if (typeof save === 'function') save();
       loadFriends();
       showNotification(`👥 ${friendName} видалено`);
     }

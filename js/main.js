@@ -86,7 +86,7 @@ async function auth() {
         regDate: new Date().toISOString().split('T')[0],
         avatar: '👤', avatarType: 'emoji', avatarData: null,
         friends: [], notifications: true, level: 1,
-        achievements: {}, lastDailyBonus: null, stickers: {}
+        achievements: {}, lastDailyBonus: null, stickers: {}, history: []
       };
       await fetch(DB + "users/" + n + ".json", {method:'PUT', body:JSON.stringify(user)});
     }
@@ -105,6 +105,7 @@ async function auth() {
     if (!user.achievements) user.achievements = {};
     if (!user.lastDailyBonus) user.lastDailyBonus = null;
     if (!user.stickers) user.stickers = {};
+    if (!user.history) user.history = [];
     
     save();
     
@@ -127,6 +128,7 @@ function save() {
   if (!user) return;
   user.items = items;
   user.stickers = user.stickers || {};
+  user.history = user.history || [];
   fetch(DB + "users/" + user.name + ".json", {method:'PUT', body:JSON.stringify(user)});
 }
 
@@ -319,6 +321,8 @@ function loadQuestion() {
   const qs = themes[currentTheme];
   if (!qs || currentIndex >= qs.length) {
     const total = correctCount + wrongCount;
+    const percent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+    
     if (typeof saveThemeResult === 'function' && total > 0) {
       saveThemeResult(currentTheme, correctCount, total);
     }
@@ -326,6 +330,11 @@ function loadQuestion() {
     save();
     
     if (typeof checkStickers === 'function') checkStickers();
+    
+    // Додаємо в історію завершення теми
+    if (typeof addThemeCompleteToHistory === 'function' && total > 0) {
+      addThemeCompleteToHistory(getThemeName(currentTheme), percent);
+    }
     
     document.getElementById('qtext').textContent = "Тема завершена!";
     document.getElementById('feedback').innerHTML = '';
@@ -375,6 +384,8 @@ function checkAnswer(selected, correct, button) {
   
   let reward = 100;
   const timeTaken = (Date.now() - (typeof lastAnswerTime !== 'undefined' ? lastAnswerTime : Date.now())) / 1000;
+  let finalReward = reward;
+  let penalty = 30;
   
   if (selected === correct) {
     correctCount++;
@@ -389,7 +400,7 @@ function checkAnswer(selected, correct, button) {
       }
     }
     
-    let finalReward = reward + bonus;
+    finalReward = reward + bonus;
     if (typeof eventActive !== 'undefined' && eventActive === 'double_money') {
       finalReward *= 2;
       showNotification(`🎉 ПОДВІЙНІ ГРОШІ! +${finalReward} ₴`, false, 1000);
@@ -399,20 +410,30 @@ function checkAnswer(selected, correct, button) {
     button.style.background = '#4caf50';
     document.getElementById('feedback').innerHTML = `<span class="correct">✓ ПРАВИЛЬНО! +${finalReward} ₴</span>`;
     correctSound.play().catch(()=>{});
+    
+    // Додаємо в історію правильну відповідь
+    if (typeof addCorrectAnswerToHistory === 'function') {
+      addCorrectAnswerToHistory(getThemeName(currentTheme), finalReward);
+    }
   } else {
     wrongCount++;
     if (typeof applyGameBonuses === 'function') applyGameBonuses(false);
     else if (typeof correctStreak !== 'undefined') correctStreak = 0;
     
     if(pOn) {
-      let penalty = 30;
       user.points = Math.max(0, user.points - penalty);
       document.getElementById('feedback').innerHTML = `<span class="wrong">✗ НЕПРАВИЛЬНО! -${penalty} ₴</span>`;
     } else {
       document.getElementById('feedback').innerHTML = '<span class="wrong">✗ НЕПРАВИЛЬНО! (штрафи вимкнені)</span>';
+      penalty = 0;
     }
     button.style.background = '#f44336';
     wrongSound.play().catch(()=>{});
+    
+    // Додаємо в історію неправильну відповідь
+    if (typeof addWrongAnswerToHistory === 'function' && penalty > 0) {
+      addWrongAnswerToHistory(getThemeName(currentTheme), penalty);
+    }
   }
   
   document.getElementById('mon').innerText = user.points.toLocaleString();

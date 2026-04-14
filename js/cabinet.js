@@ -76,12 +76,20 @@ function loadCabinet() {
   document.getElementById('cabNick').innerText = user.name;
   document.getElementById('cabMoney').innerText = (user.points || 0).toLocaleString();
   
-  const level = calculateLevel();
-  document.getElementById('cabLevel').innerText = level.name;
-  document.getElementById('levelBadge').innerHTML = level.badge;
+  // Оновлений розрахунок рівня
+  const stats = calculateStats();
+  const totalCorrect = stats.totalCorrect;
+  let level = { name: 'Новачок', badge: '🌱' };
+  if (totalCorrect >= 1000) level = { name: 'Легенда', badge: '🏆' };
+  else if (totalCorrect >= 500) level = { name: 'Експерт', badge: '👑' };
+  else if (totalCorrect >= 300) level = { name: 'Майстер', badge: '⭐' };
+  else if (totalCorrect >= 150) level = { name: 'Студент', badge: '🎓' };
+  else if (totalCorrect >= 50) level = { name: 'Учень', badge: '📚' };
+  
+  document.getElementById('cabLevel').innerHTML = `${level.name} ${level.badge}`;
+  document.getElementById('levelBadge').innerHTML = '';
   document.getElementById('regDate').innerHTML = user.regDate || new Date().toISOString().split('T')[0];
   
-  const stats = calculateStats();
   document.getElementById('totalThemes').innerText = stats.totalThemes;
   document.getElementById('correctAnswers').innerText = stats.totalCorrect;
   document.getElementById('wrongAnswers').innerText = stats.totalWrong;
@@ -93,6 +101,7 @@ function loadCabinet() {
   updatePurchases();
   loadHistory();
   loadFriends();
+  loadAchievements();
   
   const notifToggle = document.getElementById('notificationsToggle');
   if (notifToggle) notifToggle.checked = user.notifications !== false;
@@ -105,6 +114,33 @@ function loadCabinet() {
       document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
     };
   });
+}
+
+// Завантаження досягнень
+function loadAchievements() {
+  const achievementsList = document.getElementById('achievementsList');
+  if (!achievementsList) return;
+  
+  const achievements = [
+    { id: 'firstThousand', name: '💰 Перші 1000 ₴', reward: '+100 ₴' },
+    { id: 'fiveThemes', name: '📚 5 тем пройдено', reward: '+500 ₴' },
+    { id: 'tenThemes', name: '🎓 10 тем пройдено', reward: '+1000 ₴ + значок' },
+    { id: 'threePerfect', name: '⭐ 100% у 3 темах', reward: '+1500 ₴ + значок' },
+    { id: 'streak50', name: '🔥 50 правильних поспіль', reward: '+2000 ₴ + значок' },
+    { id: 'firstFriend', name: '👥 Перший друг', reward: '+500 ₴' },
+    { id: 'fiveFriends', name: '🌟 5 друзів', reward: '+2000 ₴' }
+  ];
+  
+  achievementsList.innerHTML = achievements.map(ach => {
+    const earned = user.achievements?.[ach.id];
+    return `
+      <div class="achievement-item ${earned ? 'earned' : 'locked'}">
+        <span class="achievement-name">${ach.name}</span>
+        <span class="achievement-reward">${ach.reward}</span>
+        <span class="achievement-status">${earned ? '✅' : '🔒'}</span>
+      </div>
+    `;
+  }).join('');
 }
 
 function updateAvatarDisplay() {
@@ -120,15 +156,15 @@ function updateAvatarDisplay() {
     img.style.objectFit = 'cover';
     avatarDiv.appendChild(img);
   }
-}
-
-function calculateLevel() {
-  const totalCorrect = calculateStats().totalCorrect;
-  if (totalCorrect < 50) return { name: 'Новачок', badge: '🌱' };
-  if (totalCorrect < 200) return { name: 'Досвідчений', badge: '📚' };
-  if (totalCorrect < 500) return { name: 'Майстер', badge: '🏅' };
-  if (totalCorrect < 1000) return { name: 'Експерт', badge: '🎓' };
-  return { name: 'Грандмайстер', badge: '👑' };
+  
+  // Додаємо рамку до аватара якщо куплена
+  if (items.avatar_frame) {
+    avatarDiv.style.border = '3px solid gold';
+    avatarDiv.style.boxShadow = '0 0 10px gold';
+  } else {
+    avatarDiv.style.border = 'none';
+    avatarDiv.style.boxShadow = 'none';
+  }
 }
 
 function calculateStats() {
@@ -179,6 +215,10 @@ function updatePurchases() {
   document.getElementById('purchaseFire').innerHTML = items.fire ? '✅' : '❌';
   document.getElementById('purchaseShield').innerHTML = items.shield ? '✅' : '❌';
   document.getElementById('purchaseVip').innerHTML = items.vip ? '✅' : '❌';
+  document.getElementById('purchaseRainbow').innerHTML = items.rainbow_name ? '✅' : '❌';
+  document.getElementById('purchaseSparkles').innerHTML = items.sparkles ? '✅' : '❌';
+  document.getElementById('purchaseAvatarFrame').innerHTML = items.avatar_frame ? '✅' : '❌';
+  document.getElementById('purchaseAnimated').innerHTML = items.animated_nick ? '✅' : '❌';
 }
 
 function loadHistory() {
@@ -286,7 +326,7 @@ function saveThemeResult(theme, correct, total) {
   }
 }
 
-function showNotification(msg, isError = false) {
+function showNotification(msg, isError = false, duration = 3000) {
   if (user && user.notifications === false) return;
   const toast = document.getElementById('notificationToast');
   if (toast) {
@@ -300,7 +340,7 @@ function showNotification(msg, isError = false) {
         toast.style.background = "var(--gold)";
         toast.style.color = "#000";
       }, 300);
-    }, 2500);
+    }, duration);
   }
 }
 
@@ -379,6 +419,9 @@ async function addFriend() {
   document.getElementById('friendNick').value = '';
   loadFriends();
   showNotification(`👥 ${friendNick} додано!`);
+  
+  // Перевірка досягнень після додавання друга
+  if (typeof checkAchievements === 'function') checkAchievements();
 }
 
 function loadFriends() {
@@ -394,7 +437,7 @@ function loadFriends() {
   Promise.all(user.friends.map(async f => {
     const r = await fetch(DB + "users/" + f + ".json");
     const d = await r.json();
-    return d ? { name: f, points: d.points || 0, avatar: d.avatar || '👤' } : null;
+    return d ? { name: f, points: d.points || 0, avatar: d.avatar || '👤', level: d.level || 1 } : null;
   })).then(friends => {
     const valid = friends.filter(f => f);
     friendsDiv.innerHTML = valid.map(f => `
@@ -403,12 +446,13 @@ function loadFriends() {
           <span class="friend-avatar">${f.avatar}</span>
           <span class="friend-name">${f.name}</span>
           <span class="friend-points">${f.points.toLocaleString()} ₴</span>
+          <span class="friend-level">${getLevelIcon(f.level)}</span>
         </div>
         <button class="remove-friend" onclick="removeFriend('${f.name}')">❌</button>
       </div>
     `).join('');
     
-    const all = [...valid, { name: user.name, points: user.points, avatar: user.avatar || '👤' }]
+    const all = [...valid, { name: user.name, points: user.points, avatar: user.avatar || '👤', level: user.level || 1 }]
       .sort((a,b) => b.points - a.points);
     
     leaderboardDiv.innerHTML = all.map((f, i) => `
@@ -417,9 +461,15 @@ function loadFriends() {
         <span class="friend-avatar">${f.avatar}</span>
         <span class="leaderboard-name">${f.name} ${f.name === user.name ? '(Ви)' : ''}</span>
         <span class="leaderboard-points">${f.points.toLocaleString()} ₴</span>
+        <span class="leaderboard-level">${getLevelIcon(f.level)}</span>
       </div>
     `).join('');
   });
+}
+
+function getLevelIcon(level) {
+  const icons = ['', '🌱', '📚', '🎓', '⭐', '👑', '🏆'];
+  return icons[level] || '🌱';
 }
 
 function removeFriend(friendName) {

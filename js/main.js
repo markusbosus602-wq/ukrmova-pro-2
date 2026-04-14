@@ -36,7 +36,6 @@ window.onload = function() {
       tryAutoLogin();
     };
     
-    // Якщо відео не завантажується або забагато часу - через 10 секунд все одно запускаємо
     setTimeout(function() {
       if (splash && splash.style.display !== 'none') {
         splash.style.display = 'none';
@@ -44,13 +43,11 @@ window.onload = function() {
       }
     }, 10000);
   } else {
-    // Якщо елементів немає - одразу запускаємо авторизацію
     tryAutoLogin();
   }
 };
 
 function tryAutoLogin() {
-  console.log("tryAutoLogin called");
   const savedNick = localStorage.getItem('un');
   const savedPass = localStorage.getItem('up');
   if (savedNick && savedPass) {
@@ -86,7 +83,7 @@ async function auth() {
         regDate: new Date().toISOString().split('T')[0],
         avatar: '👤', avatarType: 'emoji', avatarData: null,
         friends: [], notifications: true, level: 1,
-        achievements: {}, lastDailyBonus: null, stickers: {}, history: []
+        achievements: {}, lastDailyBonus: null, stickers: {}
       };
       await fetch(DB + "users/" + n + ".json", {method:'PUT', body:JSON.stringify(user)});
     }
@@ -105,7 +102,6 @@ async function auth() {
     if (!user.achievements) user.achievements = {};
     if (!user.lastDailyBonus) user.lastDailyBonus = null;
     if (!user.stickers) user.stickers = {};
-    if (!user.history) user.history = [];
     
     save();
     
@@ -128,7 +124,6 @@ function save() {
   if (!user) return;
   user.items = items;
   user.stickers = user.stickers || {};
-  user.history = user.history || [];
   fetch(DB + "users/" + user.name + ".json", {method:'PUT', body:JSON.stringify(user)});
 }
 
@@ -166,7 +161,6 @@ function applyItems() {
 }
 
 function show(id) {
-  console.log("show called with id:", id);
   document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
   const screen = document.getElementById(id);
   if (screen) screen.style.display = 'flex';
@@ -331,11 +325,6 @@ function loadQuestion() {
     
     if (typeof checkStickers === 'function') checkStickers();
     
-    // Додаємо в історію завершення теми
-    if (typeof addThemeCompleteToHistory === 'function' && total > 0) {
-      addThemeCompleteToHistory(getThemeName(currentTheme), percent);
-    }
-    
     document.getElementById('qtext').textContent = "Тема завершена!";
     document.getElementById('feedback').innerHTML = '';
     document.getElementById('abox').innerHTML = `
@@ -410,11 +399,6 @@ function checkAnswer(selected, correct, button) {
     button.style.background = '#4caf50';
     document.getElementById('feedback').innerHTML = `<span class="correct">✓ ПРАВИЛЬНО! +${finalReward} ₴</span>`;
     correctSound.play().catch(()=>{});
-    
-    // Додаємо в історію правильну відповідь
-    if (typeof addCorrectAnswerToHistory === 'function') {
-      addCorrectAnswerToHistory(getThemeName(currentTheme), finalReward);
-    }
   } else {
     wrongCount++;
     if (typeof applyGameBonuses === 'function') applyGameBonuses(false);
@@ -429,11 +413,6 @@ function checkAnswer(selected, correct, button) {
     }
     button.style.background = '#f44336';
     wrongSound.play().catch(()=>{});
-    
-    // Додаємо в історію неправильну відповідь
-    if (typeof addWrongAnswerToHistory === 'function' && penalty > 0) {
-      addWrongAnswerToHistory(getThemeName(currentTheme), penalty);
-    }
   }
   
   document.getElementById('mon').innerText = user.points.toLocaleString();
@@ -459,7 +438,39 @@ function getUserAvatarHtmlForTop(avatar, avatarType, avatarData) {
   return `<span style="font-size: 20px;">👤</span>`;
 }
 
-// Показати профіль гравця (досягнення)
+// Назви товарів для відображення
+const ITEM_NAMES = {
+  gold_frame: '✨ Золота рамка',
+  crown: '👑 Корона',
+  fire: '🔥 Полум\'я',
+  shield: '🛡️ Щит',
+  vip: '💎 ВІП',
+  rainbow_name: '🌈 Веселкове ім\'я',
+  sparkles: '✨ Блискітки',
+  avatar_frame: '🖼️ Рамка аватара',
+  animated_nick: '🌟 Анімований нік',
+  vyshyvanka: '🎨 Вишиванка',
+  kobza: '🏺 Кобза',
+  sunflowers: '🌻 Соняшникове поле',
+  bookshelf: '📜 Книжкова полиця',
+  theater_mask: '🎭 Театральна маска'
+};
+
+// Назви стікерів
+const STICKER_NAMES = {
+  shevchenko: '🖋️ Тарас Шевченко',
+  lesia: '📖 Леся Українка',
+  franko: '🎭 Іван Франко',
+  kotsiubynsky: '🌾 Михайло Коцюбинський',
+  hohol: '🏰 Микола Гоголь',
+  dovzhenko: '🌊 Олександр Довженко',
+  skovoroda: '🎻 Григорій Сковорода',
+  kostenko: '👑 Ліна Костенко',
+  stus: '⚡ Василь Стус',
+  teliha: '🔥 Олена Теліга'
+};
+
+// Показати профіль гравця (з покупками та стікерами)
 async function showPlayerProfile(nickname) {
   if (!nickname) return;
   
@@ -494,18 +505,23 @@ async function showPlayerProfile(nickname) {
     else if (totalCorrect >= 150) levelName = '🎓 Студент';
     else if (totalCorrect >= 50) levelName = '📚 Учень';
     
-    // Список досягнень гравця
-    const achievementsList = [
-      { id: 'firstThousand', name: '💰 Перші 1000 ₴' },
-      { id: 'fiveThemes', name: '📚 5 тем пройдено' },
-      { id: 'tenThemes', name: '🎓 10 тем пройдено' },
-      { id: 'threePerfect', name: '⭐ 100% у 3 темах' },
-      { id: 'firstFriend', name: '👥 Перший друг' },
-      { id: 'fiveFriends', name: '🌟 5 друзів' }
-    ];
+    // Отримання списку покупок
+    const playerItems = playerData.items || {};
+    const purchasedItems = [];
+    for (let [key, value] of Object.entries(ITEM_NAMES)) {
+      if (playerItems[key] === true) {
+        purchasedItems.push(value);
+      }
+    }
     
-    const earnedAchievements = achievementsList.filter(ach => playerData.achievements?.[ach.id]);
-    const lockedAchievements = achievementsList.filter(ach => !playerData.achievements?.[ach.id]);
+    // Отримання списку стікерів
+    const playerStickers = playerData.stickers || {};
+    const earnedStickers = [];
+    for (let [key, value] of Object.entries(STICKER_NAMES)) {
+      if (playerStickers[key] === true) {
+        earnedStickers.push(value);
+      }
+    }
     
     // Отримання аватарки
     let avatarHtml = '';
@@ -520,8 +536,10 @@ async function showPlayerProfile(nickname) {
     // Формуємо HTML модального вікна
     const modalHtml = `
       <div id="playerProfileModal" class="modal" style="display: flex;">
-        <div class="modal-content" style="max-width: 350px; max-height: 80vh; overflow-y: auto;">
+        <div class="modal-content" style="max-width: 380px; max-height: 85vh; overflow-y: auto;">
           <span class="modal-close" onclick="closePlayerProfileModal()">&times;</span>
+          
+          <!-- Аватар та основна інформація -->
           <div style="text-align: center;">
             ${avatarHtml}
             <h2 style="margin: 10px 0; color: var(--gold);">${playerData.name}</h2>
@@ -532,6 +550,7 @@ async function showPlayerProfile(nickname) {
           
           <hr style="margin: 15px 0; border-color: var(--gold);">
           
+          <!-- Статистика -->
           <h3 style="color: var(--gold);">📊 Статистика</h3>
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 10px 0;">
             <div style="background: #2c3e50; padding: 8px; border-radius: 10px; text-align: center;">
@@ -560,19 +579,28 @@ async function showPlayerProfile(nickname) {
             </div>
           </div>
           
-          <h3 style="color: var(--gold);">🏆 Досягнення</h3>
-          <div style="margin: 10px 0;">
-            ${earnedAchievements.map(ach => `
-              <div style="background: linear-gradient(135deg, #2ecc71, #27ae60); padding: 8px; border-radius: 8px; margin: 5px 0; color: white;">
-                ✅ ${ach.name}
+          <hr style="margin: 15px 0; border-color: var(--gold);">
+          
+          <!-- Покупки в крамничці -->
+          <h3 style="color: var(--gold);">🛍️ Покупки в крамничці</h3>
+          <div style="margin: 10px 0; max-height: 150px; overflow-y: auto;">
+            ${purchasedItems.length > 0 ? purchasedItems.map(item => `
+              <div style="background: #e8f5e9; padding: 6px 10px; border-radius: 8px; margin: 5px 0; color: #2e7d32;">
+                ✅ ${item}
               </div>
-            `).join('')}
-            ${lockedAchievements.map(ach => `
-              <div style="background: #555; padding: 8px; border-radius: 8px; margin: 5px 0; color: #aaa;">
-                🔒 ${ach.name}
+            `).join('') : '<div style="text-align: center; color: #aaa; padding: 10px;">Ще немає покупок</div>'}
+          </div>
+          
+          <hr style="margin: 15px 0; border-color: var(--gold);">
+          
+          <!-- Стікери письменників -->
+          <h3 style="color: var(--gold);">🎨 Стікери письменників</h3>
+          <div style="margin: 10px 0; max-height: 150px; overflow-y: auto;">
+            ${earnedStickers.length > 0 ? earnedStickers.map(sticker => `
+              <div style="background: linear-gradient(135deg, var(--gold), #e67e22); padding: 6px 10px; border-radius: 8px; margin: 5px 0; color: #000; font-weight: bold;">
+                ${sticker}
               </div>
-            `).join('')}
-            ${earnedAchievements.length === 0 ? '<div style="text-align: center; color: #aaa;">Ще немає досягнень</div>' : ''}
+            `).join('') : '<div style="text-align: center; color: #aaa; padding: 10px;">Ще немає стікерів</div>'}
           </div>
           
           <button class="btn" onclick="closePlayerProfileModal()" style="margin-top: 15px;">ЗАКРИТИ</button>

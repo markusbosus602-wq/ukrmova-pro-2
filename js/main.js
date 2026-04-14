@@ -419,16 +419,41 @@ function checkAnswer(selected, correct, button) {
   }, 1200);
 }
 
+// Отримання аватарки для топу
+function getUserAvatarHtmlForTop(avatar, avatarType, avatarData) {
+  if (avatarType === 'emoji') {
+    return `<span style="font-size: 20px;">${avatar || '👤'}</span>`;
+  } else if (avatarType === 'photo' && avatarData) {
+    return `<img src="${avatarData}" style="width: 25px; height: 25px; border-radius: 50%; object-fit: cover; vertical-align: middle;">`;
+  }
+  return `<span style="font-size: 20px;">👤</span>`;
+}
+
+// Оновлена функція loadT з аватарками
 async function loadT() {
   show('top');
-  let r = await fetch(DB+"users/.json"), d = await r.json();
+  let r = await fetch(DB + "users/.json");
+  let d = await r.json();
   let l = document.getElementById('tlist');
   l.innerHTML = '';
-  if(d) {
-    let topPlayers = Object.values(d).sort((a,b)=> (b.points||0) - (a.points||0)).slice(0,100);
-    topPlayers.forEach((u,i) => {
-      l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${getLevelIcon(u.level)} ${u.name}</span><b>${u.points||0} ₴</b></div>`;
-    });
+  
+  if (d) {
+    let topPlayers = Object.values(d).sort((a, b) => (b.points || 0) - (a.points || 0)).slice(0, 100);
+    
+    for (let i = 0; i < topPlayers.length; i++) {
+      const u = topPlayers[i];
+      const avatarHtml = getUserAvatarHtmlForTop(u.avatar, u.avatarType, u.avatarData);
+      l.innerHTML += `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #ddd;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-weight: bold; width: 35px;">${i + 1}.</span>
+            ${avatarHtml}
+            <span>${getLevelIcon(u.level)} ${u.name}</span>
+          </div>
+          <b>${(u.points || 0).toLocaleString()} ₴</b>
+        </div>
+      `;
+    }
   } else {
     l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
   }

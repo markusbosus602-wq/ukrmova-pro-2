@@ -21,29 +21,36 @@ window.onload = function() {
   const video = document.getElementById('splash-video');
   const startBtn = document.getElementById('startBtn');
   
-  if (video) {
+  if (video && startBtn) {
     video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
+    
     startBtn.onclick = function() {
       startBtn.style.display = 'none';
       video.muted = false;
       video.currentTime = 0;
-      video.play().catch(() => {});
+      video.play().catch(function(e) { console.log("Video play error:", e); });
     };
+    
     video.onended = function() {
       splash.style.display = 'none';
       tryAutoLogin();
     };
+    
+    // Якщо відео не завантажується або забагато часу - через 10 секунд все одно запускаємо
+    setTimeout(function() {
+      if (splash && splash.style.display !== 'none') {
+        splash.style.display = 'none';
+        tryAutoLogin();
+      }
+    }, 10000);
+  } else {
+    // Якщо елементів немає - одразу запускаємо авторизацію
+    tryAutoLogin();
   }
-  
-  setTimeout(() => {
-    if (splash && splash.style.display !== 'none') {
-      splash.style.display = 'none';
-      tryAutoLogin();
-    }
-  }, 70000);
 };
 
 function tryAutoLogin() {
+  console.log("tryAutoLogin called");
   const savedNick = localStorage.getItem('un');
   const savedPass = localStorage.getItem('up');
   if (savedNick && savedPass) {
@@ -98,7 +105,8 @@ async function auth() {
     if (!user.achievements) user.achievements = {};
     if (!user.lastDailyBonus) user.lastDailyBonus = null;
     if (!user.stickers) user.stickers = {};
-    if (typeof save === 'function') save();
+    
+    save();
     
     if (typeof checkDailyBonus === 'function') checkDailyBonus();
     if (typeof checkEvents === 'function') checkEvents();
@@ -106,8 +114,8 @@ async function auth() {
     if (typeof checkStickers === 'function') checkStickers();
     if (typeof checkLevelUp === 'function') checkLevelUp();
     
-    if (typeof applyItems === 'function') applyItems();
-    if (typeof update === 'function') update();
+    applyItems();
+    update();
     show('menu');
   } catch(e) {
     showCustomMessage("Помилка підключення", true);
@@ -156,6 +164,7 @@ function applyItems() {
 }
 
 function show(id) {
+  console.log("show called with id:", id);
   document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
   const screen = document.getElementById(id);
   if (screen) screen.style.display = 'flex';
@@ -314,7 +323,7 @@ function loadQuestion() {
       saveThemeResult(currentTheme, correctCount, total);
     }
     user.themeAttempts[currentTheme] = (user.themeAttempts[currentTheme] || 0) + 1;
-    if (typeof save === 'function') save();
+    save();
     
     if (typeof checkStickers === 'function') checkStickers();
     
@@ -407,7 +416,7 @@ function checkAnswer(selected, correct, button) {
   }
   
   document.getElementById('mon').innerText = user.points.toLocaleString();
-  if (typeof save === 'function') save();
+  save();
   
   if (typeof checkAchievements === 'function') checkAchievements();
   if (typeof checkStickers === 'function') checkStickers();
@@ -484,7 +493,7 @@ async function showPlayerProfile(nickname) {
     } else if (playerData.avatarType === 'photo' && playerData.avatarData) {
       avatarHtml = `<img src="${playerData.avatarData}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">`;
     } else {
-      avatarHtml = `<span style="font-size: 64px;">👤</span>';
+      avatarHtml = `<span style="font-size: 64px;">👤</span>`;
     }
     
     // Формуємо HTML модального вікна

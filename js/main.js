@@ -470,7 +470,47 @@ const STICKER_NAMES = {
   teliha: '🔥 Олена Теліга'
 };
 
-// Показати профіль гравця (з покупками та стікерами)
+// Список значків (бейджів)
+const BADGES_LIST = [
+  { name: '🌱 Новачок', condition: (stats) => stats.totalThemes >= 1 },
+  { name: '📚 Досвідчений', condition: (stats) => stats.totalThemes >= 10 },
+  { name: '🏅 Майстер', condition: (stats) => stats.totalThemes >= 30 },
+  { name: '⭐ Перфекціоніст', condition: (stats) => stats.perfectCount >= 10 },
+  { name: '🏃 Марафонець', condition: (stats) => stats.totalThemes >= 50 },
+  { name: '💰 Багатій', condition: (stats, points) => points >= 10000 },
+  { name: '🎯 Перша 100%', condition: (stats) => stats.perfectCount >= 1 },
+  { name: '💎 VIP', condition: (stats, points, items) => items && items.vip },
+  { name: '👑 Легенда', condition: (stats) => stats.totalCorrect >= 1000 }
+];
+
+// Отримання значків гравця
+function getPlayerBadges(playerData) {
+  const stats = {
+    totalThemes: 0,
+    totalCorrect: 0,
+    perfectCount: 0
+  };
+  
+  if (playerData.themeResults) {
+    for (let theme in playerData.themeResults) {
+      const res = playerData.themeResults[theme];
+      stats.totalCorrect += res.correct || 0;
+      stats.totalThemes++;
+      if (res.percent === 100) stats.perfectCount++;
+    }
+  }
+  
+  const earnedBadges = [];
+  for (let badge of BADGES_LIST) {
+    if (badge.condition(stats, playerData.points || 0, playerData.items)) {
+      earnedBadges.push(badge.name);
+    }
+  }
+  
+  return earnedBadges;
+}
+
+// Показати профіль гравця (з покупками, стікерами та значками)
 async function showPlayerProfile(nickname) {
   if (!nickname) return;
   
@@ -522,6 +562,9 @@ async function showPlayerProfile(nickname) {
         earnedStickers.push(value);
       }
     }
+    
+    // Отримання списку значків
+    const earnedBadges = getPlayerBadges(playerData);
     
     // Отримання аватарки
     let avatarHtml = '';
@@ -577,6 +620,18 @@ async function showPlayerProfile(nickname) {
               <div style="font-size: 20px; font-weight: bold; color: var(--gold);">${playerData.friends?.length || 0}</div>
               <div style="font-size: 10px;">Друзів</div>
             </div>
+          </div>
+          
+          <hr style="margin: 15px 0; border-color: var(--gold);">
+          
+          <!-- Значки (бейджі) -->
+          <h3 style="color: var(--gold);">🏆 Значки</h3>
+          <div style="margin: 10px 0; display: flex; flex-wrap: wrap; gap: 6px;">
+            ${earnedBadges.length > 0 ? earnedBadges.map(badge => `
+              <div style="background: linear-gradient(135deg, var(--gold), #e67e22); padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: bold; color: #000;">
+                ${badge}
+              </div>
+            `).join('') : '<div style="text-align: center; color: #aaa; padding: 10px; width: 100%;">Ще немає значків</div>'}
           </div>
           
           <hr style="margin: 15px 0; border-color: var(--gold);">

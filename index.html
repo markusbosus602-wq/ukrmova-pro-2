@@ -514,6 +514,57 @@
     .achievement-reward { flex: 1; text-align: center; }
     .achievement-status { width: 30px; text-align: center; }
 
+    .stickers-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .sticker-item {
+      background: #f0f0f0;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+
+    .sticker-item.owned {
+      background: linear-gradient(135deg, var(--gold), #e67e22);
+      color: white;
+    }
+
+    .sticker-item.locked {
+      background: #ddd;
+      color: #666;
+    }
+
+    .sticker-emoji {
+      font-size: 32px;
+      margin-bottom: 5px;
+    }
+
+    .sticker-name {
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .sticker-desc {
+      font-size: 10px;
+      margin: 5px 0;
+    }
+
+    .sticker-status {
+      font-size: 10px;
+      margin-top: 5px;
+    }
+
+    .sticker-buy {
+      margin-top: 8px;
+      padding: 4px 8px;
+      font-size: 10px;
+      background: var(--green);
+    }
+
     .modal {
       display: none;
       position: fixed;
@@ -653,6 +704,11 @@
         <button class="shop-btn" data-item="sparkles">✨ Блискітки — 2500 ₴</button>
         <button class="shop-btn" data-item="avatar_frame">🖼️ Рамка аватара — 2000 ₴</button>
         <button class="shop-btn" data-item="animated_nick">🌟 Анімований нік — 3500 ₴</button>
+        <button class="shop-btn" data-item="vyshyvanka">🎨 Вишиванка для аватара — 4000 ₴</button>
+        <button class="shop-btn" data-item="kobza">🏺 Кобза для ніка — 3000 ₴</button>
+        <button class="shop-btn" data-item="sunflowers">🌻 Соняшникове поле — 5000 ₴</button>
+        <button class="shop-btn" data-item="bookshelf">📜 Книжкова полиця — 6000 ₴</button>
+        <button class="shop-btn" data-item="theater_mask">🎭 Театральна маска — 4500 ₴</button>
         <button class="shop-btn" data-item="secret_item" style="display:none">🤫 СЕКРЕТНИЙ ТОВАР — 10000 ₴</button>
       </div>
       <button class="btn" onclick="show('menu')">НАЗАД</button>
@@ -773,6 +829,7 @@
         <button class="tab-btn active" data-tab="profile">📋 Профіль</button>
         <button class="tab-btn" data-tab="stats">📊 Статистика</button>
         <button class="tab-btn" data-tab="achievements">🏆 Досягнення</button>
+        <button class="tab-btn" data-tab="stickers">🎨 Стікери</button>
         <button class="tab-btn" data-tab="friends">👥 Друзі</button>
         <button class="tab-btn" data-tab="settings">⚙️ Налаштування</button>
       </div>
@@ -799,6 +856,11 @@
             <div class="purchase-item">✨ Блискітки: <span id="purchaseSparkles">❌</span></div>
             <div class="purchase-item">🖼️ Рамка аватара: <span id="purchaseAvatarFrame">❌</span></div>
             <div class="purchase-item">🌟 Анімований нік: <span id="purchaseAnimated">❌</span></div>
+            <div class="purchase-item">🎨 Вишиванка: <span id="purchaseVyshyvanka">❌</span></div>
+            <div class="purchase-item">🏺 Кобза: <span id="purchaseKobza">❌</span></div>
+            <div class="purchase-item">🌻 Соняшникове поле: <span id="purchaseSunflowers">❌</span></div>
+            <div class="purchase-item">📜 Книжкова полиця: <span id="purchaseBookshelf">❌</span></div>
+            <div class="purchase-item">🎭 Театральна маска: <span id="purchaseTheaterMask">❌</span></div>
           </div>
         </div>
       </div>
@@ -829,6 +891,13 @@
         <div class="cabinet-section">
           <h3>🏆 Досягнення</h3>
           <div class="achievements-grid" id="achievementsList"></div>
+        </div>
+      </div>
+
+      <div id="tab-stickers" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>🎨 Стікери українських письменників</h3>
+          <div class="stickers-grid" id="stickersContainer"></div>
         </div>
       </div>
 

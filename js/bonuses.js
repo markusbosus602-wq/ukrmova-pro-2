@@ -105,7 +105,7 @@ function applyGameBonuses(isCorrect, timeTaken) {
   return bonus;
 }
 
-// Скидання серії (для використання в грі)
+// Скидання серії
 function resetStreak() {
   correctStreak = 0;
 }

@@ -843,6 +843,29 @@
   <script src="js/themes.js"></script>
   <script src="js/main.js"></script>
   <script src="js/cabinet.js"></script>
+  <!-- Кастомне модальне вікно для введення тексту -->
+  <div id="customPromptModal" class="modal">
+    <div class="modal-content" style="max-width: 300px;">
+      <span class="modal-close" onclick="document.getElementById('customPromptModal').style.display='none'">&times;</span>
+      <h3 id="customPromptMessage">Введіть значення</h3>
+      <input type="text" id="customPromptInput" style="margin: 15px 0; background: #333; color: white; border: 1px solid var(--gold);">
+      <div style="display: flex; gap: 10px;">
+        <button class="btn small" id="customPromptConfirm" style="background: var(--green);">Підтвердити</button>
+        <button class="btn small" id="customPromptCancel" style="background: var(--red);">Скасувати</button>
+      </div>
+    </div>
+  </div>
 
+  <!-- Кастомне модальне вікно для підтвердження -->
+  <div id="customConfirmModal" class="modal">
+    <div class="modal-content" style="max-width: 300px;">
+      <span class="modal-close" onclick="document.getElementById('customConfirmModal').style.display='none'">&times;</span>
+      <h3 id="customConfirmMessage">Підтвердіть дію</h3>
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="btn small" id="customConfirmYes" style="background: var(--green);">Так</button>
+        <button class="btn small" id="customConfirmNo" style="background: var(--red);">Ні</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

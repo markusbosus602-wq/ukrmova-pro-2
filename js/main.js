@@ -7,8 +7,14 @@ let currentTheme = '';
 let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
-let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
+let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false, rainbow_name: false, sparkles: false, avatar_frame: false, animated_nick: false };
 let currentCorrectAnswer = '';
+let correctStreak = 0; // Серія правильних відповідей
+let lastAnswerTime = 0; // Час останньої відповіді
+let dailyBonusClaimed = false; // Чи отримано щоденний бонус сьогодні
+let eventActive = null; // Активна подія: 'double_money', 'discount', 'secret_item'
+let secretItemAvailable = false;
+let secretItemEndTime = 0;
 
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
@@ -27,11 +33,156 @@ function showCustomMessage(msg, isError = false) {
         toast.style.background = "var(--gold)";
         toast.style.color = "#000";
       }, 300);
-    }, 2500);
-  } else {
-    // fallback якщо toast немає
-    console.log(msg);
+    }, 3000);
   }
+}
+
+// Перевірка щоденного бонусу
+function checkDailyBonus() {
+  const today = new Date().toISOString().split('T')[0];
+  if (user.lastDailyBonus !== today) {
+    user.lastDailyBonus = today;
+    user.points += 200;
+    save();
+    showNotification("🎁 Щоденний бонус: +200 ₴!");
+    return true;
+  }
+  return false;
+}
+
+// Перевірка та активація подій
+function checkEvents() {
+  const now = new Date();
+  const day = now.getDay(); // 0=неділя, 6=субота
+  const hour = now.getHours();
+  
+  // Вихідні - подвійні гроші (субота та неділя)
+  if (day === 0 || day === 6) {
+    if (eventActive !== 'double_money') {
+      eventActive = 'double_money';
+      showNotification("🎉 ВИХІДНІ! ПОДВІЙНІ ГРОШІ! 🎉");
+    }
+  }
+  // Свята - знижки (якщо грудень)
+  else if (now.getMonth() === 11) {
+    if (eventActive !== 'discount') {
+      eventActive = 'discount';
+      showNotification("🎄 СВЯТКОВА ЗНИЖКА -30% В МАГАЗИНІ! 🎄");
+    }
+  }
+  // Секретний товар (випадково між 18-22 годиною)
+  else if (hour >= 18 && hour <= 22 && !secretItemAvailable && Date.now() > secretItemEndTime) {
+    if (Math.random() < 0.3) { // 30% шанс появи
+      secretItemAvailable = true;
+      secretItemEndTime = Date.now() + 3600000; // на 1 годину
+      showNotification("🤫 СЕКРЕТНИЙ ТОВАР З'ЯВИВСЯ В МАГАЗИНІ! 🤫");
+    }
+  }
+  // Секретний товар зник через годину
+  else if (secretItemAvailable && Date.now() > secretItemEndTime) {
+    secretItemAvailable = false;
+    showNotification("🔒 Секретний товар зник...");
+  }
+}
+
+// Перевірка досягнень
+function checkAchievements() {
+  if (!user.achievements) user.achievements = {};
+  
+  // Досягнення: перші 1000 ₴
+  if (user.points >= 1000 && !user.achievements.firstThousand) {
+    user.achievements.firstThousand = true;
+    user.points += 100;
+    save();
+    showNotification("🏆 ДОСЯГНЕННЯ: Перші 1000 ₴! +100 ₴");
+  }
+  
+  // Досягнення: 5 пройдених тем
+  const themesCount = Object.keys(user.themeResults || {}).length;
+  if (themesCount >= 5 && !user.achievements.fiveThemes) {
+    user.achievements.fiveThemes = true;
+    user.points += 500;
+    save();
+    showNotification("🏆 ДОСЯГНЕННЯ: 5 тем пройдено! +500 ₴");
+  }
+  
+  // Досягнення: 10 пройдених тем
+  if (themesCount >= 10 && !user.achievements.tenThemes) {
+    user.achievements.tenThemes = true;
+    user.points += 1000;
+    save();
+    showNotification("🏆 ДОСЯГНЕННЯ: 10 тем пройдено! +1000 ₴ + значок 📚");
+  }
+  
+  // Досягнення: 100% у 3 темах
+  let perfectCount = 0;
+  if (user.themeResults) {
+    for (let theme in user.themeResults) {
+      if (user.themeResults[theme].percent === 100) perfectCount++;
+    }
+  }
+  if (perfectCount >= 3 && !user.achievements.threePerfect) {
+    user.achievements.threePerfect = true;
+    user.points += 1500;
+    save();
+    showNotification("🏆 ДОСЯГНЕННЯ: 100% у 3 темах! +1500 ₴ + значок ⭐");
+  }
+  
+  // Досягнення: 50 правильних відповідей поспіль
+  if (correctStreak >= 50 && !user.achievements.streak50) {
+    user.achievements.streak50 = true;
+    user.points += 2000;
+    save();
+    showNotification("🏆 ДОСЯГНЕННЯ: 50 правильних поспіль! +2000 ₴ + значок 🔥");
+  }
+  
+  // Досягнення: запросити друга
+  if ((user.friends?.length || 0) >= 1 && !user.achievements.firstFriend) {
+    user.achievements.firstFriend = true;
+    user.points += 500;
+    save();
+    showNotification("🏆 ДОСЯГНЕННЯ: Запросив друга! +500 ₴");
+  }
+  if ((user.friends?.length || 0) >= 5 && !user.achievements.fiveFriends) {
+    user.achievements.fiveFriends = true;
+    user.points += 2000;
+    save();
+    showNotification("🏆 ДОСЯГНЕННЯ: 5 друзів! +2000 ₴");
+  }
+}
+
+// Перевірка рівня
+function checkLevelUp() {
+  if (!user.level) user.level = 1;
+  const stats = calculateStats();
+  const totalCorrect = stats.totalCorrect;
+  
+  let newLevel = user.level;
+  let reward = 0;
+  
+  if (totalCorrect >= 1000 && user.level < 6) { newLevel = 6; reward = 10000; }
+  else if (totalCorrect >= 500 && user.level < 5) { newLevel = 5; reward = 5000; }
+  else if (totalCorrect >= 300 && user.level < 4) { newLevel = 4; reward = 2000; }
+  else if (totalCorrect >= 150 && user.level < 3) { newLevel = 3; reward = 1000; }
+  else if (totalCorrect >= 50 && user.level < 2) { newLevel = 2; reward = 500; }
+  
+  if (newLevel > user.level) {
+    user.level = newLevel;
+    user.points += reward;
+    save();
+    const levelNames = ['', '🌱 Новачок', '📚 Учень', '🎓 Студент', '⭐ Майстер', '👑 Експерт', '🏆 Легенда'];
+    showNotification(`🎉 ПІДВИЩЕННЯ РІВНЯ! ${levelNames[newLevel]}! +${reward} ₴ 🎉`);
+    return true;
+  }
+  return false;
+}
+
+// Отримання ціни з урахуванням знижки
+function getPriceWithDiscount(originalPrice) {
+  if (eventActive === 'discount') {
+    return Math.floor(originalPrice * 0.7);
+  }
+  return originalPrice;
 }
 
 window.onload = function() {
@@ -96,7 +247,8 @@ async function auth() {
         themeAttempts: {}, themeResults: {},
         regDate: new Date().toISOString().split('T')[0],
         avatar: '👤', avatarType: 'emoji', avatarData: null,
-        friends: [], notifications: true
+        friends: [], notifications: true, level: 1,
+        achievements: {}, lastDailyBonus: null
       };
       await fetch(DB + "users/" + n + ".json", {method:'PUT', body:JSON.stringify(user)});
     }
@@ -104,14 +256,24 @@ async function auth() {
     localStorage.setItem('up', p);
     const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
     await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify({game_nick:n, time:now})});
-    items = user.items || {gold_frame:false};
+    items = user.items || {gold_frame:false, rainbow_name:false, sparkles:false, avatar_frame:false, animated_nick:false};
     if (!user.themeResults) user.themeResults = {};
     if (!user.regDate) user.regDate = new Date().toISOString().split('T')[0];
     if (!user.avatar) user.avatar = '👤';
     if (!user.avatarType) user.avatarType = 'emoji';
     if (!user.friends) user.friends = [];
     if (user.notifications === undefined) user.notifications = true;
+    if (!user.level) user.level = 1;
+    if (!user.achievements) user.achievements = {};
+    if (!user.lastDailyBonus) user.lastDailyBonus = null;
     save();
+    
+    // Перевірка щоденного бонусу
+    checkDailyBonus();
+    checkEvents();
+    checkAchievements();
+    checkLevelUp();
+    
     applyItems();
     update();
     show('menu');
@@ -140,8 +302,19 @@ function applyItems() {
   if(items.fire) nickDisplay += ' 🔥';
   if(items.shield) nickDisplay += ' 🛡️';
   if(items.vip) nickDisplay += ' 💎 VIP';
+  if(items.rainbow_name) nickDisplay = `<span style="background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: bold;">${user.name}</span>`;
+  if(items.animated_nick) nickDisplay = `<span style="animation: pulse 1s infinite; display: inline-block;">${nickDisplay}</span>`;
+  
   const nickEl = document.getElementById('playerNick');
   if (nickEl) nickEl.innerHTML = nickDisplay;
+  
+  // Додаємо анімацію для пульсуючого ніка
+  if (!document.querySelector('#animated-nick-style')) {
+    const style = document.createElement('style');
+    style.id = 'animated-nick-style';
+    style.textContent = `@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); text-shadow: 0 0 10px gold; } 100% { transform: scale(1); } }`;
+    document.head.appendChild(style);
+  }
 }
 
 function show(id) {
@@ -150,6 +323,9 @@ function show(id) {
   if (screen) screen.style.display = 'flex';
   if (id === 'cabinet' && user && typeof loadCabinet === 'function') {
     loadCabinet();
+  }
+  if (id === 'shop' && user && typeof updateShopPrices === 'function') {
+    updateShopPrices();
   }
 }
 
@@ -230,7 +406,7 @@ async function loadPlayers() {
   }
   for (let key in d) {
     let u = d[key];
-    list.innerHTML += `<div style="padding:8px; border-bottom:1px solid #ddd;"><strong>${u.name || key}</strong><br><small>Баланс: ${u.points || 0} ₴</small></div>`;
+    list.innerHTML += `<div style="padding:8px; border-bottom:1px solid #ddd;"><strong>${u.name || key}</strong><br><small>Баланс: ${u.points || 0} ₴ | Рівень: ${u.level || 1}</small></div>`;
   }
 }
 
@@ -287,6 +463,7 @@ function startTheme(theme) {
   currentIndex = 0;
   correctCount = 0;
   wrongCount = 0;
+  correctStreak = 0;
   if (!user.themeAttempts) user.themeAttempts = {};
   if (!user.themeAttempts[theme]) user.themeAttempts[theme] = 0;
   show('game');
@@ -308,6 +485,7 @@ function loadQuestion() {
       <div class="summary">
         <strong>Правильних:</strong> ${correctCount}<br>
         <strong>Неправильних:</strong> ${wrongCount}<br>
+        <strong>Серія правильних:</strong> ${correctStreak}<br>
         <strong>Баланс:</strong> ${user.points.toLocaleString()} ₴
       </div>
       <button class="btn" onclick="show('sections')">Обрати тему</button>
@@ -340,25 +518,66 @@ function loadQuestion() {
     btn.onclick = () => checkAnswer(o, q.a, btn);
     abox.appendChild(btn);
   });
+  
+  lastAnswerTime = Date.now();
 }
 
 function checkAnswer(selected, correct, button) {
   document.querySelectorAll('#abox .btn').forEach(b => b.disabled = true);
+  
+  let reward = 100;
+  let bonus = 0;
+  
+  // Бонус за швидку відповідь (менше 3 секунд)
+  const timeTaken = (Date.now() - lastAnswerTime) / 1000;
+  if (timeTaken < 3) {
+    bonus += 25;
+    showNotification(`⚡ Швидка відповідь! +25 ₴`, false, 1000);
+  }
+  
   if (selected === correct) {
     correctCount++;
-    user.points += 100;
+    correctStreak++;
+    
+    // Бонус за серію (кожна 5-та правильна)
+    if (correctStreak % 5 === 0) {
+      bonus += 50;
+      showNotification(`🔥 Серія ${correctStreak}! +50 ₴`, false, 1000);
+    }
+    
+    // Подвійні гроші під час події
+    let finalReward = reward + bonus;
+    if (eventActive === 'double_money') {
+      finalReward *= 2;
+      showNotification(`🎉 ПОДВІЙНІ ГРОШІ! +${finalReward} ₴`, false, 1000);
+    }
+    
+    user.points += finalReward;
     button.style.background = '#4caf50';
-    document.getElementById('feedback').innerHTML = '<span class="correct">✓ ПРАВИЛЬНО!</span>';
+    document.getElementById('feedback').innerHTML = `<span class="correct">✓ ПРАВИЛЬНО! +${finalReward} ₴</span>`;
     correctSound.play().catch(()=>{});
   } else {
     wrongCount++;
-    if(pOn) user.points = Math.max(0, user.points - 30);
+    correctStreak = 0;
+    if(pOn) {
+      let penalty = 30;
+      if (eventActive === 'double_money') penalty *= 1; // штраф не подвоюється
+      user.points = Math.max(0, user.points - penalty);
+      document.getElementById('feedback').innerHTML = `<span class="wrong">✗ НЕПРАВИЛЬНО! -${penalty} ₴</span>`;
+    } else {
+      document.getElementById('feedback').innerHTML = '<span class="wrong">✗ НЕПРАВИЛЬНО! (штрафи вимкнені)</span>';
+    }
     button.style.background = '#f44336';
-    document.getElementById('feedback').innerHTML = '<span class="wrong">✗ НЕПРАВИЛЬНО!</span>';
     wrongSound.play().catch(()=>{});
   }
+  
   document.getElementById('mon').innerText = user.points.toLocaleString();
   save();
+  
+  // Перевірка досягнень та рівня
+  checkAchievements();
+  checkLevelUp();
+  
   setTimeout(() => {
     currentIndex++;
     loadQuestion();
@@ -373,7 +592,9 @@ async function loadT() {
   if(d) {
     let topPlayers = Object.values(d).sort((a,b)=> (b.points||0) - (a.points||0)).slice(0,100);
     topPlayers.forEach((u,i) => {
-      l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${u.name}</span><b>${u.points||0}</b></div>`;
+      const levelNames = ['', '🌱', '📚', '🎓', '⭐', '👑', '🏆'];
+      const levelIcon = levelNames[u.level] || '🌱';
+      l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${levelIcon} ${u.name}</span><b>${u.points||0} ₴</b></div>`;
     });
   } else {
     l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
@@ -381,15 +602,70 @@ async function loadT() {
 }
 
 function buyItem(item) {
-  const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
-  if(user.points >= prices[item]){
-    user.points -= prices[item];
+  const prices = {
+    gold_frame: 1000, crown: 2000, fire: 1500, shield: 2500, vip: 5000,
+    rainbow_name: 3000, sparkles: 2500, avatar_frame: 2000, animated_nick: 3500,
+    secret_item: 10000
+  };
+  
+  // Перевірка на секретний товар
+  if (item === 'secret_item' && !secretItemAvailable) {
+    showCustomMessage("❌ Секретний товар недоступний!", true);
+    return;
+  }
+  
+  let originalPrice = prices[item];
+  let finalPrice = getPriceWithDiscount(originalPrice);
+  let discountText = (eventActive === 'discount' && originalPrice !== finalPrice) ? ` (знижка -30%: ${finalPrice} ₴)` : '';
+  
+  if(user.points >= finalPrice){
+    user.points -= finalPrice;
     items[item] = true;
     applyItems();
     save();
     update();
-    showCustomMessage("✨ Куплено! ✨");
+    
+    if (item === 'secret_item') {
+      secretItemAvailable = false;
+      showCustomMessage(`🤫 Секретний товар куплено! +${finalPrice} ₴ бонусу! 🤫`);
+      user.points += finalPrice; // Повертаємо гроші як бонус
+      save();
+      update();
+    } else {
+      showCustomMessage(`✨ Куплено! ${discountText} ✨`);
+    }
   } else {
-    showCustomMessage("❌ Недостатньо грошей! ❌", true);
+    showCustomMessage(`❌ Недостатньо грошей! Потрібно ${finalPrice} ₴ ❌`, true);
+  }
+}
+
+// Функція для оновлення цін в магазині
+function updateShopPrices() {
+  const shopItems = document.querySelectorAll('.shop-btn');
+  const priceMap = {
+    gold_frame: 1000, crown: 2000, fire: 1500, shield: 2500, vip: 5000,
+    rainbow_name: 3000, sparkles: 2500, avatar_frame: 2000, animated_nick: 3500
+  };
+  
+  if (eventActive === 'discount') {
+    shopItems.forEach(btn => {
+      const item = btn.getAttribute('data-item');
+      if (item && priceMap[item] && !btn.innerHTML.includes('знижка')) {
+        const oldPrice = priceMap[item];
+        const newPrice = Math.floor(oldPrice * 0.7);
+        btn.innerHTML = btn.innerHTML.replace(`${oldPrice} ₴`, `${newPrice} ₴ (знижка -30%)`);
+      }
+    });
+  }
+  
+  // Показуємо секретний товар якщо доступний
+  const secretBtn = document.querySelector('.shop-btn[data-item="secret_item"]');
+  if (secretBtn) {
+    if (secretItemAvailable) {
+      secretBtn.style.display = 'block';
+      secretBtn.innerHTML = `🤫 СЕКРЕТНИЙ ТОВАР — 10000 ₴ (повертається як бонус!) 🤫`;
+    } else {
+      secretBtn.style.display = 'none';
+    }
   }
 }

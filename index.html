@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>UkrMova Pro</title>
+  <style>
+    :root {
+      --blue: #00a2ff;
+      --red: #ff4d4d;
+      --green: #2ecc71;
+      --gold: #f1c40f;
+      --dark: #d32f2f;
+      --purple: #9b59b6;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
+                  url('https://file.garden/aZHnP_3ch2qR4tWj/61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat fixed;
+      color: white;
+      min-height: 100vh;
+    }
+
+    #splash {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                  url('https://file.garden/aZHnP_3ch2qR4tWj/61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    #splash-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    #startBtn {
+      position: relative;
+      z-index: 10000;
+      padding: 16px 40px;
+      font-size: 28px;
+      font-weight: bold;
+      background: linear-gradient(45deg, #FFD700, #FFEA80);
+      color: #00204A;
+      border: 3px solid #FFFFFF;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      transition: transform 0.1s;
+    }
+
+    #startBtn:active {
+      transform: scale(0.96);
+    }
+
+    .screen {
+      display: none;
+      min-height: 100vh;
+      padding: 16px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 400px;
+      margin: auto;
+      color: #000;
+    }
+
+    .btn {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      width: 100%;
+      margin: 6px 0;
+      cursor: pointer;
+      font-size: 15px;
+      transition: transform 0.1s;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn.green { background: var(--green); }
+    .btn.red { background: var(--red); }
+    .btn.danger { background: var(--dark); }
+    .btn.theme-btn { background: #9c27b0; color: white; }
+    .btn.small {
+      padding: 8px 14px;
+      font-size: 12px;
+      width: auto;
+    }
+
+    .money {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--gold);
+    }
+
+    .nickname {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 10px 0;
+      cursor: pointer;
+    }
+
+    input {
+      background: #f5f5f5;
+      border: 1px solid #ccc;
+      padding: 12px;
+      border-radius: 12px;
+      width: 100%;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .shop-btn {
+      background: #eee;
+      border: none;
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.1s;
+      font-size: 14px;
+      font-weight: bold;
+      color: #000;
+      width: 100%;
+    }
+
+    .shop-btn:active {
+      transform: scale(0.95);
+    }
+
+    .log-box {
+      background: #f8f8f8;
+      padding: 10px;
+      border-radius: 12px;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 12px;
+      margin: 10px 0;
+    }
+
+    #admin-panel {
+      display: none;
+      margin-top: 15px;
+      padding: 15px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      text-align: left;
+    }
+
+    #feedback {
+      text-align: center;
+      font-size: 36px;
+      margin: 15px 0;
+    }
+
+    .correct { 
+      color: #2ecc71;
+    }
+
+    .wrong { 
+      color: #ff4d4d;
+    }
+
+    #abox {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--gold));
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 4px;
+    }
+
+    #question-counter {
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .cabinet-card {
+      max-width: 400px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .cabinet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 2px solid var(--gold);
+      padding-bottom: 12px;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), #e67e22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-edit-btn {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      background: var(--gold);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cabinet-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: #2a2a3a;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+      color: white;
+    }
+
+    .tab-btn.active {
+      background: var(--gold);
+      color: #000;
+    }
+
+    .cabinet-tab {
+      display: none;
+    }
+
+    .cabinet-tab.active {
+      display: block;
+    }
+
+    .cabinet-section {
+      background: rgba(255,255,255,0.9);
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 12px;
+      color: #000;
+    }
+
+    .cabinet-section h3 {
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px;
+    }
+
+    .info-item {
+      background: #f0f0f0;
+      padding: 8px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .edit-btn {
+      background: var(--gold);
+      border: none;
+      padding: 4px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #2c3e50, #1a2632);
+      padding: 8px;
+      border-radius: 12px;
+      text-align: center;
+      color: white;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--gold);
+    }
+
+    .stat-label {
+      font-size: 9px;
+      color: #aaa;
+    }
+
+    .badges-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .badge {
+      background: linear-gradient(135deg, var(--gold), #e67e22);
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: bold;
+      color: #000;
+    }
+
+    .badge.locked {
+      background: #555;
+      color: #aaa;
+      filter: grayscale(0.5);
+    }
+
+    .purchases-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .purchase-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px;
+      background: #f0f0f0;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+
+    .history-list {
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px;
+      border-bottom: 1px solid #ddd;
+      font-size: 12px;
+    }
+
+    .history-percent {
+      font-weight: bold;
+      color: var(--gold);
+    }
+
+    .settings-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .add-friend {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .friend-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .friend-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .friend-avatar { font-size: 24px; }
+    .friend-name { font-weight: bold; font-size: 13px; }
+    .friend-points { color: var(--gold); font-size: 11px; }
+    .friend-level { font-size: 12px; }
+
+    .remove-friend {
+      background: var(--red);
+      border: none;
+      padding: 4px 8px;
+      border-radius: 6px;
+      color: white;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .leaderboard-rank {
+      font-weight: bold;
+      color: var(--gold);
+      width: 28px;
+    }
+
+    .achievements-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .achievement-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      background: #f0f0f0;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    .achievement-item.earned {
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+      color: white;
+    }
+
+    .achievement-item.locked {
+      background: #ddd;
+      color: #666;
+    }
+
+    .achievement-name { flex: 2; }
+    .achievement-reward { flex: 1; text-align: center; }
+    .achievement-status { width: 30px; text-align: center; }
+
+    .stickers-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .sticker-item {
+      background: #f0f0f0;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+
+    .sticker-item.owned {
+      background: linear-gradient(135deg, var(--gold), #e67e22);
+      color: white;
+    }
+
+    .sticker-item.locked {
+      background: #ddd;
+      color: #666;
+    }
+
+    .sticker-emoji {
+      font-size: 32px;
+      margin-bottom: 5px;
+    }
+
+    .sticker-name {
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .sticker-desc {
+      font-size: 10px;
+      margin: 5px 0;
+    }
+
+    .sticker-status {
+      font-size: 10px;
+      margin-top: 5px;
+    }
+
+    .sticker-buy {
+      margin-top: 8px;
+      padding: 4px 8px;
+      font-size: 10px;
+      background: var(--green);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: #1e1e2e;
+      padding: 20px;
+      border-radius: 24px;
+      max-width: 300px;
+      width: 90%;
+      text-align: center;
+      color: white;
+    }
+
+    .modal-close {
+      float: right;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .avatar-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 12px 0;
+    }
+
+    .avatar-option {
+      font-size: 28px;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 50%;
+    }
+
+    .avatar-option:active {
+      background: var(--gold);
+      transform: scale(0.9);
+    }
+
+    .notification-toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--gold);
+      color: #000;
+      padding: 8px 14px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 12px;
+      transition: transform 0.2s;
+      white-space: nowrap;
+      max-width: 90%;
+      white-space: normal;
+      text-align: center;
+      z-index: 1500;
+    }
+
+    .notification-toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SPLASH SCREEN -->
+  <div id="splash">
+    <video id="splash-video" playsinline preload="auto" muted></video>
+    <button id="startBtn">ПОЧАТИ ГРУ</button>
+  </div>
+
+  <!-- AUTH SCREEN -->
+  <div id="auth-screen" class="screen">
+    <div class="card">
+      <h2 style="color:var(--gold)">UKRMOVA PRO</h2>
+      <input type="text" id="nick" placeholder="Нікнейм" autocomplete="off">
+      <input type="password" id="pass" placeholder="Пароль" autocomplete="off">
+      <button class="btn" onclick="auth()">УВІЙТИ / ЗАРЕЄСТРУВАТИСЯ</button>
+      <p id="auth-error" style="color:red; margin-top:10px; min-height:24px;"></p>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <div id="menu" class="screen">
+    <div class="card">
+      <h3 onclick="admT()" style="cursor:pointer">МЕНЮ</h3>
+      <div class="nickname" id="playerNick"></div>
+      <div class="money"><span id="mon">0</span> ₴</div>
+      <button class="btn" onclick="show('sections')">ГРАТИ</button>
+      <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
+      <button class="btn green" onclick="show('shop')">КРАМНИЧКА</button>
+      <button class="btn" style="background:var(--purple)" onclick="show('cabinet')">📦 МОЯ СКРИНЬКА</button>
+
+      <div id="admin-panel">
+        <b style="color:var(--red);cursor:pointer;font-size:18px" onclick="closeAdm()">❌ ЗАКРИТИ АДМІНКУ</b><br><br>
+        <button class="btn" id="pen-btn" style="background:var(--red)" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
+        <p><b>Управління гравцями</b></p>
+        <input type="text" id="a-n" placeholder="Нік гравця">
+        <button class="btn" style="background:var(--green);color:#000" onclick="edO(true)">+ ГРОШІ</button>
+        <button class="btn" style="background:var(--red)" onclick="edO(false)">- ГРОШІ</button>
+        <button class="btn danger" onclick="delU()">ВИДАЛИТИ ЗА НІКОМ</button>
+        <br><br>
+        <button class="btn" style="background:var(--blue);width:100%" onclick="loadPlayers()">ПОКАЗАТИ ВСІХ ГРАВЦІВ</button>
+        <div id="player-list"></div>
+        <br><br>
+        <h4 style="color:var(--blue)">Лог входів</h4>
+        <div id="user-log" class="log-box">Завантаження...</div>
+        <button class="btn" style="background:#ff9800;margin-top:8px;width:48%;margin-right:4%" onclick="loadUserLog()">Оновити</button>
+        <button class="btn danger" style="margin-top:8px;width:48%" onclick="clearUserLog()">Очистити</button>
+        <br><br>
+        <h4 style="color:var(--blue)">Лог адмінки</h4>
+        <div id="admin-log" class="log-box">Завантаження...</div>
+        <button class="btn" style="background:#ff9800;margin-top:8px;width:48%;margin-right:4%" onclick="loadAdminLogs()">Оновити</button>
+        <button class="btn danger" style="margin-top:8px;width:48%" onclick="clearAdminLogs()">Очистити</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- КРАМНИЧКА -->
+  <div id="shop" class="screen">
+    <div class="card">
+      <h2>КРАМНИЧКА</h2>
+      <div class="shop-grid">
+        <button class="shop-btn" data-item="gold_frame">✨ Золота рамка — 1000 ₴</button>
+        <button class="shop-btn" data-item="crown">👑 Корона — 2000 ₴</button>
+        <button class="shop-btn" data-item="fire">🔥 Полум'я — 1500 ₴</button>
+        <button class="shop-btn" data-item="shield">🛡️ Щит — 2500 ₴</button>
+        <button class="shop-btn" data-item="vip">💎 ВІП — 5000 ₴</button>
+        <button class="shop-btn" data-item="rainbow_name">🌈 Веселкове ім'я — 3000 ₴</button>
+        <button class="shop-btn" data-item="sparkles">✨ Блискітки — 2500 ₴</button>
+        <button class="shop-btn" data-item="avatar_frame">🖼️ Рамка аватара — 2000 ₴</button>
+        <button class="shop-btn" data-item="animated_nick">🌟 Анімований нік — 3500 ₴</button>
+        <button class="shop-btn" data-item="vyshyvanka">🎨 Вишиванка для аватара — 4000 ₴</button>
+        <button class="shop-btn" data-item="kobza">🏺 Кобза для ніка — 3000 ₴</button>
+        <button class="shop-btn" data-item="sunflowers">🌻 Соняшникове поле — 5000 ₴</button>
+        <button class="shop-btn" data-item="bookshelf">📜 Книжкова полиця — 6000 ₴</button>
+        <button class="shop-btn" data-item="theater_mask">🎭 Театральна маска — 4500 ₴</button>
+        <button class="shop-btn" data-item="secret_item" style="display:none">🤫 СЕКРЕТНИЙ ТОВАР — 10000 ₴</button>
+      </div>
+      <button class="btn" onclick="show('menu')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- SECTIONS -->
+  <div id="sections" class="screen">
+    <div class="card">
+      <h2>Обери розділ</h2>
+      <button class="btn theme-btn" onclick="show('imennyky')">📖 Іменники</button>
+      <button class="btn theme-btn" onclick="show('prykmetnyky')">📝 Прикметники</button>
+      <button class="btn theme-btn" onclick="show('zajmennyky')">🔤 Займенники</button>
+      <button class="btn theme-btn" onclick="show('chyslivnyky')">🔢 Числівники</button>
+      <button class="btn theme-btn" onclick="show('frazeologizmy')">💬 Фразеологізми</button>
+      <button class="btn red" onclick="show('menu')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ІМЕННИКИ -->
+  <div id="imennyky" class="screen">
+    <div class="card">
+      <h2>Іменники</h2>
+      <button class="btn theme-btn" onclick="startTheme('vydminy')">Відміни іменників</button>
+      <button class="btn theme-btn" onclick="startTheme('orudnyi_1vidmina')">Орудний відмінок 1 відміни</button>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ПРИКМЕТНИКИ -->
+  <div id="prykmetnyky" class="screen">
+    <div class="card">
+      <h2>Прикметники</h2>
+      <button class="btn theme-btn" onclick="startTheme('prykmetnyky')">Прикметники</button>
+      <button class="btn theme-btn" onclick="startTheme('grupy_prykmetnykiv')">Групи за значенням</button>
+      <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni')">Ступені порівняння</button>
+      <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni_2')">Ступені порівняння 2</button>
+      <button class="btn theme-btn" onclick="startTheme('ne_z_prykmetnykamy')">Правопис НЕ</button>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ЗАЙМЕННИКИ -->
+  <div id="zajmennyky" class="screen">
+    <div class="card">
+      <h2>Займенники</h2>
+      <button class="btn theme-btn" onclick="startTheme('zajmennyky_rozriady')">Розряди займенників</button>
+      <button class="btn theme-btn" onclick="startTheme('zajmennyky_pravopys')">Правопис неозначених і заперечних</button>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ЧИСЛІВНИКИ -->
+  <div id="chyslivnyky" class="screen">
+    <div class="card">
+      <h2>Числівники</h2>
+      <button class="btn theme-btn" onclick="startTheme('chyslivnyky_1')">Числівники №1</button>
+      <button class="btn theme-btn" onclick="startTheme('chyslivnyky_2')">Числівники №2</button>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ФРАЗЕОЛОГІЗМИ - ВСІ 14 ЗАВДАНЬ -->
+  <div id="frazeologizmy" class="screen">
+    <div class="card">
+      <h2>Фразеологізми</h2>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy1')">ЗАВДАННЯ 1</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy2')">ЗАВДАННЯ 2</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy3')">ЗАВДАННЯ 3</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy4')">ЗАВДАННЯ 4</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy5')">ЗАВДАННЯ 5</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy6')">ЗАВДАННЯ 6</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy7')">ЗАВДАННЯ 7</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy8')">ЗАВДАННЯ 8</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy9')">ЗАВДАННЯ 9</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy10')">ЗАВДАННЯ 10</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy11')">ЗАВДАННЯ 11</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy12')">ЗАВДАННЯ 12</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy13')">ЗАВДАННЯ 13</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy14')">ЗАВДАННЯ 14</button>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="game" class="screen">
+    <div class="card">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div id="question-counter"></div>
+      <h3 id="qtext"></h3>
+      <div id="feedback"></div>
+      <div id="abox"></div>
+      <button class="btn red" style="margin-top:20px;" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- TOP -->
+  <div id="top" class="screen">
+    <div class="card">
+      <h3>🏆 ТОП 1000</h3>
+      <div id="tlist">Завантаження...</div>
+      <button class="btn" onclick="show('menu')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- CABINET -->
+  <div id="cabinet" class="screen">
+    <div class="card cabinet-card">
+      <div class="cabinet-header">
+        <h2>📦 МОЯ СКРИНЬКА</h2>
+        <div class="avatar-wrapper" onclick="openAvatarModal()">
+          <div class="avatar" id="cabinetAvatar">👤</div>
+          <div class="avatar-edit-btn">📷</div>
+        </div>
+      </div>
+
+      <div class="cabinet-tabs">
+        <button class="tab-btn active" data-tab="profile">📋 Профіль</button>
+        <button class="tab-btn" data-tab="stats">📊 Статистика</button>
+        <button class="tab-btn" data-tab="achievements">🏆 Досягнення</button>
+        <button class="tab-btn" data-tab="stickers">🎨 Стікери</button>
+        <button class="tab-btn" data-tab="friends">👥 Друзі</button>
+        <button class="tab-btn" data-tab="settings">⚙️ Налаштування</button>
+      </div>
+
+      <div id="tab-profile" class="cabinet-tab active">
+        <div class="cabinet-section">
+          <h3>📋 Особиста інформація</h3>
+          <div class="info-grid">
+            <div class="info-item"><span>Нікнейм:</span> <strong id="cabNick"></strong> <button class="edit-btn" onclick="editNick()">✏️</button></div>
+            <div class="info-item"><span>Рівень:</span> <strong id="cabLevel"></strong> <span id="levelBadge"></span></div>
+            <div class="info-item"><span>Баланс:</span> <strong id="cabMoney">0</strong> ₴</div>
+            <div class="info-item"><span>Реєстрація:</span> <strong id="regDate">—</strong></div>
+          </div>
+        </div>
+        <div class="cabinet-section">
+          <h3>🛍️ Мої покупки</h3>
+          <div class="purchases-grid">
+            <div class="purchase-item">✨ Золота рамка: <span id="purchaseGold">❌</span></div>
+            <div class="purchase-item">👑 Корона: <span id="purchaseCrown">❌</span></div>
+            <div class="purchase-item">🔥 Полум'я: <span id="purchaseFire">❌</span></div>
+            <div class="purchase-item">🛡️ Щит: <span id="purchaseShield">❌</span></div>
+            <div class="purchase-item">💎 ВІП: <span id="purchaseVip">❌</span></div>
+            <div class="purchase-item">🌈 Веселкове ім'я: <span id="purchaseRainbow">❌</span></div>
+            <div class="purchase-item">✨ Блискітки: <span id="purchaseSparkles">❌</span></div>
+            <div class="purchase-item">🖼️ Рамка аватара: <span id="purchaseAvatarFrame">❌</span></div>
+            <div class="purchase-item">🌟 Анімований нік: <span id="purchaseAnimated">❌</span></div>
+            <div class="purchase-item">🎨 Вишиванка: <span id="purchaseVyshyvanka">❌</span></div>
+            <div class="purchase-item">🏺 Кобза: <span id="purchaseKobza">❌</span></div>
+            <div class="purchase-item">🌻 Соняшникове поле: <span id="purchaseSunflowers">❌</span></div>
+            <div class="purchase-item">📜 Книжкова полиця: <span id="purchaseBookshelf">❌</span></div>
+            <div class="purchase-item">🎭 Театральна маска: <span id="purchaseTheaterMask">❌</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-stats" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>📊 Моя статистика</h3>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="totalThemes">0</div><div class="stat-label">Пройдено тем</div></div>
+            <div class="stat-card"><div class="stat-value" id="correctAnswers">0</div><div class="stat-label">Правильних</div></div>
+            <div class="stat-card"><div class="stat-value" id="wrongAnswers">0</div><div class="stat-label">Неправильних</div></div>
+            <div class="stat-card"><div class="stat-value" id="avgPercent">0%</div><div class="stat-label">Середній %</div></div>
+            <div class="stat-card"><div class="stat-value" id="bestResult">0%</div><div class="stat-label">Найкращий</div></div>
+            <div class="stat-card"><div class="stat-value" id="perfectCount">0</div><div class="stat-label">100% тем</div></div>
+          </div>
+        </div>
+        <div class="cabinet-section">
+          <h3>📜 Історія проходження</h3>
+          <div class="history-list" id="historyList">Ще немає пройдених тем</div>
+        </div>
+        <div class="cabinet-section">
+          <h3>🏆 Значки</h3>
+          <div class="badges-grid" id="badgesContainer"></div>
+        </div>
+      </div>
+
+      <div id="tab-achievements" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>🏆 Досягнення</h3>
+          <div class="achievements-grid" id="achievementsList"></div>
+        </div>
+      </div>
+
+      <div id="tab-stickers" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>🎨 Стікери українських письменників</h3>
+          <div class="stickers-grid" id="stickersContainer"></div>
+        </div>
+      </div>
+
+      <div id="tab-friends" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>👥 Мої друзі</h3>
+          <div class="add-friend">
+            <input type="text" id="friendNick" placeholder="Нікнейм друга">
+            <button class="btn small" onclick="addFriend()">➕ Додати</button>
+          </div>
+          <div class="friends-list" id="friendsList">У вас ще немає друзів</div>
+        </div>
+        <div class="cabinet-section">
+          <h3>🏆 Таблиця лідерів (друзі)</h3>
+          <div class="leaderboard-friends" id="leaderboardFriends">Додайте друзів</div>
+        </div>
+      </div>
+
+      <div id="tab-settings" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>⚙️ Налаштування</h3>
+          <div class="settings-row">
+            <button class="btn small" onclick="changePassword()">🔐 Змінити пароль</button>
+            <button class="btn small danger" onclick="logout()">🚪 Вийти</button>
+          </div>
+          <div class="settings-row" style="margin-top:12px;">
+            <label><input type="checkbox" id="notificationsToggle" onchange="toggleNotifications()"> 📢 Сповіщення</label>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn red" onclick="show('menu')">◀ НАЗАД</button>
+    </div>
+  </div>
+
+  <div id="avatarModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeAvatarModal()">&times;</span>
+      <h3>Виберіть аватарку</h3>
+      <div class="avatar-options">
+        <div class="avatar-option" onclick="setAvatar('👤')">👤</div>
+        <div class="avatar-option" onclick="setAvatar('😀')">😀</div>
+        <div class="avatar-option" onclick="setAvatar('🎮')">🎮</div>
+        <div class="avatar-option" onclick="setAvatar('🏆')">🏆</div>
+        <div class="avatar-option" onclick="setAvatar('⭐')">⭐</div>
+        <div class="avatar-option" onclick="setAvatar('🔥')">🔥</div>
+        <div class="avatar-option" onclick="setAvatar('💎')">💎</div>
+        <div class="avatar-option" onclick="setAvatar('👑')">👑</div>
+        <div class="avatar-option" onclick="setAvatar('📚')">📚</div>
+        <div class="avatar-option" onclick="setAvatar('🎓')">🎓</div>
+      </div>
+      <hr>
+      <h3>Або завантажте фото</h3>
+      <input type="file" id="avatarFile" accept="image/*" style="display:none">
+      <button class="btn small" onclick="document.getElementById('avatarFile').click()">📷 Вибрати фото</button>
+      <div id="avatarPreview"></div>
+    </div>
+  </div>
+
+  <!-- Кастомне модальне вікно для введення тексту -->
+  <div id="customPromptModal" class="modal">
+    <div class="modal-content" style="max-width: 300px;">
+      <span class="modal-close" onclick="document.getElementById('customPromptModal').style.display='none'">&times;</span>
+      <h3 id="customPromptMessage">Введіть значення</h3>
+      <input type="text" id="customPromptInput" style="margin: 15px 0; background: #333; color: white; border: 1px solid var(--gold);">
+      <div style="display: flex; gap: 10px;">
+        <button class="btn small" id="customPromptConfirm" style="background: var(--green);">Підтвердити</button>
+        <button class="btn small" id="customPromptCancel" style="background: var(--red);">Скасувати</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Кастомне модальне вікно для підтвердження -->
+  <div id="customConfirmModal" class="modal">
+    <div class="modal-content" style="max-width: 300px;">
+      <span class="modal-close" onclick="document.getElementById('customConfirmModal').style.display='none'">&times;</span>
+      <h3 id="customConfirmMessage">Підтвердіть дію</h3>
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="btn small" id="customConfirmYes" style="background: var(--green);">Так</button>
+        <button class="btn small" id="customConfirmNo" style="background: var(--red);">Ні</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="notificationToast" class="notification-toast"></div>
+
+  <!-- Підключення допоміжних модулів -->
+  <script src="js/utils.js"></script>
+  <script src="js/shop.js"></script>
+  <script src="js/bonuses.js"></script>
+  <script src="js/achievements.js"></script>
+  <script src="js/stickers.js"></script>
+  <script src="js/friends.js"></script>
+  
+  <!-- Підключення тем -->
+  <script src="js/themes/vydminy.js"></script>
+  <script src="js/themes/orudnyi_1vidmina.js"></script>
+  <script src="js/themes/prykmetnyky.js"></script>
+  <script src="js/themes/grupy_prykmetnykiv.js"></script>
+  <script src="js/themes/prykmetnyky_stupeni.js"></script>
+  <script src="js/themes/prykmetnyky_stupeni_2.js"></script>
+  <script src="js/themes/ne_z_prykmetnykamy.js"></script>
+  <script src="js/themes/chyslivnyky_1.js"></script>
+  <script src="js/themes/chyslivnyky_2.js"></script>
+  <script src="js/themes/zajmennyky_rozriady.js"></script>
+  <script src="js/themes/zajmennyky_pravopys.js"></script>
+  <script src="js/themes/frazeologizmy1.js"></script>
+  <script src="js/themes/frazeologizmy2.js"></script>
+  <script src="js/themes/frazeologizmy3.js"></script>
+  <script src="js/themes/frazeologizmy4.js"></script>
+  <script src="js/themes/frazeologizmy5.js"></script>
+  <script src="js/themes/frazeologizmy6.js"></script>
+  <script src="js/themes/frazeologizmy7.js"></script>
+  <script src="js/themes/frazeologizmy8.js"></script>
+  <script src="js/themes/frazeologizmy9.js"></script>
+  <script src="js/themes/frazeologizmy10.js"></script>
+  <script src="js/themes/frazeologizmy11.js"></script>
+  <script src="js/themes/frazeologizmy12.js"></script>
+  <script src="js/themes/frazeologizmy13.js"></script>
+  <script src="js/themes/frazeologizmy14.js"></script>
+  <script src="js/themes/index.js"></script>
+  
+  <!-- Головні файли -->
+  <script src="js/cabinet.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    // Обробник для кнопок крамнички
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.shop-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var itemName = this.getAttribute('data-item');
+          if (itemName && typeof buyItem === 'function') {
+            buyItem(itemName);
+          }
+          return false;
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>

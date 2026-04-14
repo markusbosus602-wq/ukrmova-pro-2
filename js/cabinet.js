@@ -145,7 +145,10 @@ function loadAchievements() {
 // Завантаження стікерів письменників
 function loadStickers() {
   const stickersContainer = document.getElementById('stickersContainer');
-  if (!stickersContainer) return;
+  if (!stickersContainer) {
+    console.log('stickersContainer not found');
+    return;
+  }
   
   const stickersList = [
     { id: 'shevchenko', name: 'Тарас Шевченко', emoji: '🖋️', desc: '100% у темі "Відміни"', price: 5000 },
@@ -160,8 +163,10 @@ function loadStickers() {
     { id: 'teliha', name: 'Олена Теліга', emoji: '🔥', desc: '1000 правильних відповідей', price: 12000 }
   ];
   
+  if (!user.stickers) user.stickers = {};
+  
   stickersContainer.innerHTML = stickersList.map(s => {
-    const owned = user.stickers?.[s.id];
+    const owned = user.stickers[s.id];
     return `
       <div class="sticker-item ${owned ? 'owned' : 'locked'}">
         <div class="sticker-emoji">${s.emoji}</div>

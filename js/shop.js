@@ -30,15 +30,24 @@ function buyItem(item) {
     return;
   }
   
+  // ПЕРЕВІРКА: чи товар вже куплений (для звичайних товарів)
+  if (!item.startsWith('sticker_') && item !== 'secret_item') {
+    if (items[item] === true) {
+      showCustomMessage(`❌ Ви вже купили "${SHOP_NAMES[item]}"!`, true);
+      return;
+    }
+  }
+  
   if (item === 'secret_item' && typeof secretItemAvailable !== 'undefined' && !secretItemAvailable) {
     showCustomMessage("❌ Секретний товар недоступний!", true);
     return;
   }
   
+  // ПЕРЕВІРКА: чи стікер вже є
   if (item.startsWith('sticker_')) {
     const stickerName = item.replace('sticker_', '');
     if (user.stickers?.[stickerName]) {
-      showCustomMessage("❌ Ви вже маєте цей стікер!", true);
+      showCustomMessage(`❌ Ви вже маєте стікер "${SHOP_NAMES[item]}"!`, true);
       return;
     }
   }
@@ -55,14 +64,14 @@ function buyItem(item) {
       const stickerName = item.replace('sticker_', '');
       if (!user.stickers) user.stickers = {};
       user.stickers[stickerName] = true;
-      showCustomMessage(`🎨 ${SHOP_NAMES[item]} куплено! +2000 ₴ бонусу! 🎨`);
+      showCustomMessage(`🎨 Стікер "${SHOP_NAMES[item]}" куплено! +2000 ₴ бонусу! 🎨`);
       user.points += 2000;
     } else if (item === 'secret_item') {
       if (typeof secretItemAvailable !== 'undefined') secretItemAvailable = false;
       showCustomMessage(`🤫 ${SHOP_NAMES[item]} куплено! +${finalPrice} ₴ бонусу! 🤫`);
       user.points += finalPrice;
     } else {
-      if (typeof items !== 'undefined') items[item] = true;
+      items[item] = true;
       showCustomMessage(`✨ ${SHOP_NAMES[item]} куплено! ✨`);
     }
     

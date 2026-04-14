@@ -33,6 +33,16 @@ async function addFriend() {
   if (typeof checkAchievements === 'function') checkAchievements();
 }
 
+// Отримання аватарки користувача у вигляді HTML
+function getUserAvatarHtml(avatar, avatarType, avatarData) {
+  if (avatarType === 'emoji') {
+    return `<span style="font-size: 24px;">${avatar || '👤'}</span>`;
+  } else if (avatarType === 'photo' && avatarData) {
+    return `<img src="${avatarData}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">`;
+  }
+  return `<span style="font-size: 24px;">👤</span>`;
+}
+
 // Завантажити друзів
 function loadFriends() {
   const friendsDiv = document.getElementById('friendsList');
@@ -49,13 +59,25 @@ function loadFriends() {
   Promise.all(user.friends.map(async f => {
     const r = await fetch(DB + "users/" + f + ".json");
     const d = await r.json();
-    return d ? { name: f, points: d.points || 0, avatar: d.avatar || '👤', level: d.level || 1 } : null;
+    if (d) {
+      return { 
+        name: f, 
+        points: d.points || 0, 
+        avatar: d.avatar || '👤',
+        avatarType: d.avatarType || 'emoji',
+        avatarData: d.avatarData || null,
+        level: d.level || 1 
+      };
+    }
+    return null;
   })).then(friends => {
     const valid = friends.filter(f => f);
+    
+    // Список друзів з аватарками
     friendsDiv.innerHTML = valid.map(f => `
       <div class="friend-item">
         <div class="friend-info">
-          <span class="friend-avatar">${f.avatar}</span>
+          <div class="friend-avatar">${getUserAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
           <span class="friend-name">${f.name}</span>
           <span class="friend-points">${f.points.toLocaleString()} ₴</span>
           <span class="friend-level">${getLevelIcon(f.level)}</span>
@@ -64,13 +86,20 @@ function loadFriends() {
       </div>
     `).join('');
     
-    const all = [...valid, { name: user.name, points: user.points, avatar: user.avatar || '👤', level: user.level || 1 }]
-      .sort((a,b) => b.points - a.points);
+    // Таблиця лідерів серед друзів + поточний користувач
+    const all = [...valid, { 
+      name: user.name, 
+      points: user.points, 
+      avatar: user.avatar || '👤',
+      avatarType: user.avatarType || 'emoji',
+      avatarData: user.avatarData || null,
+      level: user.level || 1 
+    }].sort((a,b) => b.points - a.points);
     
     leaderboardDiv.innerHTML = all.map((f, i) => `
       <div class="leaderboard-item">
         <span class="leaderboard-rank">${i+1}</span>
-        <span class="friend-avatar">${f.avatar}</span>
+        <div class="friend-avatar">${getUserAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
         <span class="leaderboard-name">${f.name} ${f.name === user.name ? '(Ви)' : ''}</span>
         <span class="leaderboard-points">${f.points.toLocaleString()} ₴</span>
         <span class="leaderboard-level">${getLevelIcon(f.level)}</span>

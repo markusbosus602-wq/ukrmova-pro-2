@@ -258,6 +258,7 @@
       justify-content: center;
       font-size: 28px;
       overflow: hidden;
+      transition: all 0.3s ease;
     }
 
     .avatar img {
@@ -451,11 +452,13 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .friend-avatar { font-size: 24px; }
     .friend-name { font-weight: bold; font-size: 13px; }
     .friend-points { color: var(--gold); font-size: 11px; }
+    .friend-level { font-size: 12px; }
 
     .remove-friend {
       background: var(--red);
@@ -480,6 +483,36 @@
       color: var(--gold);
       width: 28px;
     }
+
+    .achievements-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .achievement-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      background: #f0f0f0;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    .achievement-item.earned {
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+      color: white;
+    }
+
+    .achievement-item.locked {
+      background: #ddd;
+      color: #666;
+    }
+
+    .achievement-name { flex: 2; }
+    .achievement-reward { flex: 1; text-align: center; }
+    .achievement-status { width: 30px; text-align: center; }
 
     .modal {
       display: none;
@@ -616,6 +649,11 @@
         <button class="shop-btn" data-item="fire">🔥 Полум'я — 1500 ₴</button>
         <button class="shop-btn" data-item="shield">🛡️ Щит — 2500 ₴</button>
         <button class="shop-btn" data-item="vip">💎 ВІП — 5000 ₴</button>
+        <button class="shop-btn" data-item="rainbow_name">🌈 Веселкове ім'я — 3000 ₴</button>
+        <button class="shop-btn" data-item="sparkles">✨ Блискітки — 2500 ₴</button>
+        <button class="shop-btn" data-item="avatar_frame">🖼️ Рамка аватара — 2000 ₴</button>
+        <button class="shop-btn" data-item="animated_nick">🌟 Анімований нік — 3500 ₴</button>
+        <button class="shop-btn" data-item="secret_item" style="display:none">🤫 СЕКРЕТНИЙ ТОВАР — 10000 ₴</button>
       </div>
       <button class="btn" onclick="show('menu')">НАЗАД</button>
     </div>
@@ -734,6 +772,7 @@
       <div class="cabinet-tabs">
         <button class="tab-btn active" data-tab="profile">📋 Профіль</button>
         <button class="tab-btn" data-tab="stats">📊 Статистика</button>
+        <button class="tab-btn" data-tab="achievements">🏆 Досягнення</button>
         <button class="tab-btn" data-tab="friends">👥 Друзі</button>
         <button class="tab-btn" data-tab="settings">⚙️ Налаштування</button>
       </div>
@@ -756,6 +795,10 @@
             <div class="purchase-item">🔥 Полум'я: <span id="purchaseFire">❌</span></div>
             <div class="purchase-item">🛡️ Щит: <span id="purchaseShield">❌</span></div>
             <div class="purchase-item">💎 ВІП: <span id="purchaseVip">❌</span></div>
+            <div class="purchase-item">🌈 Веселкове ім'я: <span id="purchaseRainbow">❌</span></div>
+            <div class="purchase-item">✨ Блискітки: <span id="purchaseSparkles">❌</span></div>
+            <div class="purchase-item">🖼️ Рамка аватара: <span id="purchaseAvatarFrame">❌</span></div>
+            <div class="purchase-item">🌟 Анімований нік: <span id="purchaseAnimated">❌</span></div>
           </div>
         </div>
       </div>
@@ -777,8 +820,15 @@
           <div class="history-list" id="historyList">Ще немає пройдених тем</div>
         </div>
         <div class="cabinet-section">
-          <h3>🏆 Досягнення</h3>
+          <h3>🏆 Значки</h3>
           <div class="badges-grid" id="badgesContainer"></div>
+        </div>
+      </div>
+
+      <div id="tab-achievements" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>🏆 Досягнення</h3>
+          <div class="achievements-grid" id="achievementsList"></div>
         </div>
       </div>
 
@@ -792,7 +842,7 @@
           <div class="friends-list" id="friendsList">У вас ще немає друзів</div>
         </div>
         <div class="cabinet-section">
-          <h3>🏆 Таблиця лідерів</h3>
+          <h3>🏆 Таблиця лідерів (друзі)</h3>
           <div class="leaderboard-friends" id="leaderboardFriends">Додайте друзів</div>
         </div>
       </div>
@@ -838,11 +888,6 @@
     </div>
   </div>
 
-  <div id="notificationToast" class="notification-toast"></div>
-
-  <script src="js/themes.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/cabinet.js"></script>
   <!-- Кастомне модальне вікно для введення тексту -->
   <div id="customPromptModal" class="modal">
     <div class="modal-content" style="max-width: 300px;">
@@ -867,6 +912,9 @@
       </div>
     </div>
   </div>
+
+  <div id="notificationToast" class="notification-toast"></div>
+
   <!-- Підключення тем (кожна тема - окремий файл) -->
   <script src="js/themes/vydminy.js"></script>
   <script src="js/themes/orudnyi_1vidmina.js"></script>
@@ -896,5 +944,23 @@
   <script src="js/themes/index.js"></script>
   <script src="js/main.js"></script>
   <script src="js/cabinet.js"></script>
+
+  <script>
+    // Обробник для кнопок магазину
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.shop-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var itemName = this.getAttribute('data-item');
+          if (itemName && typeof buyItem === 'function') {
+            buyItem(itemName);
+          }
+          return false;
+        });
+      });
+    });
+  </script>
+
 </body>
 </html>

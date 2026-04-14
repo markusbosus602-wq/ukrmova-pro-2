@@ -28,6 +28,8 @@ function checkStickers() {
     user.points += 2000;
     if (typeof save === 'function') save();
     showNotification("🎨 ОТРИМАНО СТІКЕР: Тарас Шевченко! +2000 ₴ 🖋️");
+    if (typeof addStickerToHistory === 'function') addStickerToHistory('Тарас Шевченко');
+    if (typeof addBonusToHistory === 'function') addBonusToHistory('Бонус за стікер Шевченка', 2000);
   }
   
   // Леся Українка (100% у Прикметниках)
@@ -36,6 +38,8 @@ function checkStickers() {
     user.points += 2000;
     if (typeof save === 'function') save();
     showNotification("📖 ОТРИМАНО СТІКЕР: Леся Українка! +2000 ₴");
+    if (typeof addStickerToHistory === 'function') addStickerToHistory('Леся Українка');
+    if (typeof addBonusToHistory === 'function') addBonusToHistory('Бонус за стікер Лесі Українки', 2000);
   }
   
   // Франко (100% у Займенниках)
@@ -44,6 +48,8 @@ function checkStickers() {
     user.points += 2000;
     if (typeof save === 'function') save();
     showNotification("🎭 ОТРИМАНО СТІКЕР: Іван Франко! +2000 ₴");
+    if (typeof addStickerToHistory === 'function') addStickerToHistory('Іван Франко');
+    if (typeof addBonusToHistory === 'function') addBonusToHistory('Бонус за стікер Франка', 2000);
   }
   
   // Коцюбинський (100% у Числівниках)
@@ -52,6 +58,8 @@ function checkStickers() {
     user.points += 2000;
     if (typeof save === 'function') save();
     showNotification("🌾 ОТРИМАНО СТІКЕР: Михайло Коцюбинський! +2000 ₴");
+    if (typeof addStickerToHistory === 'function') addStickerToHistory('Михайло Коцюбинський');
+    if (typeof addBonusToHistory === 'function') addBonusToHistory('Бонус за стікер Коцюбинського', 2000);
   }
   
   // Гоголь (100% у будь-якому фразеологізмі)
@@ -65,6 +73,8 @@ function checkStickers() {
     user.points += 2000;
     if (typeof save === 'function') save();
     showNotification("🏰 ОТРИМАНО СТІКЕР: Микола Гоголь! +2000 ₴");
+    if (typeof addStickerToHistory === 'function') addStickerToHistory('Микола Гоголь');
+    if (typeof addBonusToHistory === 'function') addBonusToHistory('Бонус за стікер Гоголя', 2000);
   }
   
   // Довженко (100% у 5 темах)
@@ -73,6 +83,8 @@ function checkStickers() {
     user.points += 3000;
     if (typeof save === 'function') save();
     showNotification("🌊 ОТРИМАНО СТІКЕР: Олександр Довженко! +3000 ₴");
+    if (typeof addStickerToHistory === 'function') addStickerToHistory('Олександр Довженко');
+    if (typeof addBonusToHistory === 'function') addBonusToHistory('Бонус за стікер Довженка', 3000);
   }
   
   // Сковорода (100% у 10 темах)
@@ -81,6 +93,8 @@ function checkStickers() {
     user.points += 5000;
     if (typeof save === 'function') save();
     showNotification("🎻 ОТРИМАНО СТІКЕР: Григорій Сковорода! +5000 ₴");
+    if (typeof addStickerToHistory === 'function') addStickerToHistory('Григорій Сковорода');
+    if (typeof addBonusToHistory === 'function') addBonusToHistory('Бонус за стікер Сковороди', 5000);
   }
   
   // Костенко (100% у всіх темах)
@@ -90,6 +104,8 @@ function checkStickers() {
     user.points += 10000;
     if (typeof save === 'function') save();
     showNotification("👑 ОТРИМАНО СТІКЕР: Ліна Костенко! +10000 ₴");
+    if (typeof addStickerToHistory === 'function') addStickerToHistory('Ліна Костенко');
+    if (typeof addBonusToHistory === 'function') addBonusToHistory('Бонус за стікер Костенко', 10000);
   }
   
   // Стус (серія 50)
@@ -98,6 +114,8 @@ function checkStickers() {
     user.points += 3000;
     if (typeof save === 'function') save();
     showNotification("⚡ ОТРИМАНО СТІКЕР: Василь Стус! +3000 ₴");
+    if (typeof addStickerToHistory === 'function') addStickerToHistory('Василь Стус');
+    if (typeof addBonusToHistory === 'function') addBonusToHistory('Бонус за стікер Стуса', 3000);
   }
   
   // Теліга (1000 правильних)
@@ -106,6 +124,8 @@ function checkStickers() {
     user.points += 5000;
     if (typeof save === 'function') save();
     showNotification("🔥 ОТРИМАНО СТІКЕР: Олена Теліга! +5000 ₴");
+    if (typeof addStickerToHistory === 'function') addStickerToHistory('Олена Теліга');
+    if (typeof addBonusToHistory === 'function') addBonusToHistory('Бонус за стікер Теліги', 5000);
   }
 }
 

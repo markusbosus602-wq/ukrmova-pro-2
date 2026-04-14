@@ -846,6 +846,7 @@
         <button class="tab-btn" data-tab="stats">📊 Статистика</button>
         <button class="tab-btn" data-tab="achievements">🏆 Досягнення</button>
         <button class="tab-btn" data-tab="stickers">🎨 Стікери</button>
+        <button class="tab-btn" data-tab="history">📜 Історія</button>
         <button class="tab-btn" data-tab="friends">👥 Друзі</button>
         <button class="tab-btn" data-tab="settings">⚙️ Налаштування</button>
       </div>
@@ -914,6 +915,14 @@
         <div class="cabinet-section">
           <h3>🎨 Стікери українських письменників</h3>
           <div class="stickers-grid" id="stickersContainer"></div>
+        </div>
+      </div>
+
+      <div id="tab-history" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>📜 Історія дій</h3>
+          <div id="historyTabList" style="max-height: 400px; overflow-y: auto;"></div>
+          <button class="btn small" onclick="clearHistory()" style="margin-top: 10px; background: var(--red);">Очистити історію</button>
         </div>
       </div>
 
@@ -1002,6 +1011,7 @@
 
   <!-- Підключення допоміжних модулів -->
   <script src="js/utils.js"></script>
+  <script src="js/notifications.js"></script>
   <script src="js/shop.js"></script>
   <script src="js/bonuses.js"></script>
   <script src="js/achievements.js"></script>

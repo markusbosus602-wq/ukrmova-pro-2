@@ -429,7 +429,149 @@ function getUserAvatarHtmlForTop(avatar, avatarType, avatarData) {
   return `<span style="font-size: 20px;">👤</span>`;
 }
 
-// Оновлена функція loadT з аватарками
+// Показати профіль гравця (досягнення)
+async function showPlayerProfile(nickname) {
+  if (!nickname) return;
+  
+  try {
+    const r = await fetch(DB + "users/" + nickname + ".json");
+    const playerData = await r.json();
+    
+    if (!playerData) {
+      showCustomMessage("❌ Гравця не знайдено!", true);
+      return;
+    }
+    
+    // Розрахунок статистики гравця
+    let totalCorrect = 0, totalWrong = 0, totalThemes = 0, perfectCount = 0;
+    if (playerData.themeResults) {
+      for (let theme in playerData.themeResults) {
+        const res = playerData.themeResults[theme];
+        totalCorrect += res.correct || 0;
+        totalWrong += (res.total || res.correct) - (res.correct || 0);
+        totalThemes++;
+        if (res.percent === 100) perfectCount++;
+      }
+    }
+    
+    const avgPercent = totalCorrect + totalWrong > 0 ? Math.round((totalCorrect / (totalCorrect + totalWrong)) * 100) : 0;
+    
+    // Визначення рівня
+    let levelName = '🌱 Новачок';
+    if (totalCorrect >= 1000) levelName = '🏆 Легенда';
+    else if (totalCorrect >= 500) levelName = '👑 Експерт';
+    else if (totalCorrect >= 300) levelName = '⭐ Майстер';
+    else if (totalCorrect >= 150) levelName = '🎓 Студент';
+    else if (totalCorrect >= 50) levelName = '📚 Учень';
+    
+    // Список досягнень гравця
+    const achievementsList = [
+      { id: 'firstThousand', name: '💰 Перші 1000 ₴' },
+      { id: 'fiveThemes', name: '📚 5 тем пройдено' },
+      { id: 'tenThemes', name: '🎓 10 тем пройдено' },
+      { id: 'threePerfect', name: '⭐ 100% у 3 темах' },
+      { id: 'firstFriend', name: '👥 Перший друг' },
+      { id: 'fiveFriends', name: '🌟 5 друзів' }
+    ];
+    
+    const earnedAchievements = achievementsList.filter(ach => playerData.achievements?.[ach.id]);
+    const lockedAchievements = achievementsList.filter(ach => !playerData.achievements?.[ach.id]);
+    
+    // Отримання аватарки
+    let avatarHtml = '';
+    if (playerData.avatarType === 'emoji') {
+      avatarHtml = `<span style="font-size: 64px;">${playerData.avatar || '👤'}</span>`;
+    } else if (playerData.avatarType === 'photo' && playerData.avatarData) {
+      avatarHtml = `<img src="${playerData.avatarData}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">`;
+    } else {
+      avatarHtml = `<span style="font-size: 64px;">👤</span>';
+    }
+    
+    // Формуємо HTML модального вікна
+    const modalHtml = `
+      <div id="playerProfileModal" class="modal" style="display: flex;">
+        <div class="modal-content" style="max-width: 350px; max-height: 80vh; overflow-y: auto;">
+          <span class="modal-close" onclick="closePlayerProfileModal()">&times;</span>
+          <div style="text-align: center;">
+            ${avatarHtml}
+            <h2 style="margin: 10px 0; color: var(--gold);">${playerData.name}</h2>
+            <p style="margin: 5px 0;"><strong>${levelName}</strong></p>
+            <p style="margin: 5px 0;">💰 Баланс: <strong>${(playerData.points || 0).toLocaleString()} ₴</strong></p>
+            <p style="margin: 5px 0;">📅 Реєстрація: ${playerData.regDate || 'невідомо'}</p>
+          </div>
+          
+          <hr style="margin: 15px 0; border-color: var(--gold);">
+          
+          <h3 style="color: var(--gold);">📊 Статистика</h3>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 10px 0;">
+            <div style="background: #2c3e50; padding: 8px; border-radius: 10px; text-align: center;">
+              <div style="font-size: 20px; font-weight: bold; color: var(--gold);">${totalThemes}</div>
+              <div style="font-size: 10px;">Тем пройдено</div>
+            </div>
+            <div style="background: #2c3e50; padding: 8px; border-radius: 10px; text-align: center;">
+              <div style="font-size: 20px; font-weight: bold; color: var(--gold);">${totalCorrect}</div>
+              <div style="font-size: 10px;">Правильних</div>
+            </div>
+            <div style="background: #2c3e50; padding: 8px; border-radius: 10px; text-align: center;">
+              <div style="font-size: 20px; font-weight: bold; color: var(--gold);">${totalWrong}</div>
+              <div style="font-size: 10px;">Неправильних</div>
+            </div>
+            <div style="background: #2c3e50; padding: 8px; border-radius: 10px; text-align: center;">
+              <div style="font-size: 20px; font-weight: bold; color: var(--gold);">${avgPercent}%</div>
+              <div style="font-size: 10px;">Середній %</div>
+            </div>
+            <div style="background: #2c3e50; padding: 8px; border-radius: 10px; text-align: center;">
+              <div style="font-size: 20px; font-weight: bold; color: var(--gold);">${perfectCount}</div>
+              <div style="font-size: 10px;">100% тем</div>
+            </div>
+            <div style="background: #2c3e50; padding: 8px; border-radius: 10px; text-align: center;">
+              <div style="font-size: 20px; font-weight: bold; color: var(--gold);">${playerData.friends?.length || 0}</div>
+              <div style="font-size: 10px;">Друзів</div>
+            </div>
+          </div>
+          
+          <h3 style="color: var(--gold);">🏆 Досягнення</h3>
+          <div style="margin: 10px 0;">
+            ${earnedAchievements.map(ach => `
+              <div style="background: linear-gradient(135deg, #2ecc71, #27ae60); padding: 8px; border-radius: 8px; margin: 5px 0; color: white;">
+                ✅ ${ach.name}
+              </div>
+            `).join('')}
+            ${lockedAchievements.map(ach => `
+              <div style="background: #555; padding: 8px; border-radius: 8px; margin: 5px 0; color: #aaa;">
+                🔒 ${ach.name}
+              </div>
+            `).join('')}
+            ${earnedAchievements.length === 0 ? '<div style="text-align: center; color: #aaa;">Ще немає досягнень</div>' : ''}
+          </div>
+          
+          <button class="btn" onclick="closePlayerProfileModal()" style="margin-top: 15px;">ЗАКРИТИ</button>
+        </div>
+      </div>
+    `;
+    
+    // Додаємо модальне вікно в body
+    const existingModal = document.getElementById('playerProfileModal');
+    if (existingModal) existingModal.remove();
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Додаємо обробник для закриття при кліку поза вікном
+    document.getElementById('playerProfileModal').addEventListener('click', function(e) {
+      if (e.target === this) closePlayerProfileModal();
+    });
+    
+  } catch(e) {
+    console.error(e);
+    showCustomMessage("❌ Помилка завантаження профілю!", true);
+  }
+}
+
+function closePlayerProfileModal() {
+  const modal = document.getElementById('playerProfileModal');
+  if (modal) modal.remove();
+}
+
+// Оновлена функція loadT з аватарками та клікабельними ніками
 async function loadT() {
   show('top');
   let r = await fetch(DB + "users/.json");
@@ -448,7 +590,7 @@ async function loadT() {
           <div style="display: flex; align-items: center; gap: 10px;">
             <span style="font-weight: bold; width: 35px;">${i + 1}.</span>
             ${avatarHtml}
-            <span>${getLevelIcon(u.level)} ${u.name}</span>
+            <span style="cursor: pointer; color: var(--gold); text-decoration: underline;" onclick="showPlayerProfile('${u.name.replace(/'/g, "\\'")}')">${getLevelIcon(u.level)} ${u.name}</span>
           </div>
           <b>${(u.points || 0).toLocaleString()} ₴</b>
         </div>

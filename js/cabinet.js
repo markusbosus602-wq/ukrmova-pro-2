@@ -68,17 +68,29 @@ function loadCabinet() {
   });
 }
 
-// Функція для отримання HTML аватарки
-function getAvatarHtml(avatar, avatarType, avatarData) {
+// Функція для отримання HTML аватарки (зменшений розмір для друзів)
+function getFriendAvatarHtml(avatar, avatarType, avatarData) {
   if (avatarType === 'photo' && avatarData && avatarData.startsWith('data:image')) {
-    return `<img src="${avatarData}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\\\"font-size:24px;\\\">👤</span>';">`;
+    return `<img src="${avatarData}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\\\"font-size:20px;\\\">👤</span>';">`;
   }
   // Для емодзі або за замовчуванням
   let emoji = '👤';
   if (avatarType === 'emoji' && avatar && typeof avatar === 'string' && avatar.length <= 10) {
     emoji = avatar;
   }
-  return `<span style="font-size: 24px;">${emoji}</span>`;
+  return `<span style="font-size: 20px;">${emoji}</span>`;
+}
+
+// Функція для аватарки в таблиці лідерів (ще менше)
+function getLeaderboardAvatarHtml(avatar, avatarType, avatarData) {
+  if (avatarType === 'photo' && avatarData && avatarData.startsWith('data:image')) {
+    return `<img src="${avatarData}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\\\"font-size:18px;\\\">👤</span>';">`;
+  }
+  let emoji = '👤';
+  if (avatarType === 'emoji' && avatar && typeof avatar === 'string' && avatar.length <= 10) {
+    emoji = avatar;
+  }
+  return `<span style="font-size: 18px;">${emoji}</span>`;
 }
 
 function updateAvatarDisplay() {
@@ -464,14 +476,14 @@ function loadFriends() {
     }
     
     friendsDiv.innerHTML = valid.map(f => `
-      <div class="friend-item">
-        <div class="friend-info">
-          <div class="friend-avatar">${getAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
+      <div class="friend-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #ddd;">
+        <div class="friend-info" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <div class="friend-avatar" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">${getFriendAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
           <span class="friend-name" style="font-weight: bold; font-size: 14px;">${f.name}</span>
           <span class="friend-points" style="color: var(--gold); font-size: 12px;">${(f.points || 0).toLocaleString()} ₴</span>
           <span class="friend-level" style="font-size: 13px;">${getLevelIcon(f.level)}</span>
         </div>
-        <button class="remove-friend" onclick="removeFriend('${f.name.replace(/'/g, "\\'")}')">❌</button>
+        <button class="remove-friend" onclick="removeFriend('${f.name.replace(/'/g, "\\'")}')" style="background: var(--red); border: none; padding: 4px 8px; border-radius: 6px; color: white; font-size: 10px; cursor: pointer;">❌</button>
       </div>
     `).join('');
     
@@ -485,12 +497,12 @@ function loadFriends() {
     }].sort((a,b) => (b.points || 0) - (a.points || 0));
     
     leaderboardDiv.innerHTML = all.map((f, i) => `
-      <div class="leaderboard-item">
+      <div class="leaderboard-item" style="display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #ddd;">
         <span class="leaderboard-rank" style="font-weight: bold; color: var(--gold); width: 30px;">${i+1}</span>
-        <div class="friend-avatar" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">${getAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
+        <div class="friend-avatar" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">${getLeaderboardAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
         <span class="leaderboard-name" style="flex: 1; font-size: 13px;">${f.name} ${f.name === user.name ? '(Ви)' : ''}</span>
         <span class="leaderboard-points" style="color: var(--gold); font-weight: bold;">${(f.points || 0).toLocaleString()} ₴</span>
-        <span class="leaderboard-level" style="margin-left: 5px;">${getLevelIcon(f.level)}</span>
+        <span class="leaderboard-level" style="margin-left: 5px; font-size: 12px;">${getLevelIcon(f.level)}</span>
       </div>
     `).join('');
   }).catch(err => {

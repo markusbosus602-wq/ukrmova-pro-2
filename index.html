@@ -579,7 +579,6 @@
       margin-top: 5px;
     }
 
-    /* Адаптивна сітка стікерів */
     @media (max-width: 480px) {
       .stickers-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -590,7 +589,6 @@
       }
     }
 
-    /* Кольорові квадрати для покупок */
     .square {
       display: inline-block;
       width: 32px;
@@ -624,6 +622,18 @@
       color: #7f8c8d;
       border: 2px solid #7f8c8d;
       cursor: default;
+    }
+
+    /* Стилі для повідомлень в підтримці */
+    .message-bubble {
+      margin-bottom: 15px;
+    }
+
+    .message-text {
+      padding: 10px;
+      border-radius: 12px;
+      word-break: break-word;
+      white-space: pre-wrap;
     }
 
     .modal {
@@ -695,7 +705,6 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* Стилі для модального вікна профілю гравця */
     #playerProfileModal .modal-content {
       background: #1e1e2e;
       color: white;
@@ -883,7 +892,7 @@
     </div>
   </div>
 
-  <!-- ФРАЗЕОЛОГІЗМИ - ВСІ 14 ЗАВДАНЬ -->
+  <!-- ФРАЗЕОЛОГІЗМИ -->
   <div id="frazeologizmy" class="screen">
     <div class="card">
       <h2>Фразеологізми</h2>
@@ -1014,18 +1023,22 @@
         </div>
       </div>
 
-      <!-- ВИПРАВЛЕНА ВКЛАДКА ПІДТРИМКА ДЛЯ ТЕЛЕФОНІВ -->
+      <!-- ПІДТРИМКА -->
       <div id="tab-support" class="cabinet-tab">
         <div class="cabinet-section">
           <h3>💬 Технічна підтримка</h3>
           <div style="margin-bottom: 15px;">
             <textarea id="supportMessage" 
-                      placeholder="Напишіть ваше повідомлення..." 
+                      placeholder="Напишіть ваше повідомлення українською, російською або англійською мовою..." 
+                      lang="uk"
                       style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ccc; min-height: 120px; font-family: inherit; font-size: 16px; background: white; color: #333; resize: vertical; -webkit-appearance: none; appearance: none; box-sizing: border-box;"></textarea>
-            <button class="btn" onclick="sendSupportMessage()" style="background: var(--green); margin-top: 12px; width: 100%; padding: 12px; font-size: 16px;">📨 Відправити</button>
+            <div style="display: flex; gap: 10px; margin-top: 12px;">
+              <button class="btn" onclick="sendSupportMessage()" style="background: var(--green); flex: 2; padding: 12px; font-size: 16px;">📨 Відправити</button>
+              <button class="btn" onclick="refreshSupportMessages()" style="background: var(--blue); flex: 1; padding: 12px; font-size: 16px;">🔄 Оновити</button>
+            </div>
           </div>
-          <h4 style="margin-top: 15px;">📩 Мої повідомлення</h4>
-          <div id="supportMessagesList" style="max-height: 400px; overflow-y: auto; -webkit-overflow-scrolling: touch;"></div>
+          <h4 style="margin-top: 15px;">📩 Діалог з підтримкою</h4>
+          <div id="supportMessagesList" style="max-height: 400px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 5px;"></div>
         </div>
       </div>
 
@@ -1085,7 +1098,6 @@
     </div>
   </div>
 
-  <!-- Кастомне модальне вікно для введення тексту -->
   <div id="customPromptModal" class="modal">
     <div class="modal-content" style="max-width: 300px;">
       <span class="modal-close" onclick="document.getElementById('customPromptModal').style.display='none'">&times;</span>
@@ -1098,7 +1110,6 @@
     </div>
   </div>
 
-  <!-- Кастомне модальне вікно для підтвердження -->
   <div id="customConfirmModal" class="modal">
     <div class="modal-content" style="max-width: 300px;">
       <span class="modal-close" onclick="document.getElementById('customConfirmModal').style.display='none'">&times;</span>
@@ -1112,7 +1123,7 @@
 
   <div id="notificationToast" class="notification-toast"></div>
 
-  <!-- Підключення допоміжних модулів -->
+  <!-- Підключення скриптів -->
   <script src="js/utils.js"></script>
   <script src="js/shop.js"></script>
   <script src="js/bonuses.js"></script>
@@ -1121,7 +1132,6 @@
   <script src="js/friends.js"></script>
   <script src="js/support.js"></script>
   
-  <!-- Підключення тем -->
   <script src="js/themes/vydminy.js"></script>
   <script src="js/themes/orudnyi_1vidmina.js"></script>
   <script src="js/themes/prykmetnyky.js"></script>
@@ -1149,7 +1159,6 @@
   <script src="js/themes/frazeologizmy14.js"></script>
   <script src="js/themes/index.js"></script>
   
-  <!-- Головні файли -->
   <script src="js/cabinet.js"></script>
   <script src="js/main.js"></script>
 
@@ -1171,8 +1180,8 @@
     }
     
     async function resetAllPlayersItems() {
-      if (!confirm("⚠️ УВАГА! Це скине ВСІ покупки (золота рамка, корона, веселкове ім'я, рамка аватара, анімований нік тощо) для ВСІХ гравців! Гроші за покупки НЕ ПОВЕРНУТЬСЯ. Ви впевнені?")) return;
-      if (!confirm("🔴 ОСТАННЄ ПОПЕРЕДЖЕННЯ! Цю дію НЕ МОЖНА СКАСУВАТИ. Всі покупки всіх гравців будуть видалені. Продовжити?")) return;
+      if (!confirm("⚠️ УВАГА! Це скине ВСІ покупки для ВСІХ гравців! Гроші за покупки НЕ ПОВЕРНУТЬСЯ. Ви впевнені?")) return;
+      if (!confirm("🔴 ОСТАННЄ ПОПЕРЕДЖЕННЯ! Цю дію НЕ МОЖНА СКАСУВАТИ. Продовжити?")) return;
       
       showCustomMessage("🔄 Скидання всіх покупок...");
       
@@ -1205,17 +1214,13 @@
           });
           
           if (changed && player.items) {
-            await fetch(DB + "users/" + playerName + ".json", { 
-              method: 'PUT', 
-              body: JSON.stringify(player) 
-            });
+            await fetch(DB + "users/" + playerName + ".json", { method: 'PUT', body: JSON.stringify(player) });
             count++;
           }
         }
         
         showNotification(`✅ Скинуто покупки для ${count} гравців! Оновіть сторінку.`);
         setTimeout(() => location.reload(), 2000);
-        
       } catch(e) {
         console.error(e);
         showCustomMessage("❌ Помилка при скиданні покупок!", true);

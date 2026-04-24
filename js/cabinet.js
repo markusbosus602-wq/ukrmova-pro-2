@@ -58,17 +58,38 @@ function loadCabinet() {
   const notifToggle = document.getElementById('notificationsToggle');
   if (notifToggle) notifToggle.checked = user.notifications !== false;
   
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.cabinet-tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+  // ПЕРЕКОНУЄМОСЬ ЩО ВКЛАДКИ ПРАЦЮЮТЬ
+  initTabs();
+}
+
+// Функція для ініціалізації вкладок
+function initTabs() {
+  const tabs = document.querySelectorAll('.cabinet-tabs .tab-btn');
+  tabs.forEach(btn => {
+    // Видаляємо старі обробники, щоб не було дублювання
+    btn.removeEventListener('click', btn._handler);
+    // Створюємо новий обробник
+    const handler = function() {
+      const tabId = this.getAttribute('data-tab');
+      // Ховаємо всі вкладки
+      document.querySelectorAll('.cabinet-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      // Показуємо обрану вкладку
+      const activeTab = document.getElementById(`tab-${tabId}`);
+      if (activeTab) {
+        activeTab.classList.add('active');
+      }
+      // Оновлюємо активний стан кнопок
+      tabs.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
     };
+    btn._handler = handler;
+    btn.addEventListener('click', handler);
   });
 }
 
-// Функція для отримання HTML аватарки для друзів (дуже маленький розмір)
+// Функція для отримання HTML аватарки для друзів
 function getFriendAvatarHtml(avatar, avatarType, avatarData) {
   if (avatarType === 'photo' && avatarData && avatarData.startsWith('data:image')) {
     return `<img src="${avatarData}" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\\\"font-size:16px;\\\">👤</span>';">`;
@@ -80,7 +101,7 @@ function getFriendAvatarHtml(avatar, avatarType, avatarData) {
   return `<span style="font-size: 16px;">${emoji}</span>`;
 }
 
-// Функція для аватарки в таблиці лідерів (ще менше)
+// Функція для аватарки в таблиці лідерів
 function getLeaderboardAvatarHtml(avatar, avatarType, avatarData) {
   if (avatarType === 'photo' && avatarData && avatarData.startsWith('data:image')) {
     return `<img src="${avatarData}" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\\\"font-size:14px;\\\">👤</span>';">`;
@@ -89,7 +110,7 @@ function getLeaderboardAvatarHtml(avatar, avatarType, avatarData) {
   if (avatarType === 'emoji' && avatar && typeof avatar === 'string' && avatar.length <= 10) {
     emoji = avatar;
   }
-  return `<span style="font-size: 14px;">${emoji}</span>";
+  return `<span style="font-size: 14px;">${emoji}</span>`;
 }
 
 function updateAvatarDisplay() {
@@ -110,7 +131,6 @@ function updateAvatarDisplay() {
     avatarDiv.innerHTML = '👤';
   }
   
-  // Рамка аватара - без змін
   if (items.avatar_frame && items.avatar_frame_active !== false) {
     avatarDiv.style.border = '3px solid gold';
     avatarDiv.style.boxShadow = '0 0 10px gold';
@@ -119,7 +139,6 @@ function updateAvatarDisplay() {
     avatarDiv.style.boxShadow = 'none';
   }
   
-  // Вишиванка - без змін
   if (items.vyshyvanka && items.vyshyvanka_active !== false) {
     avatarDiv.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
     avatarDiv.style.color = 'white';

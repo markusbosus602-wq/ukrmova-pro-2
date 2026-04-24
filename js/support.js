@@ -4,9 +4,12 @@
 async function sendSupportMessage() {
   if (!user) return;
   
-  const message = document.getElementById('supportMessage').value.trim();
+  const messageInput = document.getElementById('supportMessage');
+  const message = messageInput.value.trim();
+  
   if (!message) {
     showNotification("❌ Введіть повідомлення!", true);
+    if (navigator.vibrate) navigator.vibrate(100);
     return;
   }
   
@@ -24,12 +27,16 @@ async function sendSupportMessage() {
   user.supportMessages.push(newMessage);
   if (typeof save === 'function') save();
   
-  document.getElementById('supportMessage').value = '';
+  messageInput.value = '';
+  messageInput.blur();
+  
   loadSupportMessages();
   showNotification("✅ Повідомлення відправлено! Очікуйте відповіді.");
+  
+  if (navigator.vibrate) navigator.vibrate(50);
 }
 
-// Завантажити повідомлення гравця
+// Завантажити повідомлення гравця (весь діалог)
 function loadSupportMessages() {
   if (!user) return;
   
@@ -37,23 +44,50 @@ function loadSupportMessages() {
   if (!container) return;
   
   if (!user.supportMessages || user.supportMessages.length === 0) {
-    container.innerHTML = '<div style="text-align: center; padding: 20px; color: #aaa;">У вас ще немає повідомлень</div>';
+    container.innerHTML = '<div style="text-align: center; padding: 20px; color: #aaa;">📭 У вас ще немає повідомлень</div>';
     return;
   }
   
-  container.innerHTML = user.supportMessages.map(msg => `
-    <div style="background: ${msg.reply ? '#e8f5e9' : '#fff3e0'}; padding: 12px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid ${msg.reply ? '#2ecc71' : '#f1c40f'};">
-      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-        <strong>📝 ${msg.from}</strong>
-        <small style="color: #666;">${msg.date}</small>
+  // Сортуємо за датою (старі зверху, нові знизу)
+  const sortedMessages = [...user.supportMessages].sort((a, b) => a.id - b.id);
+  
+  container.innerHTML = sortedMessages.map(msg => `
+    <div class="message-bubble ${msg.from === user.name ? 'outgoing' : 'incoming'}" style="margin-bottom: 15px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 5px; flex-wrap: wrap;">
+        <strong>${msg.from === user.name ? '👤 Ви' : '📩 Адміністратор'}</strong>
+        <small style="color: #666; font-size: 10px;">${msg.date}</small>
       </div>
-      <div style="margin-bottom: 8px;">${msg.message}</div>
+      <div class="message-text" style="background: ${msg.from === user.name ? '#007bff' : '#e9ecef'}; color: ${msg.from === user.name ? 'white' : '#333'}; padding: 10px; border-radius: 12px; word-break: break-word; white-space: pre-wrap;">
+        ${escapeHtml(msg.message)}
+      </div>
       ${msg.reply ? `
-        <div style="background: #e8f5e9; padding: 8px; border-radius: 8px; margin-top: 8px;">
-          <strong>📩 Відповідь адміністратора:</strong><br>
-          ${msg.reply}
+        <div style="margin-top: 8px; margin-left: 20px; border-left: 3px solid #2ecc71; padding-left: 10px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <strong>📩 Відповідь адміністратора</strong>
+          </div>
+          <div style="background: #e8f5e9; padding: 10px; border-radius: 12px; word-break: break-word; white-space: pre-wrap;">
+            ${escapeHtml(msg.reply)}
+          </div>
         </div>
-      ` : '<div style="color: #999; font-size: 12px;">⏳ Очікує відповіді...</div>'}
+      ` : ''}
     </div>
   `).join('');
+  
+  // Прокручуємо до останнього повідомлення
+  setTimeout(() => {
+    container.scrollTop = container.scrollHeight;
+  }, 100);
+}
+
+// Оновити повідомлення (для адмін-панелі)
+function refreshSupportMessages() {
+  loadSupportMessages();
+}
+
+// Функція для захисту від XSS
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }

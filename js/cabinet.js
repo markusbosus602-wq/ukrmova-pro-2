@@ -58,59 +58,27 @@ function loadCabinet() {
   const notifToggle = document.getElementById('notificationsToggle');
   if (notifToggle) notifToggle.checked = user.notifications !== false;
   
-  // ПЕРЕКОНУЄМОСЬ ЩО ВКЛАДКИ ПРАЦЮЮТЬ
-  initTabs();
-}
-
-// Функція для ініціалізації вкладок
-function initTabs() {
-  const tabs = document.querySelectorAll('.cabinet-tabs .tab-btn');
-  tabs.forEach(btn => {
-    // Видаляємо старі обробники, щоб не було дублювання
-    btn.removeEventListener('click', btn._handler);
-    // Створюємо новий обробник
-    const handler = function() {
-      const tabId = this.getAttribute('data-tab');
-      // Ховаємо всі вкладки
-      document.querySelectorAll('.cabinet-tab').forEach(tab => {
-        tab.classList.remove('active');
-      });
-      // Показуємо обрану вкладку
-      const activeTab = document.getElementById(`tab-${tabId}`);
-      if (activeTab) {
-        activeTab.classList.add('active');
-      }
-      // Оновлюємо активний стан кнопок
-      tabs.forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.cabinet-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
     };
-    btn._handler = handler;
-    btn.addEventListener('click', handler);
   });
 }
 
-// Функція для отримання HTML аватарки для друзів
-function getFriendAvatarHtml(avatar, avatarType, avatarData) {
+// Функція для отримання HTML аватарки
+function getAvatarHtml(avatar, avatarType, avatarData) {
   if (avatarType === 'photo' && avatarData && avatarData.startsWith('data:image')) {
-    return `<img src="${avatarData}" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\\\"font-size:16px;\\\">👤</span>';">`;
+    return `<img src="${avatarData}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\\\"font-size:24px;\\\">👤</span>';">`;
   }
+  // Для емодзі або за замовчуванням
   let emoji = '👤';
   if (avatarType === 'emoji' && avatar && typeof avatar === 'string' && avatar.length <= 10) {
     emoji = avatar;
   }
-  return `<span style="font-size: 16px;">${emoji}</span>`;
-}
-
-// Функція для аватарки в таблиці лідерів
-function getLeaderboardAvatarHtml(avatar, avatarType, avatarData) {
-  if (avatarType === 'photo' && avatarData && avatarData.startsWith('data:image')) {
-    return `<img src="${avatarData}" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\\\"font-size:14px;\\\">👤</span>';">`;
-  }
-  let emoji = '👤';
-  if (avatarType === 'emoji' && avatar && typeof avatar === 'string' && avatar.length <= 10) {
-    emoji = avatar;
-  }
-  return `<span style="font-size: 14px;">${emoji}</span>`;
+  return `<span style="font-size: 24px;">${emoji}</span>`;
 }
 
 function updateAvatarDisplay() {
@@ -131,6 +99,7 @@ function updateAvatarDisplay() {
     avatarDiv.innerHTML = '👤';
   }
   
+  // Рамка аватара
   if (items.avatar_frame && items.avatar_frame_active !== false) {
     avatarDiv.style.border = '3px solid gold';
     avatarDiv.style.boxShadow = '0 0 10px gold';
@@ -139,6 +108,7 @@ function updateAvatarDisplay() {
     avatarDiv.style.boxShadow = 'none';
   }
   
+  // Вишиванка
   if (items.vyshyvanka && items.vyshyvanka_active !== false) {
     avatarDiv.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
     avatarDiv.style.color = 'white';
@@ -494,14 +464,14 @@ function loadFriends() {
     }
     
     friendsDiv.innerHTML = valid.map(f => `
-      <div class="friend-item" style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #ddd;">
-        <div class="friend-info" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-          <div class="friend-avatar" style="width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;">${getFriendAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
-          <span class="friend-name" style="font-weight: bold; font-size: 13px;">${f.name}</span>
-          <span class="friend-points" style="color: var(--gold); font-size: 11px;">${(f.points || 0).toLocaleString()} ₴</span>
-          <span class="friend-level" style="font-size: 12px;">${getLevelIcon(f.level)}</span>
+      <div class="friend-item">
+        <div class="friend-info">
+          <div class="friend-avatar">${getAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
+          <span class="friend-name" style="font-weight: bold; font-size: 14px;">${f.name}</span>
+          <span class="friend-points" style="color: var(--gold); font-size: 12px;">${(f.points || 0).toLocaleString()} ₴</span>
+          <span class="friend-level" style="font-size: 13px;">${getLevelIcon(f.level)}</span>
         </div>
-        <button class="remove-friend" onclick="removeFriend('${f.name.replace(/'/g, "\\'")}')" style="background: var(--red); border: none; padding: 4px 6px; border-radius: 6px; color: white; font-size: 10px; cursor: pointer;">❌</button>
+        <button class="remove-friend" onclick="removeFriend('${f.name.replace(/'/g, "\\'")}')">❌</button>
       </div>
     `).join('');
     
@@ -515,12 +485,12 @@ function loadFriends() {
     }].sort((a,b) => (b.points || 0) - (a.points || 0));
     
     leaderboardDiv.innerHTML = all.map((f, i) => `
-      <div class="leaderboard-item" style="display: flex; align-items: center; gap: 8px; padding: 6px; border-bottom: 1px solid #ddd;">
-        <span class="leaderboard-rank" style="font-weight: bold; color: var(--gold); width: 25px; font-size: 12px;">${i+1}</span>
-        <div class="friend-avatar" style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;">${getLeaderboardAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
-        <span class="leaderboard-name" style="flex: 1; font-size: 12px;">${f.name} ${f.name === user.name ? '(Ви)' : ''}</span>
-        <span class="leaderboard-points" style="color: var(--gold); font-weight: bold; font-size: 11px;">${(f.points || 0).toLocaleString()} ₴</span>
-        <span class="leaderboard-level" style="margin-left: 3px; font-size: 11px;">${getLevelIcon(f.level)}</span>
+      <div class="leaderboard-item">
+        <span class="leaderboard-rank" style="font-weight: bold; color: var(--gold); width: 30px;">${i+1}</span>
+        <div class="friend-avatar" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">${getAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
+        <span class="leaderboard-name" style="flex: 1; font-size: 13px;">${f.name} ${f.name === user.name ? '(Ви)' : ''}</span>
+        <span class="leaderboard-points" style="color: var(--gold); font-weight: bold;">${(f.points || 0).toLocaleString()} ₴</span>
+        <span class="leaderboard-level" style="margin-left: 5px;">${getLevelIcon(f.level)}</span>
       </div>
     `).join('');
   }).catch(err => {

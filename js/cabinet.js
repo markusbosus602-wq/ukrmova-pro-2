@@ -68,9 +68,18 @@ function loadCabinet() {
   });
 }
 
+// Функція для отримання HTML аватарки
+function getAvatarHtml(avatar, avatarType, avatarData) {
+  if (avatarType === 'photo' && avatarData && avatarData.startsWith('data:image')) {
+    return `<img src="${avatarData}" style="width: 55px; height: 55px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='👤';">`;
+  }
+  return `<span style="font-size: 28px;">${avatar || '👤'}</span>`;
+}
+
 function updateAvatarDisplay() {
   const avatarDiv = document.getElementById('cabinetAvatar');
   avatarDiv.innerHTML = '';
+  
   if (user.avatarType === 'emoji') {
     avatarDiv.innerHTML = user.avatar || '👤';
   } else if (user.avatarType === 'photo' && user.avatarData) {
@@ -79,7 +88,10 @@ function updateAvatarDisplay() {
     img.style.width = '100%';
     img.style.height = '100%';
     img.style.objectFit = 'cover';
+    img.onerror = () => { avatarDiv.innerHTML = '👤'; };
     avatarDiv.appendChild(img);
+  } else {
+    avatarDiv.innerHTML = '👤';
   }
   
   // Рамка аватара
@@ -126,28 +138,33 @@ function loadBadges(stats) {
   ).join('');
 }
 
-// Функція для оновлення покупок з кольоровими квадратами для всіх товарів
+// Функція для оновлення покупок
 function updatePurchases() {
-  // Основні товари (з кольоровими квадратами для перемикання)
-  updateBasicItemSquare('gold_frame', 'purchaseGold', 'Золота рамка');
-  updateBasicItemSquare('crown', 'purchaseCrown', 'Корона');
-  updateBasicItemSquare('fire', 'purchaseFire', 'Полум\'я');
-  updateBasicItemSquare('shield', 'purchaseShield', 'Щит');
-  updateBasicItemSquare('vip', 'purchaseVip', 'ВІП');
+  // Основні товари
+  const goldSpan = document.getElementById('purchaseGold');
+  const crownSpan = document.getElementById('purchaseCrown');
+  const fireSpan = document.getElementById('purchaseFire');
+  const shieldSpan = document.getElementById('purchaseShield');
+  const vipSpan = document.getElementById('purchaseVip');
+  
+  if (goldSpan) goldSpan.innerHTML = items.gold_frame ? '✅' : '❌';
+  if (crownSpan) crownSpan.innerHTML = items.crown ? '✅' : '❌';
+  if (fireSpan) fireSpan.innerHTML = items.fire ? '✅' : '❌';
+  if (shieldSpan) shieldSpan.innerHTML = items.shield ? '✅' : '❌';
+  if (vipSpan) vipSpan.innerHTML = items.vip ? '✅' : '❌';
   
   // Візуальні товари
-  updateColorSquare('rainbow_name', 'purchaseRainbow', 'Веселкове ім\'я');
-  updateColorSquare('sparkles', 'purchaseSparkles', 'Блискітки');
-  updateColorSquare('avatar_frame', 'purchaseAvatarFrame', 'Рамка аватара');
-  updateColorSquare('animated_nick', 'purchaseAnimated', 'Анімований нік');
-  updateColorSquare('vyshyvanka', 'purchaseVyshyvanka', 'Вишиванка');
-  updateColorSquare('kobza', 'purchaseKobza', 'Кобза');
-  updateColorSquare('sunflowers', 'purchaseSunflowers', 'Соняшникове поле');
-  updateColorSquare('bookshelf', 'purchaseBookshelf', 'Книжкова полиця');
-  updateColorSquare('theater_mask', 'purchaseTheaterMask', 'Театральна маска');
+  updateBasicItemSquare('rainbow_name', 'purchaseRainbow', 'Веселкове ім\'я');
+  updateBasicItemSquare('sparkles', 'purchaseSparkles', 'Блискітки');
+  updateBasicItemSquare('avatar_frame', 'purchaseAvatarFrame', 'Рамка аватара');
+  updateBasicItemSquare('animated_nick', 'purchaseAnimated', 'Анімований нік');
+  updateBasicItemSquare('vyshyvanka', 'purchaseVyshyvanka', 'Вишиванка');
+  updateBasicItemSquare('kobza', 'purchaseKobza', 'Кобза');
+  updateBasicItemSquare('sunflowers', 'purchaseSunflowers', 'Соняшникове поле');
+  updateBasicItemSquare('bookshelf', 'purchaseBookshelf', 'Книжкова полиця');
+  updateBasicItemSquare('theater_mask', 'purchaseTheaterMask', 'Театральна маска');
 }
 
-// Функція для простих товарів (без додаткових ефектів, тільки вкл/викл)
 function updateBasicItemSquare(itemKey, elementId, itemName) {
   const element = document.getElementById(elementId);
   if (!element) return;
@@ -157,42 +174,13 @@ function updateBasicItemSquare(itemKey, elementId, itemName) {
     return;
   }
   
-  // Для простих товарів теж додаємо можливість вимкнення
   const isActive = items[itemKey + '_active'] !== false;
   
   if (isActive) {
-    element.innerHTML = `<span class="square green" data-item="${itemKey}" data-name="${itemName}" data-basic="true">✅</span>
+    element.innerHTML = `<span class="square green" data-item="${itemKey}" data-name="${itemName}" style="cursor: pointer;">✅</span>
     <span style="font-size: 10px; margin-left: 5px; color: green;">(активний)</span>`;
   } else {
-    element.innerHTML = `<span class="square yellow" data-item="${itemKey}" data-name="${itemName}" data-basic="true">⏻</span>
-    <span style="font-size: 10px; margin-left: 5px; color: orange;">(вимкнений)</span>`;
-  }
-  
-  const square = element.querySelector('.square');
-  if (square) {
-    square.onclick = (function(k, n) {
-      return function() { toggleBasicItemEffect(k, n); };
-    })(itemKey, itemName);
-  }
-}
-
-// Функція для візуальних товарів
-function updateColorSquare(itemKey, elementId, itemName) {
-  const element = document.getElementById(elementId);
-  if (!element) return;
-  
-  if (!items[itemKey]) {
-    element.innerHTML = '❌';
-    return;
-  }
-  
-  const isActive = items[itemKey + '_active'] !== false;
-  
-  if (isActive) {
-    element.innerHTML = `<span class="square green" data-item="${itemKey}" data-name="${itemName}" data-visual="true">✅</span>
-    <span style="font-size: 10px; margin-left: 5px; color: green;">(активний)</span>`;
-  } else {
-    element.innerHTML = `<span class="square yellow" data-item="${itemKey}" data-name="${itemName}" data-visual="true">⏻</span>
+    element.innerHTML = `<span class="square yellow" data-item="${itemKey}" data-name="${itemName}" style="cursor: pointer;">⏻</span>
     <span style="font-size: 10px; margin-left: 5px; color: orange;">(вимкнений)</span>`;
   }
   
@@ -204,45 +192,7 @@ function updateColorSquare(itemKey, elementId, itemName) {
   }
 }
 
-// Функція для перемикання простих товарів
-function toggleBasicItemEffect(itemKey, itemName) {
-  console.log("toggleBasicItemEffect called for:", itemKey, itemName);
-  
-  if (!items[itemKey]) {
-    showNotification(`❌ Товар "${itemName}" не куплений!`, true);
-    return;
-  }
-  
-  if (items[itemKey + '_active'] === undefined) {
-    items[itemKey + '_active'] = true;
-  }
-  
-  const isActive = items[itemKey + '_active'];
-  
-  if (isActive) {
-    items[itemKey + '_active'] = false;
-    showNotification(`⏸ Ефект "${itemName}" вимкнено!`);
-  } else {
-    items[itemKey + '_active'] = true;
-    showNotification(`▶ Ефект "${itemName}" ввімкнено!`);
-  }
-  
-  if (typeof save === 'function') save();
-  
-  // Оновлюємо відображення
-  updatePurchases();
-  updateAvatarDisplay();
-  
-  // Оновлюємо нікнейм в меню
-  if (typeof applyItems === 'function') {
-    applyItems();
-  }
-}
-
-// Функція для перемикання візуальних товарів
 function toggleItemEffect(itemKey, itemName) {
-  console.log("toggleItemEffect called for:", itemKey, itemName);
-  
   if (!items[itemKey]) {
     showNotification(`❌ Товар "${itemName}" не куплений!`, true);
     return;
@@ -263,15 +213,9 @@ function toggleItemEffect(itemKey, itemName) {
   }
   
   if (typeof save === 'function') save();
-  
-  // Оновлюємо відображення
   updatePurchases();
   updateAvatarDisplay();
-  
-  // Оновлюємо нікнейм в меню
-  if (typeof applyItems === 'function') {
-    applyItems();
-  }
+  if (typeof applyItems === 'function') applyItems();
 }
 
 function loadHistory() {
@@ -491,13 +435,13 @@ function loadFriends() {
   Promise.all(user.friends.map(async f => {
     const r = await fetch(DB + "users/" + f + ".json");
     const d = await r.json();
-    return d ? { name: f, points: d.points || 0, avatar: d.avatar || '👤', level: d.level || 1 } : null;
+    return d ? { name: f, points: d.points || 0, avatar: d.avatar || '👤', avatarType: d.avatarType || 'emoji', avatarData: d.avatarData || null, level: d.level || 1 } : null;
   })).then(friends => {
     const valid = friends.filter(f => f);
     friendsDiv.innerHTML = valid.map(f => `
       <div class="friend-item">
         <div class="friend-info">
-          <span class="friend-avatar">${f.avatar}</span>
+          <div class="friend-avatar">${getAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
           <span class="friend-name">${f.name}</span>
           <span class="friend-points">${f.points.toLocaleString()} ₴</span>
           <span class="friend-level">${getLevelIcon(f.level)}</span>
@@ -506,13 +450,13 @@ function loadFriends() {
       </div>
     `).join('');
     
-    const all = [...valid, { name: user.name, points: user.points, avatar: user.avatar || '👤', level: user.level || 1 }]
+    const all = [...valid, { name: user.name, points: user.points, avatar: user.avatar || '👤', avatarType: user.avatarType || 'emoji', avatarData: user.avatarData || null, level: user.level || 1 }]
       .sort((a,b) => b.points - a.points);
     
     leaderboardDiv.innerHTML = all.map((f, i) => `
       <div class="leaderboard-item">
         <span class="leaderboard-rank">${i+1}</span>
-        <span class="friend-avatar">${f.avatar}</span>
+        <div class="friend-avatar">${getAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
         <span class="leaderboard-name">${f.name} ${f.name === user.name ? '(Ви)' : ''}</span>
         <span class="leaderboard-points">${f.points.toLocaleString()} ₴</span>
         <span class="leaderboard-level">${getLevelIcon(f.level)}</span>

@@ -71,9 +71,14 @@ function loadCabinet() {
 // Функція для отримання HTML аватарки
 function getAvatarHtml(avatar, avatarType, avatarData) {
   if (avatarType === 'photo' && avatarData && avatarData.startsWith('data:image')) {
-    return `<img src="${avatarData}" style="width: 55px; height: 55px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='👤';">`;
+    return `<img src="${avatarData}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\\\"font-size:24px;\\\">👤</span>';">`;
   }
-  return `<span style="font-size: 28px;">${avatar || '👤'}</span>`;
+  // Для емодзі або за замовчуванням
+  let emoji = '👤';
+  if (avatarType === 'emoji' && avatar && typeof avatar === 'string' && avatar.length <= 10) {
+    emoji = avatar;
+  }
+  return `<span style="font-size: 24px;">${emoji}</span>`;
 }
 
 function updateAvatarDisplay() {
@@ -138,9 +143,7 @@ function loadBadges(stats) {
   ).join('');
 }
 
-// Функція для оновлення покупок
 function updatePurchases() {
-  // Основні товари
   const goldSpan = document.getElementById('purchaseGold');
   const crownSpan = document.getElementById('purchaseCrown');
   const fireSpan = document.getElementById('purchaseFire');
@@ -153,7 +156,6 @@ function updatePurchases() {
   if (shieldSpan) shieldSpan.innerHTML = items.shield ? '✅' : '❌';
   if (vipSpan) vipSpan.innerHTML = items.vip ? '✅' : '❌';
   
-  // Візуальні товари
   updateBasicItemSquare('rainbow_name', 'purchaseRainbow', 'Веселкове ім\'я');
   updateBasicItemSquare('sparkles', 'purchaseSparkles', 'Блискітки');
   updateBasicItemSquare('avatar_frame', 'purchaseAvatarFrame', 'Рамка аватара');
@@ -388,6 +390,8 @@ function toggleNotifications() {
   if (typeof save === 'function') save();
 }
 
+// ========== ФУНКЦІЇ ДЛЯ ДРУЗІВ ==========
+
 async function addFriend() {
   const friendNick = document.getElementById('friendNick').value.trim();
   if (!friendNick) {
@@ -433,35 +437,66 @@ function loadFriends() {
   }
   
   Promise.all(user.friends.map(async f => {
-    const r = await fetch(DB + "users/" + f + ".json");
-    const d = await r.json();
-    return d ? { name: f, points: d.points || 0, avatar: d.avatar || '👤', avatarType: d.avatarType || 'emoji', avatarData: d.avatarData || null, level: d.level || 1 } : null;
+    try {
+      const r = await fetch(DB + "users/" + f + ".json");
+      const d = await r.json();
+      if (d) {
+        return { 
+          name: f, 
+          points: d.points || 0, 
+          avatar: d.avatar || '👤',
+          avatarType: d.avatarType || 'emoji',
+          avatarData: d.avatarData || null,
+          level: d.level || 1 
+        };
+      }
+    } catch(e) {
+      console.log("Помилка завантаження друга:", f);
+    }
+    return null;
   })).then(friends => {
-    const valid = friends.filter(f => f);
+    const valid = friends.filter(f => f !== null);
+    
+    if (valid.length === 0) {
+      friendsDiv.innerHTML = 'У вас ще немає друзів';
+      leaderboardDiv.innerHTML = 'Додайте друзів';
+      return;
+    }
+    
     friendsDiv.innerHTML = valid.map(f => `
       <div class="friend-item">
         <div class="friend-info">
           <div class="friend-avatar">${getAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
-          <span class="friend-name">${f.name}</span>
-          <span class="friend-points">${f.points.toLocaleString()} ₴</span>
-          <span class="friend-level">${getLevelIcon(f.level)}</span>
+          <span class="friend-name" style="font-weight: bold; font-size: 14px;">${f.name}</span>
+          <span class="friend-points" style="color: var(--gold); font-size: 12px;">${(f.points || 0).toLocaleString()} ₴</span>
+          <span class="friend-level" style="font-size: 13px;">${getLevelIcon(f.level)}</span>
         </div>
-        <button class="remove-friend" onclick="removeFriend('${f.name}')">❌</button>
+        <button class="remove-friend" onclick="removeFriend('${f.name.replace(/'/g, "\\'")}')">❌</button>
       </div>
     `).join('');
     
-    const all = [...valid, { name: user.name, points: user.points, avatar: user.avatar || '👤', avatarType: user.avatarType || 'emoji', avatarData: user.avatarData || null, level: user.level || 1 }]
-      .sort((a,b) => b.points - a.points);
+    const all = [...valid, { 
+      name: user.name, 
+      points: user.points || 0, 
+      avatar: user.avatar || '👤',
+      avatarType: user.avatarType || 'emoji',
+      avatarData: user.avatarData || null,
+      level: user.level || 1 
+    }].sort((a,b) => (b.points || 0) - (a.points || 0));
     
     leaderboardDiv.innerHTML = all.map((f, i) => `
       <div class="leaderboard-item">
-        <span class="leaderboard-rank">${i+1}</span>
-        <div class="friend-avatar">${getAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
-        <span class="leaderboard-name">${f.name} ${f.name === user.name ? '(Ви)' : ''}</span>
-        <span class="leaderboard-points">${f.points.toLocaleString()} ₴</span>
-        <span class="leaderboard-level">${getLevelIcon(f.level)}</span>
+        <span class="leaderboard-rank" style="font-weight: bold; color: var(--gold); width: 30px;">${i+1}</span>
+        <div class="friend-avatar" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">${getAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
+        <span class="leaderboard-name" style="flex: 1; font-size: 13px;">${f.name} ${f.name === user.name ? '(Ви)' : ''}</span>
+        <span class="leaderboard-points" style="color: var(--gold); font-weight: bold;">${(f.points || 0).toLocaleString()} ₴</span>
+        <span class="leaderboard-level" style="margin-left: 5px;">${getLevelIcon(f.level)}</span>
       </div>
     `).join('');
+  }).catch(err => {
+    console.log("Помилка завантаження друзів:", err);
+    friendsDiv.innerHTML = 'Помилка завантаження друзів';
+    leaderboardDiv.innerHTML = 'Помилка завантаження';
   });
 }
 

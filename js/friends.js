@@ -33,12 +33,14 @@ async function addFriend() {
   if (typeof checkAchievements === 'function') checkAchievements();
 }
 
-// Отримання аватарки користувача у вигляді HTML
-function getUserAvatarHtml(avatar, avatarType, avatarData) {
+// Отримання HTML аватарки (без base64 рядків у тексті)
+function getFriendAvatarHtml(avatar, avatarType, avatarData) {
   if (avatarType === 'emoji') {
     return `<span style="font-size: 24px;">${avatar || '👤'}</span>`;
   } else if (avatarType === 'photo' && avatarData) {
-    return `<img src="${avatarData}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">`;
+    // Обмежуємо довжину base64 для відображення
+    const shortData = avatarData.length > 100 ? avatarData.substring(0, 100) + '...' : avatarData;
+    return `<img src="${avatarData}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\\\"font-size:24px;\\\">👤</span>';">`;
   }
   return `<span style="font-size: 24px;">👤</span>`;
 }
@@ -73,20 +75,18 @@ function loadFriends() {
   })).then(friends => {
     const valid = friends.filter(f => f);
     
-    // Список друзів з аватарками
     friendsDiv.innerHTML = valid.map(f => `
       <div class="friend-item">
         <div class="friend-info">
-          <div class="friend-avatar">${getUserAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
-          <span class="friend-name">${f.name}</span>
+          <div class="friend-avatar">${getFriendAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
+          <span class="friend-name">${escapeHtml(f.name)}</span>
           <span class="friend-points">${f.points.toLocaleString()} ₴</span>
           <span class="friend-level">${getLevelIcon(f.level)}</span>
         </div>
-        <button class="remove-friend" onclick="removeFriend('${f.name}')">❌</button>
+        <button class="remove-friend" onclick="removeFriend('${escapeHtml(f.name)}')">❌</button>
       </div>
     `).join('');
     
-    // Таблиця лідерів серед друзів + поточний користувач
     const all = [...valid, { 
       name: user.name, 
       points: user.points, 
@@ -99,8 +99,8 @@ function loadFriends() {
     leaderboardDiv.innerHTML = all.map((f, i) => `
       <div class="leaderboard-item">
         <span class="leaderboard-rank">${i+1}</span>
-        <div class="friend-avatar">${getUserAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
-        <span class="leaderboard-name">${f.name} ${f.name === user.name ? '(Ви)' : ''}</span>
+        <div class="friend-avatar">${getFriendAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
+        <span class="leaderboard-name">${escapeHtml(f.name)} ${f.name === user.name ? '(Ви)' : ''}</span>
         <span class="leaderboard-points">${f.points.toLocaleString()} ₴</span>
         <span class="leaderboard-level">${getLevelIcon(f.level)}</span>
       </div>
@@ -118,4 +118,12 @@ function removeFriend(friendName) {
       showNotification(`👥 ${friendName} видалено`);
     }
   });
+}
+
+// Функція для захисту від XSS
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }

@@ -141,6 +141,8 @@
 
     textarea {
       resize: vertical;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     .shop-grid {
@@ -553,31 +555,27 @@
       text-align: center;
     }
 
-    /* Покращення якості зображень стікерів на мобільних пристроях */
     .sticker-emoji img {
       width: 100%;
-      max-width: 120px;
+      max-width: 100px;
       height: auto;
       aspect-ratio: 1/1;
       border-radius: 50%;
       object-fit: cover;
-      image-rendering: crisp-edges;
-      image-rendering: -webkit-optimize-contrast;
-      image-rendering: high-quality;
     }
 
     .sticker-name {
       font-weight: bold;
-      font-size: clamp(12px, 4vw, 14px);
+      font-size: 12px;
     }
 
     .sticker-desc {
-      font-size: clamp(10px, 3.5vw, 11px);
+      font-size: 10px;
       margin: 5px 0;
     }
 
     .sticker-status {
-      font-size: clamp(10px, 3vw, 11px);
+      font-size: 10px;
       margin-top: 5px;
     }
 
@@ -587,13 +585,8 @@
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
       }
-      
       .sticker-item {
         padding: 8px;
-      }
-      
-      .sticker-emoji img {
-        max-width: 100px;
       }
     }
 
@@ -1021,15 +1014,18 @@
         </div>
       </div>
 
+      <!-- ВИПРАВЛЕНА ВКЛАДКА ПІДТРИМКА ДЛЯ ТЕЛЕФОНІВ -->
       <div id="tab-support" class="cabinet-tab">
         <div class="cabinet-section">
           <h3>💬 Технічна підтримка</h3>
           <div style="margin-bottom: 15px;">
-            <textarea id="supportMessage" placeholder="Напишіть ваше повідомлення..." style="width: 100%; padding: 10px; border-radius: 12px; border: 1px solid #ccc; min-height: 100px;"></textarea>
-            <button class="btn" onclick="sendSupportMessage()" style="background: var(--green); margin-top: 10px;">📨 Відправити</button>
+            <textarea id="supportMessage" 
+                      placeholder="Напишіть ваше повідомлення..." 
+                      style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ccc; min-height: 120px; font-family: inherit; font-size: 16px; background: white; color: #333; resize: vertical; -webkit-appearance: none; appearance: none; box-sizing: border-box;"></textarea>
+            <button class="btn" onclick="sendSupportMessage()" style="background: var(--green); margin-top: 12px; width: 100%; padding: 12px; font-size: 16px;">📨 Відправити</button>
           </div>
-          <h4>📩 Мої повідомлення</h4>
-          <div id="supportMessagesList" style="max-height: 400px; overflow-y: auto;"></div>
+          <h4 style="margin-top: 15px;">📩 Мої повідомлення</h4>
+          <div id="supportMessagesList" style="max-height: 400px; overflow-y: auto; -webkit-overflow-scrolling: touch;"></div>
         </div>
       </div>
 

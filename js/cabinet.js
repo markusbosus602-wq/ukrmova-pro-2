@@ -2,36 +2,12 @@
 
 let earnedBadges = [];
 
-// ВСІ товари, які мають кнопки ВКЛ/ВИКЛ
-const ALL_ITEMS_WITH_BUTTONS = [
-  'gold_frame', 'crown', 'fire', 'shield', 'vip',
-  'rainbow_name', 'sparkles', 'avatar_frame', 'animated_nick',
-  'vyshyvanka', 'kobza', 'sunflowers', 'bookshelf', 'theater_mask'
-];
-
-// Назви товарів для відображення
-const ITEM_NAMES = {
-  gold_frame: '✨ Золота рамка',
-  crown: '👑 Корона',
-  fire: '🔥 Полум\'я',
-  shield: '🛡️ Щит',
-  vip: '💎 ВІП',
-  rainbow_name: '🌈 Веселкове ім\'я',
-  sparkles: '✨ Блискітки',
-  avatar_frame: '🖼️ Рамка аватара',
-  animated_nick: '🌟 Анімований нік',
-  vyshyvanka: '🎨 Вишиванка',
-  kobza: '🏺 Кобза',
-  sunflowers: '🌻 Соняшникове поле',
-  bookshelf: '📜 Книжкова полиця',
-  theater_mask: '🎭 Театральна маска'
-};
-
 // Функція для примусової активації всіх покупок
 function initAllPurchases() {
+  const visualItems = ['rainbow_name', 'sparkles', 'avatar_frame', 'animated_nick', 'vyshyvanka', 'kobza', 'sunflowers', 'bookshelf', 'theater_mask'];
   let changed = false;
   
-  ALL_ITEMS_WITH_BUTTONS.forEach(item => {
+  visualItems.forEach(item => {
     if (items[item] && items[item + '_active'] === undefined) {
       items[item + '_active'] = true;
       changed = true;
@@ -46,8 +22,6 @@ function initAllPurchases() {
 function loadCabinet() {
   if (!user) return;
   
-  // Оновлюємо items з user
-  items = user.items || items;
   initAllPurchases();
   
   updateAvatarDisplay();
@@ -164,147 +138,92 @@ function loadBadges(stats) {
   }
 }
 
-// ГОЛОВНА ФУНКЦІЯ - оновлює ВСІ покупки з кнопками
 function updatePurchases() {
-  // Перебираємо ВСІ товари зі списку
-  for (const itemKey of ALL_ITEMS_WITH_BUTTONS) {
-    const elementId = getElementIdForItem(itemKey);
-    const itemName = ITEM_NAMES[itemKey];
-    updateVisualItem(itemKey, elementId, itemName);
-  }
+  const goldSpan = document.getElementById('purchaseGold');
+  const crownSpan = document.getElementById('purchaseCrown');
+  const fireSpan = document.getElementById('purchaseFire');
+  const shieldSpan = document.getElementById('purchaseShield');
+  const vipSpan = document.getElementById('purchaseVip');
+  
+  if (goldSpan) goldSpan.innerHTML = items.gold_frame ? '✅' : '❌';
+  if (crownSpan) crownSpan.innerHTML = items.crown ? '✅' : '❌';
+  if (fireSpan) fireSpan.innerHTML = items.fire ? '✅' : '❌';
+  if (shieldSpan) shieldSpan.innerHTML = items.shield ? '✅' : '❌';
+  if (vipSpan) vipSpan.innerHTML = items.vip ? '✅' : '❌';
+  
+  updateVisualItem('rainbow_name', 'purchaseRainbow', '🌈 Веселкове ім\'я');
+  updateVisualItem('sparkles', 'purchaseSparkles', '✨ Блискітки');
+  updateVisualItem('avatar_frame', 'purchaseAvatarFrame', '🖼️ Рамка аватара');
+  updateVisualItem('animated_nick', 'purchaseAnimated', '🌟 Анімований нік');
+  updateVisualItem('vyshyvanka', 'purchaseVyshyvanka', '🎨 Вишиванка');
+  updateVisualItem('kobza', 'purchaseKobza', '🏺 Кобза');
+  updateVisualItem('sunflowers', 'purchaseSunflowers', '🌻 Соняшникове поле');
+  updateVisualItem('bookshelf', 'purchaseBookshelf', '📜 Книжкова полиця');
+  updateVisualItem('theater_mask', 'purchaseTheaterMask', '🎭 Театральна маска');
 }
 
-// Отримує ID елемента для товару
-function getElementIdForItem(itemKey) {
-  const idMap = {
-    gold_frame: 'purchaseGold',
-    crown: 'purchaseCrown',
-    fire: 'purchaseFire',
-    shield: 'purchaseShield',
-    vip: 'purchaseVip',
-    rainbow_name: 'purchaseRainbow',
-    sparkles: 'purchaseSparkles',
-    avatar_frame: 'purchaseAvatarFrame',
-    animated_nick: 'purchaseAnimated',
-    vyshyvanka: 'purchaseVyshyvanka',
-    kobza: 'purchaseKobza',
-    sunflowers: 'purchaseSunflowers',
-    bookshelf: 'purchaseBookshelf',
-    theater_mask: 'purchaseTheaterMask'
-  };
-  return idMap[itemKey];
-}
-
-// Функція створення кнопки для одного товару
 function updateVisualItem(itemKey, elementId, itemName) {
   const element = document.getElementById(elementId);
-  if (!element) {
-    console.log("Елемент не знайдено:", elementId);
-    return;
-  }
+  if (!element) return;
   
-  // Перевіряємо чи товар куплений
   if (!items[itemKey]) {
-    element.innerHTML = '❌ (не куплено)';
+    element.innerHTML = '❌';
     return;
   }
   
-  // Перевіряємо статус активності
   const isActive = items[itemKey + '_active'] !== false;
+  const btnId = 'btn_' + itemKey;
   
-  // Створюємо кнопку
-  const btnId = `btn_${itemKey}`;
-  const buttonHtml = `
-    <button id="${btnId}" 
-            class="toggle-gift-btn" 
-            data-item="${itemKey}" 
-            data-name="${itemName}"
-            style="background: ${isActive ? '#2ecc71' : '#f1c40f'}; 
-                   color: ${isActive ? 'white' : '#333'}; 
-                   border: none; 
-                   padding: 8px 16px; 
-                   border-radius: 25px; 
-                   font-size: 14px; 
-                   cursor: pointer; 
-                   min-width: 90px; 
-                   font-weight: bold;
-                   touch-action: manipulation;
-                   box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
-      ${isActive ? '✅ ВКЛ' : '⏻ ВИКЛ'}
-    </button>
-  `;
+  if (isActive) {
+    element.innerHTML = '<button id="' + btnId + '" class="toggle-gift-btn" data-item="' + itemKey + '" data-name="' + itemName + '" style="background: #2ecc71; color: white; border: none; padding: 8px 16px; border-radius: 25px; font-size: 14px; cursor: pointer; min-width: 90px; font-weight: bold; touch-action: manipulation;">✅ ВКЛ</button>';
+  } else {
+    element.innerHTML = '<button id="' + btnId + '" class="toggle-gift-btn" data-item="' + itemKey + '" data-name="' + itemName + '" style="background: #f1c40f; color: #333; border: none; padding: 8px 16px; border-radius: 25px; font-size: 14px; cursor: pointer; min-width: 90px; font-weight: bold; touch-action: manipulation;">⏻ ВИКЛ</button>';
+  }
   
-  element.innerHTML = buttonHtml;
-  
-  // Додаємо обробник подій
   const btn = document.getElementById(btnId);
   if (btn) {
-    // Видаляємо старі обробники
-    const newBtn = btn.cloneNode(true);
-    btn.parentNode.replaceChild(newBtn, btn);
-    
-    // Додаємо обробник для touch (телефон)
-    newBtn.addEventListener('touchstart', function(e) {
+    btn.onclick = function(e) {
       e.preventDefault();
       e.stopPropagation();
-      const item = this.getAttribute('data-item');
-      const name = this.getAttribute('data-name');
-      toggleItemEffect(item, name);
-    }, { passive: false });
-    
-    // Додаємо обробник для click (комп'ютер)
-    newBtn.addEventListener('click', function(e) {
+      toggleItemEffect(itemKey, itemName);
+    };
+    btn.ontouchstart = function(e) {
       e.preventDefault();
       e.stopPropagation();
-      const item = this.getAttribute('data-item');
-      const name = this.getAttribute('data-name');
-      toggleItemEffect(item, name);
-    });
+      toggleItemEffect(itemKey, itemName);
+    };
   }
 }
 
-// Функція перемикання ефекту для ВСІХ товарів
 function toggleItemEffect(itemKey, itemName) {
-  console.log("toggleItemEffect called:", itemKey, itemName);
-  
   if (!items[itemKey]) {
-    showNotification(`❌ Товар "${itemName}" не куплений!`, true);
+    showNotification('❌ Товар "' + itemName + '" не куплений!', true);
     return;
   }
   
-  // Ініціалізуємо статус активності
   if (items[itemKey + '_active'] === undefined) {
     items[itemKey + '_active'] = true;
   }
   
-  // Перемикаємо
   const isActive = items[itemKey + '_active'];
   
   if (isActive) {
     items[itemKey + '_active'] = false;
-    showNotification(`⏸ Ефект "${itemName}" вимкнено!`);
+    showNotification('⏸ Ефект "' + itemName + '" вимкнено!');
   } else {
     items[itemKey + '_active'] = true;
-    showNotification(`▶ Ефект "${itemName}" ввімкнено!`);
+    showNotification('▶ Ефект "' + itemName + '" ввімкнено!');
   }
   
-  // Зберігаємо
   if (typeof save === 'function') save();
   
-  // Оновлюємо відображення
   updatePurchases();
   updateAvatarDisplay();
   if (typeof applyItems === 'function') applyItems();
-  
-  // Перезавантажуємо кабінет для оновлення всіх ефектів
-  setTimeout(() => {
-    if (typeof loadCabinet === 'function') loadCabinet();
-  }, 100);
 }
 
 function loadHistory() {
   const container = document.getElementById('historyList');
-  if (!container) return;
   if (!user.themeResults || Object.keys(user.themeResults).length === 0) {
     container.innerHTML = 'Ще немає пройдених тем';
     return;

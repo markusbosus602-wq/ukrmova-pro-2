@@ -68,6 +68,7 @@ function loadCabinet() {
   });
 }
 
+// Функція для отримання HTML аватарки
 function getAvatarHtml(avatar, avatarType, avatarData) {
   if (avatarType === 'photo' && avatarData && avatarData.startsWith('data:image')) {
     return `<img src="${avatarData}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size:32px;\'>👤</span>';">`;
@@ -93,6 +94,7 @@ function updateAvatarDisplay() {
     avatarDiv.innerHTML = '👤';
   }
   
+  // Рамка аватара
   if (items.avatar_frame && items.avatar_frame_active !== false) {
     avatarDiv.style.border = '3px solid gold';
     avatarDiv.style.boxShadow = '0 0 10px gold';
@@ -101,6 +103,7 @@ function updateAvatarDisplay() {
     avatarDiv.style.boxShadow = 'none';
   }
   
+  // Вишиванка
   if (items.vyshyvanka && items.vyshyvanka_active !== false) {
     avatarDiv.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
     avatarDiv.style.color = 'white';
@@ -138,7 +141,9 @@ function loadBadges(stats) {
   }
 }
 
+// Функція оновлення покупок
 function updatePurchases() {
+  // Основні товари
   const goldSpan = document.getElementById('purchaseGold');
   const crownSpan = document.getElementById('purchaseCrown');
   const fireSpan = document.getElementById('purchaseFire');
@@ -151,6 +156,7 @@ function updatePurchases() {
   if (shieldSpan) shieldSpan.innerHTML = items.shield ? '✅' : '❌';
   if (vipSpan) vipSpan.innerHTML = items.vip ? '✅' : '❌';
   
+  // Візуальні товари - з кнопками для телефону
   updateVisualItem('rainbow_name', 'purchaseRainbow', '🌈 Веселкове ім\'я');
   updateVisualItem('sparkles', 'purchaseSparkles', '✨ Блискітки');
   updateVisualItem('avatar_frame', 'purchaseAvatarFrame', '🖼️ Рамка аватара');
@@ -162,6 +168,7 @@ function updatePurchases() {
   updateVisualItem('theater_mask', 'purchaseTheaterMask', '🎭 Театральна маска');
 }
 
+// Функція створення кнопки для товару (працює на телефоні та комп'ютері)
 function updateVisualItem(itemKey, elementId, itemName) {
   const element = document.getElementById(elementId);
   if (!element) return;
@@ -174,19 +181,23 @@ function updateVisualItem(itemKey, elementId, itemName) {
   const isActive = items[itemKey + '_active'] !== false;
   const btnId = 'btn_' + itemKey;
   
+  // Створюємо кнопку
   if (isActive) {
-    element.innerHTML = '<button id="' + btnId + '" class="toggle-gift-btn" data-item="' + itemKey + '" data-name="' + itemName + '" style="background: #2ecc71; color: white; border: none; padding: 8px 16px; border-radius: 25px; font-size: 14px; cursor: pointer; min-width: 90px; font-weight: bold; touch-action: manipulation;">✅ ВКЛ</button>';
+    element.innerHTML = '<button id="' + btnId + '" class="toggle-gift-btn" style="background: #2ecc71; color: white; border: none; padding: 8px 16px; border-radius: 25px; font-size: 14px; cursor: pointer; min-width: 90px; font-weight: bold; touch-action: manipulation;">✅ ВКЛ</button>';
   } else {
-    element.innerHTML = '<button id="' + btnId + '" class="toggle-gift-btn" data-item="' + itemKey + '" data-name="' + itemName + '" style="background: #f1c40f; color: #333; border: none; padding: 8px 16px; border-radius: 25px; font-size: 14px; cursor: pointer; min-width: 90px; font-weight: bold; touch-action: manipulation;">⏻ ВИКЛ</button>';
+    element.innerHTML = '<button id="' + btnId + '" class="toggle-gift-btn" style="background: #f1c40f; color: #333; border: none; padding: 8px 16px; border-radius: 25px; font-size: 14px; cursor: pointer; min-width: 90px; font-weight: bold; touch-action: manipulation;">⏻ ВИКЛ</button>';
   }
   
+  // Додаємо обробники для телефону і комп'ютера
   const btn = document.getElementById(btnId);
   if (btn) {
+    // Для комп'ютера (click)
     btn.onclick = function(e) {
       e.preventDefault();
       e.stopPropagation();
       toggleItemEffect(itemKey, itemName);
     };
+    // Для телефону (touchstart)
     btn.ontouchstart = function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -195,16 +206,19 @@ function updateVisualItem(itemKey, elementId, itemName) {
   }
 }
 
+// Функція для перемикання ефекту
 function toggleItemEffect(itemKey, itemName) {
   if (!items[itemKey]) {
     showNotification('❌ Товар "' + itemName + '" не куплений!', true);
     return;
   }
   
+  // Ініціалізуємо статус активності
   if (items[itemKey + '_active'] === undefined) {
     items[itemKey + '_active'] = true;
   }
   
+  // Перемикаємо
   const isActive = items[itemKey + '_active'];
   
   if (isActive) {
@@ -215,8 +229,10 @@ function toggleItemEffect(itemKey, itemName) {
     showNotification('▶ Ефект "' + itemName + '" ввімкнено!');
   }
   
+  // Зберігаємо
   if (typeof save === 'function') save();
   
+  // Оновлюємо відображення
   updatePurchases();
   updateAvatarDisplay();
   if (typeof applyItems === 'function') applyItems();

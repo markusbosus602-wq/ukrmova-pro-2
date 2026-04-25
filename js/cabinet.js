@@ -141,7 +141,7 @@ function loadBadges(stats) {
   }
 }
 
-// ОНОВЛЕНА ФУНКЦІЯ - для телефонів
+// Функція для оновлення покупок з більшими кнопками для телефону
 function updatePurchases() {
   // Основні товари
   const goldSpan = document.getElementById('purchaseGold');
@@ -156,7 +156,7 @@ function updatePurchases() {
   if (shieldSpan) shieldSpan.innerHTML = items.shield ? '✅' : '❌';
   if (vipSpan) vipSpan.innerHTML = items.vip ? '✅' : '❌';
   
-  // Візуальні товари - з кнопками для телефону
+  // Візуальні товари
   updateVisualItem('rainbow_name', 'purchaseRainbow', '🌈 Веселкове ім\'я');
   updateVisualItem('sparkles', 'purchaseSparkles', '✨ Блискітки');
   updateVisualItem('avatar_frame', 'purchaseAvatarFrame', '🖼️ Рамка аватара');
@@ -168,7 +168,7 @@ function updatePurchases() {
   updateVisualItem('theater_mask', 'purchaseTheaterMask', '🎭 Театральна маска');
 }
 
-// НОВА ФУНКЦІЯ - створює кнопки для телефону
+// Функція для створення кнопок з великим розміром для телефону
 function updateVisualItem(itemKey, elementId, itemName) {
   const element = document.getElementById(elementId);
   if (!element) return;
@@ -180,37 +180,39 @@ function updateVisualItem(itemKey, elementId, itemName) {
   
   const isActive = items[itemKey + '_active'] !== false;
   
-  // Створюємо HTML з кнопкою, яка буде працювати на телефоні
+  // Великі кнопки для зручного натискання на телефоні
   if (isActive) {
     element.innerHTML = `
-      <span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-        <button class="toggle-item-btn active" data-item="${itemKey}" data-name="${itemName}" style="background: #2ecc71; color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; min-width: 80px;">✅ Вкл</button>
-        <span style="font-size: 11px; color: green;">(активний)</span>
-      </span>
+      <button class="toggle-gift-btn active-btn" data-item="${itemKey}" data-name="${itemName}" style="background: #2ecc71; color: white; border: none; padding: 8px 16px; border-radius: 25px; font-size: 14px; cursor: pointer; min-width: 100px; font-weight: bold; touch-action: manipulation;">✅ ВКЛ</button>
     `;
   } else {
     element.innerHTML = `
-      <span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-        <button class="toggle-item-btn inactive" data-item="${itemKey}" data-name="${itemName}" style="background: #f1c40f; color: #333; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; min-width: 80px;">⏻ Викл</button>
-        <span style="font-size: 11px; color: orange;">(вимкнений)</span>
-      </span>
+      <button class="toggle-gift-btn inactive-btn" data-item="${itemKey}" data-name="${itemName}" style="background: #f1c40f; color: #333; border: none; padding: 8px 16px; border-radius: 25px; font-size: 14px; cursor: pointer; min-width: 100px; font-weight: bold; touch-action: manipulation;">⏻ ВИКЛ</button>
     `;
   }
   
-  // Додаємо обробник події
-  const btn = element.querySelector('.toggle-item-btn');
+  // Додаємо обробник
+  const btn = element.querySelector('.toggle-gift-btn');
   if (btn) {
-    // Для телефонів - використовуємо touchstart
-    btn.addEventListener('touchstart', function(e) {
+    // Видаляємо старі обробники
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    
+    // Додаємо обробник для телефону (touchstart) і для комп'ютера (click)
+    newBtn.addEventListener('touchstart', function(e) {
       e.preventDefault();
       e.stopPropagation();
-      toggleItemEffect(itemKey, itemName);
-    });
-    // Для комп'ютера - click
-    btn.addEventListener('click', function(e) {
+      const item = this.getAttribute('data-item');
+      const name = this.getAttribute('data-name');
+      toggleItemEffect(item, name);
+    }, { passive: false });
+    
+    newBtn.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
-      toggleItemEffect(itemKey, itemName);
+      const item = this.getAttribute('data-item');
+      const name = this.getAttribute('data-name');
+      toggleItemEffect(item, name);
     });
   }
 }
@@ -234,7 +236,7 @@ function toggleItemEffect(itemKey, itemName) {
   
   if (isActive) {
     items[itemKey + '_active'] = false;
-    showNotification(`⏸ Ефект "${itemName}" вимкнено! (натисніть "Вкл" щоб ввімкнути)`);
+    showNotification(`⏸ Ефект "${itemName}" вимкнено!`);
   } else {
     items[itemKey + '_active'] = true;
     showNotification(`▶ Ефект "${itemName}" ввімкнено!`);

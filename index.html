@@ -1256,9 +1256,9 @@
       showNotification("✅ Лог адмінки очищено");
     }
     
-    // ЖДЕМО ПОЛНОГО ЗАВАНТАЖЕННЯ СТОРІНКИ
-    window.addEventListener('load', function() {
-      console.log("Сторінка завантажена");
+    // ОСНОВНА ФУНКЦІЯ ЗАПУСКУ
+    window.addEventListener('DOMContentLoaded', function() {
+      console.log("DOM завантажено");
       
       const splash = document.getElementById('splash');
       const video = document.getElementById('splash-video');
@@ -1278,31 +1278,31 @@
           }).catch(function(err) {
             console.log("Помилка відео:", err);
             splash.style.display = 'none';
-            tryAutoLogin();
+            if (typeof tryAutoLogin === 'function') tryAutoLogin();
           });
         };
         
         video.onended = function() {
           console.log("Відео закінчилось");
           splash.style.display = 'none';
-          tryAutoLogin();
+          if (typeof tryAutoLogin === 'function') tryAutoLogin();
         };
         
         video.onerror = function() {
           console.log("Помилка завантаження відео");
           splash.style.display = 'none';
-          tryAutoLogin();
+          if (typeof tryAutoLogin === 'function') tryAutoLogin();
         };
         
         setTimeout(function() {
           if (splash && splash.style.display !== 'none') {
             console.log("Таймаут - пропускаємо відео");
             splash.style.display = 'none';
-            tryAutoLogin();
+            if (typeof tryAutoLogin === 'function') tryAutoLogin();
           }
         }, 30000);
       } else {
-        tryAutoLogin();
+        if (typeof tryAutoLogin === 'function') tryAutoLogin();
       }
     });
     

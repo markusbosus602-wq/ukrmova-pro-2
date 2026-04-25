@@ -71,9 +71,9 @@ function loadCabinet() {
 // Функція для отримання HTML аватарки
 function getAvatarHtml(avatar, avatarType, avatarData) {
   if (avatarType === 'photo' && avatarData && avatarData.startsWith('data:image')) {
-    return `<img src="${avatarData}" style="width: 55px; height: 55px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='👤';">`;
+    return `<img src="${avatarData}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size:32px;\'>👤</span>';">`;
   }
-  return `<span style="font-size: 28px;">${avatar || '👤'}</span>`;
+  return `<span style="font-size: 32px;">${avatar || '👤'}</span>`;
 }
 
 function updateAvatarDisplay() {
@@ -133,12 +133,15 @@ function loadBadges(stats) {
     }
   });
   
-  document.getElementById('badgesContainer').innerHTML = badges.map(b => 
-    `<div class="badge ${b.cond() ? '' : 'locked'}">${b.name}</div>`
-  ).join('');
+  const container = document.getElementById('badgesContainer');
+  if (container) {
+    container.innerHTML = badges.map(b => 
+      `<div class="badge ${b.cond() ? '' : 'locked'}">${b.name}</div>`
+    ).join('');
+  }
 }
 
-// Функція для оновлення покупок
+// ОНОВЛЕНА ФУНКЦІЯ - для телефонів
 function updatePurchases() {
   // Основні товари
   const goldSpan = document.getElementById('purchaseGold');
@@ -153,19 +156,20 @@ function updatePurchases() {
   if (shieldSpan) shieldSpan.innerHTML = items.shield ? '✅' : '❌';
   if (vipSpan) vipSpan.innerHTML = items.vip ? '✅' : '❌';
   
-  // Візуальні товари
-  updateBasicItemSquare('rainbow_name', 'purchaseRainbow', 'Веселкове ім\'я');
-  updateBasicItemSquare('sparkles', 'purchaseSparkles', 'Блискітки');
-  updateBasicItemSquare('avatar_frame', 'purchaseAvatarFrame', 'Рамка аватара');
-  updateBasicItemSquare('animated_nick', 'purchaseAnimated', 'Анімований нік');
-  updateBasicItemSquare('vyshyvanka', 'purchaseVyshyvanka', 'Вишиванка');
-  updateBasicItemSquare('kobza', 'purchaseKobza', 'Кобза');
-  updateBasicItemSquare('sunflowers', 'purchaseSunflowers', 'Соняшникове поле');
-  updateBasicItemSquare('bookshelf', 'purchaseBookshelf', 'Книжкова полиця');
-  updateBasicItemSquare('theater_mask', 'purchaseTheaterMask', 'Театральна маска');
+  // Візуальні товари - з кнопками для телефону
+  updateVisualItem('rainbow_name', 'purchaseRainbow', '🌈 Веселкове ім\'я');
+  updateVisualItem('sparkles', 'purchaseSparkles', '✨ Блискітки');
+  updateVisualItem('avatar_frame', 'purchaseAvatarFrame', '🖼️ Рамка аватара');
+  updateVisualItem('animated_nick', 'purchaseAnimated', '🌟 Анімований нік');
+  updateVisualItem('vyshyvanka', 'purchaseVyshyvanka', '🎨 Вишиванка');
+  updateVisualItem('kobza', 'purchaseKobza', '🏺 Кобза');
+  updateVisualItem('sunflowers', 'purchaseSunflowers', '🌻 Соняшникове поле');
+  updateVisualItem('bookshelf', 'purchaseBookshelf', '📜 Книжкова полиця');
+  updateVisualItem('theater_mask', 'purchaseTheaterMask', '🎭 Театральна маска');
 }
 
-function updateBasicItemSquare(itemKey, elementId, itemName) {
+// НОВА ФУНКЦІЯ - створює кнопки для телефону
+function updateVisualItem(itemKey, elementId, itemName) {
   const element = document.getElementById(elementId);
   if (!element) return;
   
@@ -176,43 +180,70 @@ function updateBasicItemSquare(itemKey, elementId, itemName) {
   
   const isActive = items[itemKey + '_active'] !== false;
   
+  // Створюємо HTML з кнопкою, яка буде працювати на телефоні
   if (isActive) {
-    element.innerHTML = `<span class="square green" data-item="${itemKey}" data-name="${itemName}" style="cursor: pointer;">✅</span>
-    <span style="font-size: 10px; margin-left: 5px; color: green;">(активний)</span>`;
+    element.innerHTML = `
+      <span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <button class="toggle-item-btn active" data-item="${itemKey}" data-name="${itemName}" style="background: #2ecc71; color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; min-width: 80px;">✅ Вкл</button>
+        <span style="font-size: 11px; color: green;">(активний)</span>
+      </span>
+    `;
   } else {
-    element.innerHTML = `<span class="square yellow" data-item="${itemKey}" data-name="${itemName}" style="cursor: pointer;">⏻</span>
-    <span style="font-size: 10px; margin-left: 5px; color: orange;">(вимкнений)</span>`;
+    element.innerHTML = `
+      <span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <button class="toggle-item-btn inactive" data-item="${itemKey}" data-name="${itemName}" style="background: #f1c40f; color: #333; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; min-width: 80px;">⏻ Викл</button>
+        <span style="font-size: 11px; color: orange;">(вимкнений)</span>
+      </span>
+    `;
   }
   
-  const square = element.querySelector('.square');
-  if (square) {
-    square.onclick = (function(k, n) {
-      return function() { toggleItemEffect(k, n); };
-    })(itemKey, itemName);
+  // Додаємо обробник події
+  const btn = element.querySelector('.toggle-item-btn');
+  if (btn) {
+    // Для телефонів - використовуємо touchstart
+    btn.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleItemEffect(itemKey, itemName);
+    });
+    // Для комп'ютера - click
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleItemEffect(itemKey, itemName);
+    });
   }
 }
 
+// Функція для перемикання ефекту
 function toggleItemEffect(itemKey, itemName) {
+  console.log("toggleItemEffect called:", itemKey, itemName);
+  
   if (!items[itemKey]) {
     showNotification(`❌ Товар "${itemName}" не куплений!`, true);
     return;
   }
   
+  // Ініціалізуємо статус активності
   if (items[itemKey + '_active'] === undefined) {
     items[itemKey + '_active'] = true;
   }
   
+  // Перемикаємо
   const isActive = items[itemKey + '_active'];
   
   if (isActive) {
     items[itemKey + '_active'] = false;
-    showNotification(`⏸ Ефект "${itemName}" вимкнено! (натисніть на жовтий квадрат щоб ввімкнути)`);
+    showNotification(`⏸ Ефект "${itemName}" вимкнено! (натисніть "Вкл" щоб ввімкнути)`);
   } else {
     items[itemKey + '_active'] = true;
     showNotification(`▶ Ефект "${itemName}" ввімкнено!`);
   }
   
+  // Зберігаємо
   if (typeof save === 'function') save();
+  
+  // Оновлюємо відображення
   updatePurchases();
   updateAvatarDisplay();
   if (typeof applyItems === 'function') applyItems();

@@ -780,7 +780,7 @@
     </div>
   </div>
 
-  <!-- SHOP -->
+  <!-- КРАМНИЧКА -->
   <div id="shop" class="screen">
     <div class="card">
       <h2>🛒 КРАМНИЧКА</h2>
@@ -1257,7 +1257,7 @@
       showNotification("✅ Лог адмінки очищено");
     }
     
-    // ГОЛОВНА ФУНКЦІЯ ЗАПУСКУ - ПРАВИЛЬНО ПОКАЗУЄ МЕНЮ ПІСЛЯ ВІДЕО
+    // ГОЛОВНА ФУНКЦІЯ ЗАПУСКУ
     document.addEventListener('DOMContentLoaded', function() {
       console.log("Сторінка завантажена");
       
@@ -1266,25 +1266,13 @@
       const startBtn = document.getElementById('startBtn');
       
       function finishSplashAndStart() {
-        console.log("Завершуємо splash і запускаємо auth");
+        console.log("Завершуємо splash");
         splash.style.display = 'none';
-        
-        // Перевіряємо чи є збережені дані
-        const savedNick = localStorage.getItem('un');
-        const savedPass = localStorage.getItem('up');
-        
-        if (savedNick && savedPass && typeof auth === 'function') {
-          console.log("Є збережені дані, автовхід");
-          document.getElementById('nick').value = savedNick;
-          document.getElementById('pass').value = savedPass;
-          auth();
-        } else if (typeof show === 'function') {
-          console.log("Немає збережених даних, показуємо форму входу");
-          show('auth-screen');
+        if (typeof tryAutoLogin === 'function') {
+          tryAutoLogin();
         } else {
-          console.log("Показуємо auth-screen напряму");
-          document.getElementById('auth-screen').style.display = 'flex';
-          document.getElementById('menu').style.display = 'none';
+          console.log("tryAutoLogin не знайдено");
+          if (typeof show === 'function') show('auth-screen');
         }
       }
       
@@ -1294,7 +1282,7 @@
         
         startBtn.onclick = function(e) {
           e.preventDefault();
-          console.log("Кнопка натиснута - запускаємо відео");
+          console.log("Кнопка натиснута");
           startBtn.style.display = 'none';
           video.muted = false;
           video.play().catch(function(err) {
@@ -1313,13 +1301,12 @@
           finishSplashAndStart();
         };
         
-        // Таймаут 8 секунд - якщо відео не запустили
         setTimeout(function() {
           if (splash && splash.style.display !== 'none') {
             console.log("Таймаут - пропускаємо відео");
             finishSplashAndStart();
           }
-        }, 8000);
+        }, 10000);
       } else {
         finishSplashAndStart();
       }

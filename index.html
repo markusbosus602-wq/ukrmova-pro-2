@@ -153,7 +153,8 @@
     }
 
     .shop-btn {
-      background: #eee;
+      background: linear-gradient(135deg, #2c3e50, #1a2632);
+      color: white;
       border: none;
       padding: 12px;
       border-radius: 12px;
@@ -162,8 +163,8 @@
       transition: transform 0.1s;
       font-size: 14px;
       font-weight: bold;
-      color: #000;
       width: 100%;
+      touch-action: manipulation;
     }
 
     .shop-btn:active {
@@ -307,6 +308,7 @@
       font-weight: bold;
       font-size: 13px;
       color: white;
+      touch-action: manipulation;
     }
 
     .tab-btn.active {
@@ -624,7 +626,6 @@
       cursor: default;
     }
 
-    /* Стилі для повідомлень в підтримці */
     .message-bubble {
       margin-bottom: 15px;
     }
@@ -718,6 +719,10 @@
 
     #playerProfileModal hr {
       border-color: var(--gold);
+    }
+
+    .toggle-gift-btn {
+      touch-action: manipulation;
     }
   </style>
 </head>
@@ -814,7 +819,7 @@
   <!-- КРАМНИЧКА -->
   <div id="shop" class="screen">
     <div class="card">
-      <h2>КРАМНИЧКА</h2>
+      <h2>🛒 КРАМНИЧКА</h2>
       <div class="shop-grid">
         <button class="shop-btn" data-item="gold_frame">✨ Золота рамка — 1000 ₴</button>
         <button class="shop-btn" data-item="crown">👑 Корона — 2000 ₴</button>
@@ -832,7 +837,7 @@
         <button class="shop-btn" data-item="theater_mask">🎭 Театральна маска — 4500 ₴</button>
         <button class="shop-btn" data-item="secret_item" style="display:none">🤫 СЕКРЕТНИЙ ТОВАР — 10000 ₴</button>
       </div>
-      <button class="btn" onclick="show('menu')">НАЗАД</button>
+      <button class="btn red" onclick="show('menu')">◀ НАЗАД</button>
     </div>
   </div>
 
@@ -852,7 +857,7 @@
   <!-- ІМЕННИКИ -->
   <div id="imennyky" class="screen">
     <div class="card">
-      <h2>Іменники</h2>
+      <h2>📖 Іменники</h2>
       <button class="btn theme-btn" onclick="startTheme('vydminy')">Відміни іменників</button>
       <button class="btn theme-btn" onclick="startTheme('orudnyi_1vidmina')">Орудний відмінок 1 відміни</button>
       <button class="btn red" onclick="show('sections')">НАЗАД</button>
@@ -862,7 +867,7 @@
   <!-- ПРИКМЕТНИКИ -->
   <div id="prykmetnyky" class="screen">
     <div class="card">
-      <h2>Прикметники</h2>
+      <h2>📝 Прикметники</h2>
       <button class="btn theme-btn" onclick="startTheme('prykmetnyky')">Прикметники</button>
       <button class="btn theme-btn" onclick="startTheme('grupy_prykmetnykiv')">Групи за значенням</button>
       <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni')">Ступені порівняння</button>
@@ -875,7 +880,7 @@
   <!-- ЗАЙМЕННИКИ -->
   <div id="zajmennyky" class="screen">
     <div class="card">
-      <h2>Займенники</h2>
+      <h2>🔤 Займенники</h2>
       <button class="btn theme-btn" onclick="startTheme('zajmennyky_rozriady')">Розряди займенників</button>
       <button class="btn theme-btn" onclick="startTheme('zajmennyky_pravopys')">Правопис неозначених і заперечних</button>
       <button class="btn red" onclick="show('sections')">НАЗАД</button>
@@ -885,7 +890,7 @@
   <!-- ЧИСЛІВНИКИ -->
   <div id="chyslivnyky" class="screen">
     <div class="card">
-      <h2>Числівники</h2>
+      <h2>🔢 Числівники</h2>
       <button class="btn theme-btn" onclick="startTheme('chyslivnyky_1')">Числівники №1</button>
       <button class="btn theme-btn" onclick="startTheme('chyslivnyky_2')">Числівники №2</button>
       <button class="btn red" onclick="show('sections')">НАЗАД</button>
@@ -895,7 +900,7 @@
   <!-- ФРАЗЕОЛОГІЗМИ -->
   <div id="frazeologizmy" class="screen">
     <div class="card">
-      <h2>Фразеологізми</h2>
+      <h2>💬 Фразеологізми</h2>
       <button class="btn theme-btn" onclick="startTheme('frazeologizmy1')">ЗАВДАННЯ 1</button>
       <button class="btn theme-btn" onclick="startTheme('frazeologizmy2')">ЗАВДАННЯ 2</button>
       <button class="btn theme-btn" onclick="startTheme('frazeologizmy3')">ЗАВДАННЯ 3</button>
@@ -1023,14 +1028,13 @@
         </div>
       </div>
 
-      <!-- ПІДТРИМКА -->
+      <!-- ПІДТРИМКА - прибрано напис про мову -->
       <div id="tab-support" class="cabinet-tab">
         <div class="cabinet-section">
           <h3>💬 Технічна підтримка</h3>
           <div style="margin-bottom: 15px;">
             <textarea id="supportMessage" 
-                      placeholder="Напишіть ваше повідомлення українською, російською або англійською мовою..." 
-                      lang="uk"
+                      placeholder="Напишіть ваше повідомлення..."
                       style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ccc; min-height: 120px; font-family: inherit; font-size: 16px; background: white; color: #333; resize: vertical; -webkit-appearance: none; appearance: none; box-sizing: border-box;"></textarea>
             <div style="display: flex; gap: 10px; margin-top: 12px;">
               <button class="btn" onclick="sendSupportMessage()" style="background: var(--green); flex: 2; padding: 12px; font-size: 16px;">📨 Відправити</button>
@@ -1074,6 +1078,7 @@
     </div>
   </div>
 
+  <!-- MODALS -->
   <div id="avatarModal" class="modal">
     <div class="modal-content">
       <span class="modal-close" onclick="closeAvatarModal()">&times;</span>
@@ -1123,7 +1128,7 @@
 
   <div id="notificationToast" class="notification-toast"></div>
 
-  <!-- Підключення скриптів -->
+  <!-- SCRIPTS -->
   <script src="js/utils.js"></script>
   <script src="js/shop.js"></script>
   <script src="js/bonuses.js"></script>
@@ -1303,6 +1308,5 @@
       });
     });
   </script>
-
 </body>
 </html>

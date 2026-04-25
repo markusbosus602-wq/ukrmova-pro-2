@@ -32,8 +32,7 @@
       position: fixed;
       inset: 0;
       z-index: 9999;
-      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
-                  url('https://file.garden/aZHnP_3ch2qR4tWj/61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat;
+      background: #000;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -780,7 +779,7 @@
     </div>
   </div>
 
-  <!-- КРАМНИЧКА -->
+  <!-- SHOP -->
   <div id="shop" class="screen">
     <div class="card">
       <h2>🛒 КРАМНИЧКА</h2>
@@ -997,9 +996,7 @@
         <div class="cabinet-section">
           <h3>💬 Технічна підтримка</h3>
           <div style="margin-bottom: 15px;">
-            <textarea id="supportMessage" 
-                      placeholder="Напишіть ваше повідомлення..."
-                      style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ccc; min-height: 120px; font-family: inherit; font-size: 16px; background: white; color: #333; resize: vertical; -webkit-appearance: none; appearance: none; box-sizing: border-box;"></textarea>
+            <textarea id="supportMessage" placeholder="Напишіть ваше повідомлення..." style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ccc; min-height: 120px; font-family: inherit; font-size: 16px; background: white; color: #333; resize: vertical; -webkit-appearance: none; appearance: none; box-sizing: border-box;"></textarea>
             <div style="display: flex; gap: 10px; margin-top: 12px;">
               <button class="btn" onclick="sendSupportMessage()" style="background: var(--green); flex: 2; padding: 12px; font-size: 16px;">📨 Відправити</button>
               <button class="btn" onclick="refreshSupportMessages()" style="background: var(--blue); flex: 1; padding: 12px; font-size: 16px;">🔄 Оновити</button>
@@ -1258,6 +1255,56 @@
       loadAdminAccessLog();
       showNotification("✅ Лог адмінки очищено");
     }
+    
+    // ЖДЕМО ПОЛНОГО ЗАВАНТАЖЕННЯ СТОРІНКИ
+    window.addEventListener('load', function() {
+      console.log("Сторінка завантажена");
+      
+      const splash = document.getElementById('splash');
+      const video = document.getElementById('splash-video');
+      const startBtn = document.getElementById('startBtn');
+      
+      if (video && startBtn) {
+        video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
+        video.load();
+        
+        startBtn.onclick = function(e) {
+          e.preventDefault();
+          console.log("Кнопка натиснута");
+          startBtn.style.display = 'none';
+          video.muted = false;
+          video.play().then(function() {
+            console.log("Відео грає");
+          }).catch(function(err) {
+            console.log("Помилка відео:", err);
+            splash.style.display = 'none';
+            tryAutoLogin();
+          });
+        };
+        
+        video.onended = function() {
+          console.log("Відео закінчилось");
+          splash.style.display = 'none';
+          tryAutoLogin();
+        };
+        
+        video.onerror = function() {
+          console.log("Помилка завантаження відео");
+          splash.style.display = 'none';
+          tryAutoLogin();
+        };
+        
+        setTimeout(function() {
+          if (splash && splash.style.display !== 'none') {
+            console.log("Таймаут - пропускаємо відео");
+            splash.style.display = 'none';
+            tryAutoLogin();
+          }
+        }, 30000);
+      } else {
+        tryAutoLogin();
+      }
+    });
     
     // Обробник для кнопок магазину
     document.addEventListener('DOMContentLoaded', function() {

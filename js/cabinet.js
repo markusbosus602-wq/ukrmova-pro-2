@@ -4,7 +4,7 @@ let earnedBadges = [];
 
 // Функція для примусової активації всіх покупок
 function initAllPurchases() {
-  const visualItems = ['rainbow_name', 'sparkles', 'avatar_frame', 'animated_nick', 'vyshyvanka', 'kobza', 'sunflowers', 'bookshelf', 'theater_mask'];
+  const visualItems = ['rainbow_name', 'sparkles', 'avatar_frame', 'animated_nick', 'vyshyvanka', 'kobza', 'sunflowers', 'bookshelf', 'theater_mask', 'gold_frame', 'crown', 'fire', 'shield', 'vip'];
   let changed = false;
   
   visualItems.forEach(item => {
@@ -140,22 +140,14 @@ function loadBadges(stats) {
   }
 }
 
-// ГОЛОВНА ФУНКЦІЯ - оновлює всі покупки з кнопками
+// ГОЛОВНА ФУНКЦІЯ - оновлює всі покупки з кнопками для ВСІХ товарів
 function updatePurchases() {
-  // Основні товари (без кнопок, просто статус)
-  const goldSpan = document.getElementById('purchaseGold');
-  const crownSpan = document.getElementById('purchaseCrown');
-  const fireSpan = document.getElementById('purchaseFire');
-  const shieldSpan = document.getElementById('purchaseShield');
-  const vipSpan = document.getElementById('purchaseVip');
-  
-  if (goldSpan) goldSpan.innerHTML = items.gold_frame ? '✅' : '❌';
-  if (crownSpan) crownSpan.innerHTML = items.crown ? '✅' : '❌';
-  if (fireSpan) fireSpan.innerHTML = items.fire ? '✅' : '❌';
-  if (shieldSpan) shieldSpan.innerHTML = items.shield ? '✅' : '❌';
-  if (vipSpan) vipSpan.innerHTML = items.vip ? '✅' : '❌';
-  
-  // Візуальні товари З КНОПКАМИ для ввімкнення/вимкнення
+  // ВСІ товари з кнопками ВКЛ/ВИКЛ
+  updateVisualItem('gold_frame', 'purchaseGold', '✨ Золота рамка');
+  updateVisualItem('crown', 'purchaseCrown', '👑 Корона');
+  updateVisualItem('fire', 'purchaseFire', '🔥 Полум\'я');
+  updateVisualItem('shield', 'purchaseShield', '🛡️ Щит');
+  updateVisualItem('vip', 'purchaseVip', '💎 ВІП');
   updateVisualItem('rainbow_name', 'purchaseRainbow', '🌈 Веселкове ім\'я');
   updateVisualItem('sparkles', 'purchaseSparkles', '✨ Блискітки');
   updateVisualItem('avatar_frame', 'purchaseAvatarFrame', '🖼️ Рамка аватара');
@@ -171,7 +163,6 @@ function updatePurchases() {
 function updateVisualItem(itemKey, elementId, itemName) {
   const element = document.getElementById(elementId);
   if (!element) {
-    // Якщо елемента немає в DOM, створюємо його
     return;
   }
   
@@ -234,7 +225,7 @@ function updateVisualItem(itemKey, elementId, itemName) {
   }
 }
 
-// Функція перемикання ефекту
+// Функція перемикання ефекту для ВСІХ товарів
 function toggleItemEffect(itemKey, itemName) {
   console.log("toggleItemEffect called:", itemKey, itemName);
   

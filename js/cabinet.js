@@ -2,12 +2,36 @@
 
 let earnedBadges = [];
 
+// ВСІ товари, які мають кнопки ВКЛ/ВИКЛ
+const ALL_ITEMS_WITH_BUTTONS = [
+  'gold_frame', 'crown', 'fire', 'shield', 'vip',
+  'rainbow_name', 'sparkles', 'avatar_frame', 'animated_nick',
+  'vyshyvanka', 'kobza', 'sunflowers', 'bookshelf', 'theater_mask'
+];
+
+// Назви товарів для відображення
+const ITEM_NAMES = {
+  gold_frame: '✨ Золота рамка',
+  crown: '👑 Корона',
+  fire: '🔥 Полум\'я',
+  shield: '🛡️ Щит',
+  vip: '💎 ВІП',
+  rainbow_name: '🌈 Веселкове ім\'я',
+  sparkles: '✨ Блискітки',
+  avatar_frame: '🖼️ Рамка аватара',
+  animated_nick: '🌟 Анімований нік',
+  vyshyvanka: '🎨 Вишиванка',
+  kobza: '🏺 Кобза',
+  sunflowers: '🌻 Соняшникове поле',
+  bookshelf: '📜 Книжкова полиця',
+  theater_mask: '🎭 Театральна маска'
+};
+
 // Функція для примусової активації всіх покупок
 function initAllPurchases() {
-  const visualItems = ['rainbow_name', 'sparkles', 'avatar_frame', 'animated_nick', 'vyshyvanka', 'kobza', 'sunflowers', 'bookshelf', 'theater_mask', 'gold_frame', 'crown', 'fire', 'shield', 'vip'];
   let changed = false;
   
-  visualItems.forEach(item => {
+  ALL_ITEMS_WITH_BUTTONS.forEach(item => {
     if (items[item] && items[item + '_active'] === undefined) {
       items[item + '_active'] = true;
       changed = true;
@@ -140,29 +164,42 @@ function loadBadges(stats) {
   }
 }
 
-// ГОЛОВНА ФУНКЦІЯ - оновлює всі покупки з кнопками для ВСІХ товарів
+// ГОЛОВНА ФУНКЦІЯ - оновлює ВСІ покупки з кнопками
 function updatePurchases() {
-  // ВСІ товари з кнопками ВКЛ/ВИКЛ
-  updateVisualItem('gold_frame', 'purchaseGold', '✨ Золота рамка');
-  updateVisualItem('crown', 'purchaseCrown', '👑 Корона');
-  updateVisualItem('fire', 'purchaseFire', '🔥 Полум\'я');
-  updateVisualItem('shield', 'purchaseShield', '🛡️ Щит');
-  updateVisualItem('vip', 'purchaseVip', '💎 ВІП');
-  updateVisualItem('rainbow_name', 'purchaseRainbow', '🌈 Веселкове ім\'я');
-  updateVisualItem('sparkles', 'purchaseSparkles', '✨ Блискітки');
-  updateVisualItem('avatar_frame', 'purchaseAvatarFrame', '🖼️ Рамка аватара');
-  updateVisualItem('animated_nick', 'purchaseAnimated', '🌟 Анімований нік');
-  updateVisualItem('vyshyvanka', 'purchaseVyshyvanka', '🎨 Вишиванка');
-  updateVisualItem('kobza', 'purchaseKobza', '🏺 Кобза');
-  updateVisualItem('sunflowers', 'purchaseSunflowers', '🌻 Соняшникове поле');
-  updateVisualItem('bookshelf', 'purchaseBookshelf', '📜 Книжкова полиця');
-  updateVisualItem('theater_mask', 'purchaseTheaterMask', '🎭 Театральна маска');
+  // Перебираємо ВСІ товари зі списку
+  for (const itemKey of ALL_ITEMS_WITH_BUTTONS) {
+    const elementId = getElementIdForItem(itemKey);
+    const itemName = ITEM_NAMES[itemKey];
+    updateVisualItem(itemKey, elementId, itemName);
+  }
+}
+
+// Отримує ID елемента для товару
+function getElementIdForItem(itemKey) {
+  const idMap = {
+    gold_frame: 'purchaseGold',
+    crown: 'purchaseCrown',
+    fire: 'purchaseFire',
+    shield: 'purchaseShield',
+    vip: 'purchaseVip',
+    rainbow_name: 'purchaseRainbow',
+    sparkles: 'purchaseSparkles',
+    avatar_frame: 'purchaseAvatarFrame',
+    animated_nick: 'purchaseAnimated',
+    vyshyvanka: 'purchaseVyshyvanka',
+    kobza: 'purchaseKobza',
+    sunflowers: 'purchaseSunflowers',
+    bookshelf: 'purchaseBookshelf',
+    theater_mask: 'purchaseTheaterMask'
+  };
+  return idMap[itemKey];
 }
 
 // Функція створення кнопки для одного товару
 function updateVisualItem(itemKey, elementId, itemName) {
   const element = document.getElementById(elementId);
   if (!element) {
+    console.log("Елемент не знайдено:", elementId);
     return;
   }
   
@@ -189,9 +226,10 @@ function updateVisualItem(itemKey, elementId, itemName) {
                    border-radius: 25px; 
                    font-size: 14px; 
                    cursor: pointer; 
-                   min-width: 80px; 
+                   min-width: 90px; 
                    font-weight: bold;
-                   touch-action: manipulation;">
+                   touch-action: manipulation;
+                   box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
       ${isActive ? '✅ ВКЛ' : '⏻ ВИКЛ'}
     </button>
   `;

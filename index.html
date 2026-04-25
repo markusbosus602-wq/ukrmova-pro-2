@@ -1257,7 +1257,7 @@
       showNotification("✅ Лог адмінки очищено");
     }
     
-    // ГОЛОВНА ФУНКЦІЯ ЗАПУСКУ
+    // ГОЛОВНА ФУНКЦІЯ ЗАПУСКУ - ПРАВИЛЬНО ПОКАЗУЄ МЕНЮ ПІСЛЯ ВІДЕО
     document.addEventListener('DOMContentLoaded', function() {
       console.log("Сторінка завантажена");
       
@@ -1265,14 +1265,26 @@
       const video = document.getElementById('splash-video');
       const startBtn = document.getElementById('startBtn');
       
-      function showAuth() {
-        console.log("Показуємо auth-screen");
+      function finishSplashAndStart() {
+        console.log("Завершуємо splash і запускаємо auth");
         splash.style.display = 'none';
-        if (typeof tryAutoLogin === 'function') {
-          tryAutoLogin();
-        } else {
-          console.log("tryAutoLogin не знайдено, показуємо auth-screen вручну");
+        
+        // Перевіряємо чи є збережені дані
+        const savedNick = localStorage.getItem('un');
+        const savedPass = localStorage.getItem('up');
+        
+        if (savedNick && savedPass && typeof auth === 'function') {
+          console.log("Є збережені дані, автовхід");
+          document.getElementById('nick').value = savedNick;
+          document.getElementById('pass').value = savedPass;
+          auth();
+        } else if (typeof show === 'function') {
+          console.log("Немає збережених даних, показуємо форму входу");
           show('auth-screen');
+        } else {
+          console.log("Показуємо auth-screen напряму");
+          document.getElementById('auth-screen').style.display = 'flex';
+          document.getElementById('menu').style.display = 'none';
         }
       }
       
@@ -1287,28 +1299,29 @@
           video.muted = false;
           video.play().catch(function(err) {
             console.log("Помилка відео:", err);
-            showAuth();
+            finishSplashAndStart();
           });
         };
         
         video.onended = function() {
-          console.log("Відео закінчилось - показуємо авторизацію");
-          showAuth();
+          console.log("Відео закінчилось");
+          finishSplashAndStart();
         };
         
         video.onerror = function() {
           console.log("Помилка відео");
-          showAuth();
+          finishSplashAndStart();
         };
         
+        // Таймаут 8 секунд - якщо відео не запустили
         setTimeout(function() {
           if (splash && splash.style.display !== 'none') {
-            console.log("Таймаут 10 сек - пропускаємо відео");
-            showAuth();
+            console.log("Таймаут - пропускаємо відео");
+            finishSplashAndStart();
           }
-        }, 10000);
+        }, 8000);
       } else {
-        showAuth();
+        finishSplashAndStart();
       }
     });
     

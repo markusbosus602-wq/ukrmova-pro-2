@@ -22,6 +22,8 @@ function initAllPurchases() {
 function loadCabinet() {
   if (!user) return;
   
+  // Оновлюємо items з user
+  items = user.items || items;
   initAllPurchases();
   
   updateAvatarDisplay();
@@ -68,7 +70,6 @@ function loadCabinet() {
   });
 }
 
-// Функція для отримання HTML аватарки
 function getAvatarHtml(avatar, avatarType, avatarData) {
   if (avatarType === 'photo' && avatarData && avatarData.startsWith('data:image')) {
     return `<img src="${avatarData}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size:32px;\'>👤</span>';">`;
@@ -94,7 +95,6 @@ function updateAvatarDisplay() {
     avatarDiv.innerHTML = '👤';
   }
   
-  // Рамка аватара
   if (items.avatar_frame && items.avatar_frame_active !== false) {
     avatarDiv.style.border = '3px solid gold';
     avatarDiv.style.boxShadow = '0 0 10px gold';
@@ -103,7 +103,6 @@ function updateAvatarDisplay() {
     avatarDiv.style.boxShadow = 'none';
   }
   
-  // Вишиванка
   if (items.vyshyvanka && items.vyshyvanka_active !== false) {
     avatarDiv.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
     avatarDiv.style.color = 'white';
@@ -141,9 +140,9 @@ function loadBadges(stats) {
   }
 }
 
-// Функція для оновлення покупок з більшими кнопками для телефону
+// ГОЛОВНА ФУНКЦІЯ - оновлює всі покупки з кнопками
 function updatePurchases() {
-  // Основні товари
+  // Основні товари (без кнопок, просто статус)
   const goldSpan = document.getElementById('purchaseGold');
   const crownSpan = document.getElementById('purchaseCrown');
   const fireSpan = document.getElementById('purchaseFire');
@@ -156,7 +155,7 @@ function updatePurchases() {
   if (shieldSpan) shieldSpan.innerHTML = items.shield ? '✅' : '❌';
   if (vipSpan) vipSpan.innerHTML = items.vip ? '✅' : '❌';
   
-  // Візуальні товари
+  // Візуальні товари З КНОПКАМИ для ввімкнення/вимкнення
   updateVisualItem('rainbow_name', 'purchaseRainbow', '🌈 Веселкове ім\'я');
   updateVisualItem('sparkles', 'purchaseSparkles', '✨ Блискітки');
   updateVisualItem('avatar_frame', 'purchaseAvatarFrame', '🖼️ Рамка аватара');
@@ -168,37 +167,54 @@ function updatePurchases() {
   updateVisualItem('theater_mask', 'purchaseTheaterMask', '🎭 Театральна маска');
 }
 
-// Функція для створення кнопок з великим розміром для телефону
+// Функція створення кнопки для одного товару
 function updateVisualItem(itemKey, elementId, itemName) {
   const element = document.getElementById(elementId);
-  if (!element) return;
-  
-  if (!items[itemKey]) {
-    element.innerHTML = '❌';
+  if (!element) {
+    // Якщо елемента немає в DOM, створюємо його
     return;
   }
   
-  const isActive = items[itemKey + '_active'] !== false;
-  
-  // Великі кнопки для зручного натискання на телефоні
-  if (isActive) {
-    element.innerHTML = `
-      <button class="toggle-gift-btn active-btn" data-item="${itemKey}" data-name="${itemName}" style="background: #2ecc71; color: white; border: none; padding: 8px 16px; border-radius: 25px; font-size: 14px; cursor: pointer; min-width: 100px; font-weight: bold; touch-action: manipulation;">✅ ВКЛ</button>
-    `;
-  } else {
-    element.innerHTML = `
-      <button class="toggle-gift-btn inactive-btn" data-item="${itemKey}" data-name="${itemName}" style="background: #f1c40f; color: #333; border: none; padding: 8px 16px; border-radius: 25px; font-size: 14px; cursor: pointer; min-width: 100px; font-weight: bold; touch-action: manipulation;">⏻ ВИКЛ</button>
-    `;
+  // Перевіряємо чи товар куплений
+  if (!items[itemKey]) {
+    element.innerHTML = '❌ (не куплено)';
+    return;
   }
   
-  // Додаємо обробник
-  const btn = element.querySelector('.toggle-gift-btn');
+  // Перевіряємо статус активності
+  const isActive = items[itemKey + '_active'] !== false;
+  
+  // Створюємо кнопку
+  const btnId = `btn_${itemKey}`;
+  const buttonHtml = `
+    <button id="${btnId}" 
+            class="toggle-gift-btn" 
+            data-item="${itemKey}" 
+            data-name="${itemName}"
+            style="background: ${isActive ? '#2ecc71' : '#f1c40f'}; 
+                   color: ${isActive ? 'white' : '#333'}; 
+                   border: none; 
+                   padding: 8px 16px; 
+                   border-radius: 25px; 
+                   font-size: 14px; 
+                   cursor: pointer; 
+                   min-width: 80px; 
+                   font-weight: bold;
+                   touch-action: manipulation;">
+      ${isActive ? '✅ ВКЛ' : '⏻ ВИКЛ'}
+    </button>
+  `;
+  
+  element.innerHTML = buttonHtml;
+  
+  // Додаємо обробник подій
+  const btn = document.getElementById(btnId);
   if (btn) {
     // Видаляємо старі обробники
     const newBtn = btn.cloneNode(true);
     btn.parentNode.replaceChild(newBtn, btn);
     
-    // Додаємо обробник для телефону (touchstart) і для комп'ютера (click)
+    // Додаємо обробник для touch (телефон)
     newBtn.addEventListener('touchstart', function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -207,6 +223,7 @@ function updateVisualItem(itemKey, elementId, itemName) {
       toggleItemEffect(item, name);
     }, { passive: false });
     
+    // Додаємо обробник для click (комп'ютер)
     newBtn.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -217,7 +234,7 @@ function updateVisualItem(itemKey, elementId, itemName) {
   }
 }
 
-// Функція для перемикання ефекту
+// Функція перемикання ефекту
 function toggleItemEffect(itemKey, itemName) {
   console.log("toggleItemEffect called:", itemKey, itemName);
   
@@ -249,10 +266,16 @@ function toggleItemEffect(itemKey, itemName) {
   updatePurchases();
   updateAvatarDisplay();
   if (typeof applyItems === 'function') applyItems();
+  
+  // Перезавантажуємо кабінет для оновлення всіх ефектів
+  setTimeout(() => {
+    if (typeof loadCabinet === 'function') loadCabinet();
+  }, 100);
 }
 
 function loadHistory() {
   const container = document.getElementById('historyList');
+  if (!container) return;
   if (!user.themeResults || Object.keys(user.themeResults).length === 0) {
     container.innerHTML = 'Ще немає пройдених тем';
     return;

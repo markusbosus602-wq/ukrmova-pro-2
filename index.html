@@ -153,8 +153,7 @@
     }
 
     .shop-btn {
-      background: linear-gradient(135deg, #2c3e50, #1a2632);
-      color: white;
+      background: #eee;
       border: none;
       padding: 12px;
       border-radius: 12px;
@@ -163,8 +162,8 @@
       transition: transform 0.1s;
       font-size: 14px;
       font-weight: bold;
+      color: #000;
       width: 100%;
-      touch-action: manipulation;
     }
 
     .shop-btn:active {
@@ -308,7 +307,6 @@
       font-weight: bold;
       font-size: 13px;
       color: white;
-      touch-action: manipulation;
     }
 
     .tab-btn.active {
@@ -591,6 +589,42 @@
       }
     }
 
+    .square {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      text-align: center;
+      line-height: 32px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .square:active {
+      transform: scale(0.95);
+    }
+
+    .square.green {
+      background: #2ecc71;
+      color: white;
+      border: 2px solid #27ae60;
+    }
+
+    .square.yellow {
+      background: #f1c40f;
+      color: #333;
+      border: 2px solid #e67e22;
+    }
+
+    .square.gray {
+      background: #95a5a6;
+      color: #7f8c8d;
+      border: 2px solid #7f8c8d;
+      cursor: default;
+    }
+
+    /* Стилі для повідомлень в підтримці */
     .message-bubble {
       margin-bottom: 15px;
     }
@@ -660,6 +694,7 @@
       font-weight: bold;
       font-size: 12px;
       transition: transform 0.2s;
+      white-space: nowrap;
       max-width: 90%;
       white-space: normal;
       text-align: center;
@@ -683,10 +718,6 @@
 
     #playerProfileModal hr {
       border-color: var(--gold);
-    }
-
-    .toggle-gift-btn {
-      touch-action: manipulation;
     }
   </style>
 </head>
@@ -783,7 +814,7 @@
   <!-- КРАМНИЧКА -->
   <div id="shop" class="screen">
     <div class="card">
-      <h2>🛒 КРАМНИЧКА</h2>
+      <h2>КРАМНИЧКА</h2>
       <div class="shop-grid">
         <button class="shop-btn" data-item="gold_frame">✨ Золота рамка — 1000 ₴</button>
         <button class="shop-btn" data-item="crown">👑 Корона — 2000 ₴</button>
@@ -801,7 +832,7 @@
         <button class="shop-btn" data-item="theater_mask">🎭 Театральна маска — 4500 ₴</button>
         <button class="shop-btn" data-item="secret_item" style="display:none">🤫 СЕКРЕТНИЙ ТОВАР — 10000 ₴</button>
       </div>
-      <button class="btn red" onclick="show('menu')">◀ НАЗАД</button>
+      <button class="btn" onclick="show('menu')">НАЗАД</button>
     </div>
   </div>
 
@@ -821,7 +852,7 @@
   <!-- ІМЕННИКИ -->
   <div id="imennyky" class="screen">
     <div class="card">
-      <h2>📖 Іменники</h2>
+      <h2>Іменники</h2>
       <button class="btn theme-btn" onclick="startTheme('vydminy')">Відміни іменників</button>
       <button class="btn theme-btn" onclick="startTheme('orudnyi_1vidmina')">Орудний відмінок 1 відміни</button>
       <button class="btn red" onclick="show('sections')">НАЗАД</button>
@@ -831,7 +862,7 @@
   <!-- ПРИКМЕТНИКИ -->
   <div id="prykmetnyky" class="screen">
     <div class="card">
-      <h2>📝 Прикметники</h2>
+      <h2>Прикметники</h2>
       <button class="btn theme-btn" onclick="startTheme('prykmetnyky')">Прикметники</button>
       <button class="btn theme-btn" onclick="startTheme('grupy_prykmetnykiv')">Групи за значенням</button>
       <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni')">Ступені порівняння</button>
@@ -844,7 +875,7 @@
   <!-- ЗАЙМЕННИКИ -->
   <div id="zajmennyky" class="screen">
     <div class="card">
-      <h2>🔤 Займенники</h2>
+      <h2>Займенники</h2>
       <button class="btn theme-btn" onclick="startTheme('zajmennyky_rozriady')">Розряди займенників</button>
       <button class="btn theme-btn" onclick="startTheme('zajmennyky_pravopys')">Правопис неозначених і заперечних</button>
       <button class="btn red" onclick="show('sections')">НАЗАД</button>
@@ -854,7 +885,7 @@
   <!-- ЧИСЛІВНИКИ -->
   <div id="chyslivnyky" class="screen">
     <div class="card">
-      <h2>🔢 Числівники</h2>
+      <h2>Числівники</h2>
       <button class="btn theme-btn" onclick="startTheme('chyslivnyky_1')">Числівники №1</button>
       <button class="btn theme-btn" onclick="startTheme('chyslivnyky_2')">Числівники №2</button>
       <button class="btn red" onclick="show('sections')">НАЗАД</button>
@@ -864,7 +895,7 @@
   <!-- ФРАЗЕОЛОГІЗМИ -->
   <div id="frazeologizmy" class="screen">
     <div class="card">
-      <h2>💬 Фразеологізми</h2>
+      <h2>Фразеологізми</h2>
       <button class="btn theme-btn" onclick="startTheme('frazeologizmy1')">ЗАВДАННЯ 1</button>
       <button class="btn theme-btn" onclick="startTheme('frazeologizmy2')">ЗАВДАННЯ 2</button>
       <button class="btn theme-btn" onclick="startTheme('frazeologizmy3')">ЗАВДАННЯ 3</button>
@@ -992,12 +1023,14 @@
         </div>
       </div>
 
-      <!-- ПІДТРИМКА -->
+      <!-- ПІДТРИМКА - виправлено (прибрано напис про мову) -->
       <div id="tab-support" class="cabinet-tab">
         <div class="cabinet-section">
           <h3>💬 Технічна підтримка</h3>
           <div style="margin-bottom: 15px;">
-            <textarea id="supportMessage" placeholder="Напишіть ваше повідомлення..." style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ccc; min-height: 120px; font-family: inherit; font-size: 16px; background: white; color: #333; resize: vertical; -webkit-appearance: none; appearance: none; box-sizing: border-box;"></textarea>
+            <textarea id="supportMessage" 
+                      placeholder="Напишіть ваше повідомлення..." 
+                      style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ccc; min-height: 120px; font-family: inherit; font-size: 16px; background: white; color: #333; resize: vertical; -webkit-appearance: none; appearance: none; box-sizing: border-box;"></textarea>
             <div style="display: flex; gap: 10px; margin-top: 12px;">
               <button class="btn" onclick="sendSupportMessage()" style="background: var(--green); flex: 2; padding: 12px; font-size: 16px;">📨 Відправити</button>
               <button class="btn" onclick="refreshSupportMessages()" style="background: var(--blue); flex: 1; padding: 12px; font-size: 16px;">🔄 Оновити</button>
@@ -1040,7 +1073,6 @@
     </div>
   </div>
 
-  <!-- MODALS -->
   <div id="avatarModal" class="modal">
     <div class="modal-content">
       <span class="modal-close" onclick="closeAvatarModal()">&times;</span>
@@ -1090,7 +1122,7 @@
 
   <div id="notificationToast" class="notification-toast"></div>
 
-  <!-- SCRIPTS -->
+  <!-- Підключення скриптів -->
   <script src="js/utils.js"></script>
   <script src="js/shop.js"></script>
   <script src="js/bonuses.js"></script>
@@ -1131,7 +1163,6 @@
 
   <script>
     let playersListVisible = false;
-    
     function togglePlayersList() {
       const playersList = document.getElementById('adminPlayersList');
       const btn = event.target;
@@ -1162,7 +1193,9 @@
         }
         
         let count = 0;
-        const allItems = ['gold_frame', 'crown', 'fire', 'shield', 'vip', 'rainbow_name', 'sparkles', 'avatar_frame', 'animated_nick', 'vyshyvanka', 'kobza', 'sunflowers', 'bookshelf', 'theater_mask'];
+        const visualItems = ['rainbow_name', 'sparkles', 'avatar_frame', 'animated_nick', 'vyshyvanka', 'kobza', 'sunflowers', 'bookshelf', 'theater_mask'];
+        const basicItems = ['gold_frame', 'crown', 'fire', 'shield', 'vip'];
+        const allItems = [...basicItems, ...visualItems];
         
         for (let playerName in players) {
           const player = players[playerName];
@@ -1257,70 +1290,15 @@
       showNotification("✅ Лог адмінки очищено");
     }
     
-    // ГОЛОВНА ФУНКЦІЯ ЗАПУСКУ
     document.addEventListener('DOMContentLoaded', function() {
-      console.log("Сторінка завантажена");
-      
-      const splash = document.getElementById('splash');
-      const video = document.getElementById('splash-video');
-      const startBtn = document.getElementById('startBtn');
-      
-      function finishSplashAndStart() {
-        console.log("Завершуємо splash");
-        splash.style.display = 'none';
-        if (typeof tryAutoLogin === 'function') {
-          tryAutoLogin();
-        } else {
-          console.log("tryAutoLogin не знайдено");
-          if (typeof show === 'function') show('auth-screen');
-        }
-      }
-      
-      if (video && startBtn) {
-        video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
-        video.load();
-        
-        startBtn.onclick = function(e) {
+      document.querySelectorAll('.shop-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
           e.preventDefault();
-          console.log("Кнопка натиснута");
-          startBtn.style.display = 'none';
-          video.muted = false;
-          video.play().catch(function(err) {
-            console.log("Помилка відео:", err);
-            finishSplashAndStart();
-          });
-        };
-        
-        video.onended = function() {
-          console.log("Відео закінчилось");
-          finishSplashAndStart();
-        };
-        
-        video.onerror = function() {
-          console.log("Помилка відео");
-          finishSplashAndStart();
-        };
-        
-        setTimeout(function() {
-          if (splash && splash.style.display !== 'none') {
-            console.log("Таймаут - пропускаємо відео");
-            finishSplashAndStart();
-          }
-        }, 10000);
-      } else {
-        finishSplashAndStart();
-      }
-    });
-    
-    // Обробник для кнопок магазину
-    document.querySelectorAll('.shop-btn').forEach(function(btn) {
-      btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        var itemName = this.getAttribute('data-item');
-        if (itemName && typeof buyItem === 'function') { 
-          buyItem(itemName); 
-        }
+          e.stopPropagation();
+          var itemName = this.getAttribute('data-item');
+          if (itemName && typeof buyItem === 'function') { buyItem(itemName); }
+          return false;
+        });
       });
     });
   </script>

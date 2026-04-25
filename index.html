@@ -32,7 +32,8 @@
       position: fixed;
       inset: 0;
       z-index: 9999;
-      background: #000;
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                  url('https://file.garden/aZHnP_3ch2qR4tWj/61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1256,13 +1257,24 @@
       showNotification("✅ Лог адмінки очищено");
     }
     
-    // ОСНОВНА ФУНКЦІЯ ЗАПУСКУ
-    window.addEventListener('DOMContentLoaded', function() {
-      console.log("DOM завантажено");
+    // ГОЛОВНА ФУНКЦІЯ ЗАПУСКУ
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("Сторінка завантажена");
       
       const splash = document.getElementById('splash');
       const video = document.getElementById('splash-video');
       const startBtn = document.getElementById('startBtn');
+      
+      function showAuth() {
+        console.log("Показуємо auth-screen");
+        splash.style.display = 'none';
+        if (typeof tryAutoLogin === 'function') {
+          tryAutoLogin();
+        } else {
+          console.log("tryAutoLogin не знайдено, показуємо auth-screen вручну");
+          show('auth-screen');
+        }
+      }
       
       if (video && startBtn) {
         video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
@@ -1270,53 +1282,45 @@
         
         startBtn.onclick = function(e) {
           e.preventDefault();
-          console.log("Кнопка натиснута");
+          console.log("Кнопка натиснута - запускаємо відео");
           startBtn.style.display = 'none';
           video.muted = false;
-          video.play().then(function() {
-            console.log("Відео грає");
-          }).catch(function(err) {
+          video.play().catch(function(err) {
             console.log("Помилка відео:", err);
-            splash.style.display = 'none';
-            if (typeof tryAutoLogin === 'function') tryAutoLogin();
+            showAuth();
           });
         };
         
         video.onended = function() {
-          console.log("Відео закінчилось");
-          splash.style.display = 'none';
-          if (typeof tryAutoLogin === 'function') tryAutoLogin();
+          console.log("Відео закінчилось - показуємо авторизацію");
+          showAuth();
         };
         
         video.onerror = function() {
-          console.log("Помилка завантаження відео");
-          splash.style.display = 'none';
-          if (typeof tryAutoLogin === 'function') tryAutoLogin();
+          console.log("Помилка відео");
+          showAuth();
         };
         
         setTimeout(function() {
           if (splash && splash.style.display !== 'none') {
-            console.log("Таймаут - пропускаємо відео");
-            splash.style.display = 'none';
-            if (typeof tryAutoLogin === 'function') tryAutoLogin();
+            console.log("Таймаут 10 сек - пропускаємо відео");
+            showAuth();
           }
-        }, 30000);
+        }, 10000);
       } else {
-        if (typeof tryAutoLogin === 'function') tryAutoLogin();
+        showAuth();
       }
     });
     
     // Обробник для кнопок магазину
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('.shop-btn').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          var itemName = this.getAttribute('data-item');
-          if (itemName && typeof buyItem === 'function') { 
-            buyItem(itemName); 
-          }
-        });
+    document.querySelectorAll('.shop-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var itemName = this.getAttribute('data-item');
+        if (itemName && typeof buyItem === 'function') { 
+          buyItem(itemName); 
+        }
       });
     });
   </script>

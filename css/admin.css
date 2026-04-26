@@ -1,0 +1,25 @@
+#admin-panel {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 800px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 24px;
+  padding: 20px;
+  z-index: 10001;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+#adminPlayersList {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 5px;
+  display: none;
+}

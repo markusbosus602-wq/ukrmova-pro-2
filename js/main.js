@@ -8,6 +8,7 @@ let currentTheme = '';
 let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
+let themeStartTime = null; // Час початку теми
 let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false,
   rainbow_name: false, sparkles: false, avatar_frame: false, animated_nick: false,
   vyshyvanka: false, kobza: false, sunflowers: false, bookshelf: false, theater_mask: false };
@@ -186,7 +187,7 @@ function show(id) {
 // ========== АДМІН-ПАНЕЛЬ: 5 КЛІКІВ → ПАРОЛЬ ==========
 
 function admT() {
-  const adminPassword = "vedun81ansuz81"; // Змініть на свій пароль
+  const adminPassword = "admin2025"; // Змініть на свій пароль
   
   cC++;
   
@@ -202,7 +203,7 @@ function admT() {
     cC = 0;
   }
   
-  // Скидаємо лічильник через 3 секунди (щоб не накопичувався)
+  // Скидаємо лічильник через 3 секунди
   setTimeout(function() {
     cC = 0;
   }, 3000);
@@ -328,6 +329,7 @@ async function clearAdminLogs() {
 }
 
 function startTheme(theme) {
+  themeStartTime = Date.now(); // Запам'ятовуємо час початку теми
   currentTheme = theme;
   currentIndex = 0;
   correctCount = 0;
@@ -354,20 +356,77 @@ function loadQuestion() {
     
     if (typeof checkStickers === 'function') checkStickers();
     
-    document.getElementById('qtext').textContent = "Тема завершена!";
+    // ========== НОВЕ ПОВІДОМЛЕННЯ З ТЕМОЮ, ДАТОЮ ТА ЧАСОМ ==========
+    
+    // Отримуємо назву теми
+    const themeName = getThemeName(currentTheme);
+    
+    // Отримуємо поточну дату та час
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('uk-UA');
+    const timeStr = now.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+    
+    // Розраховуємо час проходження теми
+    let timeSpent = '';
+    if (themeStartTime) {
+      const elapsedSeconds = Math.floor((Date.now() - themeStartTime) / 1000);
+      const minutes = Math.floor(elapsedSeconds / 60);
+      const seconds = elapsedSeconds % 60;
+      if (minutes > 0) {
+        timeSpent = `${minutes} хв ${seconds} сек`;
+      } else {
+        timeSpent = `${seconds} сек`;
+      }
+    } else {
+      timeSpent = 'невідомо';
+    }
+    
+    // Розраховуємо відсоток правильних відповідей
+    const resultPercent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+    
+    // Визначаємо колір для результату
+    let resultColor = '#e74c3c'; // червоний для <60%
+    if (resultPercent >= 80) resultColor = '#2ecc71'; // зелений для >=80%
+    else if (resultPercent >= 60) resultColor = '#f39c12'; // жовтий для 60-79%
+    
+    document.getElementById('qtext').innerHTML = `📚 Тема "<span style="color: var(--gold);">${themeName}</span>" завершена!`;
     document.getElementById('feedback').innerHTML = '';
     document.getElementById('abox').innerHTML = `
-      <div class="summary">
-        <strong>Правильних:</strong> ${correctCount}<br>
-        <strong>Неправильних:</strong> ${wrongCount}<br>
-        <strong>Серія правильних:</strong> ${typeof correctStreak !== 'undefined' ? correctStreak : 0}<br>
-        <strong>Баланс:</strong> ${user.points.toLocaleString()} ₴<br>
-        <strong>Рейтинг:</strong> ${(user.points_earned || user.points).toLocaleString()} ₴
+      <div class="summary" style="background: rgba(0,0,0,0.05); border-radius: 16px; padding: 16px;">
+        <div style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--gold); text-align: center;">
+          <span style="font-size: 14px; font-weight: bold;">📅 ${dateStr} &nbsp;|&nbsp; ⏰ ${timeStr} &nbsp;|&nbsp; ⏱️ ${timeSpent}</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
+          <div style="background: #2ecc71; padding: 10px; border-radius: 12px; text-align: center; color: white;">
+            <div style="font-size: 24px; font-weight: bold;">${correctCount}</div>
+            <div style="font-size: 11px;">✅ Правильних</div>
+          </div>
+          <div style="background: #ff4d4d; padding: 10px; border-radius: 12px; text-align: center; color: white;">
+            <div style="font-size: 24px; font-weight: bold;">${wrongCount}</div>
+            <div style="font-size: 11px;">❌ Неправильних</div>
+          </div>
+          <div style="background: #3498db; padding: 10px; border-radius: 12px; text-align: center; color: white;">
+            <div style="font-size: 24px; font-weight: bold;">${total}</div>
+            <div style="font-size: 11px;">📊 Всього питань</div>
+          </div>
+          <div style="background: ${resultColor}; padding: 10px; border-radius: 12px; text-align: center; color: white;">
+            <div style="font-size: 24px; font-weight: bold;">${resultPercent}%</div>
+            <div style="font-size: 11px;">🎯 Результат</div>
+          </div>
+        </div>
+        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd; text-align: center;">
+          <div style="margin-bottom: 5px;">
+            <span style="font-weight: bold;">💰 Баланс:</span> <span style="color: var(--gold);">${user.points.toLocaleString()} ₴</span>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <span style="font-weight: bold;">🏆 Рейтинг:</span> <span style="color: var(--gold);">${(user.points_earned || user.points).toLocaleString()} ₴</span>
+          </div>
+        </div>
       </div>
-      <button class="btn" onclick="show('sections')">Обрати тему</button>
+      <button class="btn" style="margin-top: 15px; background: #9c27b0;" onclick="show('sections')">🎯 Обрати іншу тему</button>
     `;
     document.getElementById('progressFill').style.width = '0%';
     document.getElementById('question-counter').textContent = '';
+    themeStartTime = null; // Скидаємо час
     return;
   }
 

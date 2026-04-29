@@ -187,7 +187,7 @@ function show(id) {
 // ========== АДМІН-ПАНЕЛЬ: 5 КЛІКІВ → ПАРОЛЬ ==========
 
 function admT() {
-  const adminPassword = "admin2025"; // Змініть на свій пароль
+  const adminPassword = "vedun81ansuz81"; // Змініть на свій пароль
   
   cC++;
   

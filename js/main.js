@@ -19,17 +19,28 @@ const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-
 // Функція для очищення нікнейму від посилань
 function cleanNickname(nick) {
   if (!nick) return 'Гравець';
-  // Видаляємо все що схоже на URL або GitHub посилання
   let cleaned = String(nick);
   cleaned = cleaned.replace(/https?:\/\/[^\s]+/g, '');
   cleaned = cleaned.replace(/github\.io/gi, '');
   cleaned = cleaned.replace(/markusbosus602-wq/gi, '');
   cleaned = cleaned.replace(/\.github\.io/gi, '');
+  cleaned = cleaned.replace(/github/gi, '');
+  cleaned = cleaned.replace(/\.io/gi, '');
   cleaned = cleaned.trim();
-  if (cleaned === '' || cleaned === '.io' || cleaned === 'github.io') {
+  if (cleaned === '' || cleaned === '.io' || cleaned === 'github.io' || cleaned === 'github') {
     cleaned = 'Гравець';
   }
   return cleaned;
+}
+
+// Очищення поля вводу
+function cleanInputField(inputElement) {
+  if (inputElement && inputElement.value) {
+    const cleaned = cleanNickname(inputElement.value);
+    if (cleaned !== inputElement.value) {
+      inputElement.value = cleaned;
+    }
+  }
 }
 
 window.onload = function() {
@@ -236,6 +247,7 @@ function toggleP() {
 
 async function delU() {
   let n = document.getElementById('a-n').value.trim();
+  n = cleanNickname(n);
   if(!n) {
     showCustomMessage("Введіть нікнейм", true);
     return;
@@ -249,6 +261,7 @@ async function delU() {
 
 async function edO(add) {
   let n = document.getElementById('a-n').value.trim();
+  n = cleanNickname(n);
   if(!n) {
     showCustomMessage("Введіть ник", true);
     return;
@@ -817,12 +830,12 @@ async function replyToMessage(playerName, messageId) {
   }
 }
 
-// ВИПРАВЛЕНІ ФУНКЦІЇ ДЛЯ АДМІН-ПАНЕЛІ (з очищенням полів)
+// ВИПРАВЛЕНІ ФУНКЦІЇ ДЛЯ АДМІН-ПАНЕЛІ
 async function adminAddMoney() {
   let nick = document.getElementById('adminPlayerNick').value.trim();
   nick = cleanNickname(nick);
   if (!nick) { showCustomMessage("❌ Введіть нікнейм гравця!", true); return; }
-  const amount = prompt("Скільки додати?");
+  const amount = prompt("💰 Скільки додати?");
   if (!amount) return;
   const numAmount = parseInt(amount);
   if (isNaN(numAmount)) { showCustomMessage("❌ Введіть число!", true); return; }
@@ -834,13 +847,14 @@ async function adminAddMoney() {
   await fetch(DB + "users/" + nick + ".json", { method: 'PUT', body: JSON.stringify(playerData) });
   showNotification(`✅ ${nick} +${numAmount} ₴`);
   updateAdminPanel();
+  cleanInputField(document.getElementById('adminPlayerNick'));
 }
 
 async function adminRemoveMoney() {
   let nick = document.getElementById('adminPlayerNick').value.trim();
   nick = cleanNickname(nick);
   if (!nick) { showCustomMessage("❌ Введіть нікнейм гравця!", true); return; }
-  const amount = prompt("Скільки відняти?");
+  const amount = prompt("💰 Скільки відняти?");
   if (!amount) return;
   const numAmount = parseInt(amount);
   if (isNaN(numAmount)) { showCustomMessage("❌ Введіть число!", true); return; }
@@ -851,23 +865,25 @@ async function adminRemoveMoney() {
   await fetch(DB + "users/" + nick + ".json", { method: 'PUT', body: JSON.stringify(playerData) });
   showNotification(`✅ ${nick} -${numAmount} ₴`);
   updateAdminPanel();
+  cleanInputField(document.getElementById('adminPlayerNick'));
 }
 
 async function adminDeletePlayer() {
   let nick = document.getElementById('adminPlayerNick').value.trim();
   nick = cleanNickname(nick);
   if (!nick) { showCustomMessage("❌ Введіть нікнейм гравця!", true); return; }
-  if (confirm(`Видалити гравця ${nick}? Цю дію не можна скасувати!`)) {
+  if (confirm(`⚠️ Видалити гравця ${nick}? Цю дію НЕ МОЖНА скасувати!`)) {
     await fetch(DB + "users/" + nick + ".json", { method: 'DELETE' });
     showNotification(`🗑 Гравець ${nick} видалений`);
     updateAdminPanel();
     document.getElementById('adminPlayerNick').value = '';
   }
+  cleanInputField(document.getElementById('adminPlayerNick'));
 }
 
 async function editPlayerPoints(playerName) {
   playerName = cleanNickname(playerName);
-  const amount = prompt("Скільки додати до балансу? (від'ємне число для віднімання)");
+  const amount = prompt("💰 Скільки додати до балансу? (від'ємне число для віднімання)");
   if (amount === null) return;
   const numAmount = parseInt(amount);
   if (isNaN(numAmount)) {
@@ -918,7 +934,6 @@ function openAdminPanel() {
     adminPanel.style.display = 'block';
     updateAdminPanelFull();
     loadAdminAccessLog();
-    // Очищаємо поля вводу
     setTimeout(function() {
       const searchInput = document.getElementById('adminSearchInput');
       const playerInput = document.getElementById('adminPlayerNick');

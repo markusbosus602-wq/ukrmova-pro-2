@@ -20,7 +20,7 @@ const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-
 function cleanNickname(nick) {
   if (!nick) return 'Гравець';
   // Видаляємо все що схоже на URL або GitHub посилання
-  let cleaned = nick;
+  let cleaned = String(nick);
   cleaned = cleaned.replace(/https?:\/\/[^\s]+/g, '');
   cleaned = cleaned.replace(/github\.io/gi, '');
   cleaned = cleaned.replace(/markusbosus602-wq/gi, '');
@@ -67,7 +67,6 @@ function tryAutoLogin() {
   const savedNick = localStorage.getItem('un');
   const savedPass = localStorage.getItem('up');
   if (savedNick && savedPass) {
-    // Очищаємо збережений нікнейм
     const cleanNick = cleanNickname(savedNick);
     if (cleanNick !== savedNick) {
       localStorage.setItem('un', cleanNick);
@@ -97,7 +96,6 @@ async function auth() {
         return;
       }
       user = d;
-      // Очищаємо нікнейм користувача від посилань
       if (user.name) {
         user.name = cleanNickname(user.name);
       }
@@ -554,7 +552,6 @@ async function showPlayerProfile(nickname) {
       return;
     }
     
-    // Очищаємо нікнейм гравця
     if (playerData.name) {
       playerData.name = cleanNickname(playerData.name);
     }
@@ -661,7 +658,6 @@ function closePlayerProfileModal() {
   if (modal) modal.remove();
 }
 
-// ОНОВЛЕНА ФУНКЦІЯ loadT - ТОП за рейтингом (points_earned)
 async function loadT() {
   show('top');
   let r = await fetch(DB + "users/.json");
@@ -670,7 +666,6 @@ async function loadT() {
   l.innerHTML = '';
   
   if (d) {
-    // Сортуємо за points_earned (загальний заробіток), а не за поточним балансом
     let topPlayers = Object.values(d).sort((a, b) => {
       const ratingA = a.points_earned || a.points || 0;
       const ratingB = b.points_earned || b.points || 0;
@@ -715,10 +710,11 @@ async function getAllPlayers() {
 
 async function updateAdminPanel() {
   const players = await getAllPlayers();
-  const searchTerm = document.getElementById('adminSearchInput')?.value.toLowerCase() || '';
+  let searchTerm = document.getElementById('adminSearchInput')?.value || '';
+  searchTerm = cleanNickname(searchTerm).toLowerCase();
   let filteredPlayers = players;
   if (searchTerm) {
-    filteredPlayers = players.filter(p => p.name && p.name.toLowerCase().includes(searchTerm));
+    filteredPlayers = players.filter(p => p.name && cleanNickname(p.name).toLowerCase().includes(searchTerm));
   }
   
   const playersList = document.getElementById('adminPlayersList');
@@ -821,6 +817,54 @@ async function replyToMessage(playerName, messageId) {
   }
 }
 
+// ВИПРАВЛЕНІ ФУНКЦІЇ ДЛЯ АДМІН-ПАНЕЛІ (з очищенням полів)
+async function adminAddMoney() {
+  let nick = document.getElementById('adminPlayerNick').value.trim();
+  nick = cleanNickname(nick);
+  if (!nick) { showCustomMessage("❌ Введіть нікнейм гравця!", true); return; }
+  const amount = prompt("Скільки додати?");
+  if (!amount) return;
+  const numAmount = parseInt(amount);
+  if (isNaN(numAmount)) { showCustomMessage("❌ Введіть число!", true); return; }
+  const r = await fetch(DB + "users/" + nick + ".json");
+  const playerData = await r.json();
+  if (!playerData) { showCustomMessage("❌ Гравця не знайдено!", true); return; }
+  playerData.points = (playerData.points || 0) + numAmount;
+  playerData.points_earned = (playerData.points_earned || playerData.points || 0);
+  await fetch(DB + "users/" + nick + ".json", { method: 'PUT', body: JSON.stringify(playerData) });
+  showNotification(`✅ ${nick} +${numAmount} ₴`);
+  updateAdminPanel();
+}
+
+async function adminRemoveMoney() {
+  let nick = document.getElementById('adminPlayerNick').value.trim();
+  nick = cleanNickname(nick);
+  if (!nick) { showCustomMessage("❌ Введіть нікнейм гравця!", true); return; }
+  const amount = prompt("Скільки відняти?");
+  if (!amount) return;
+  const numAmount = parseInt(amount);
+  if (isNaN(numAmount)) { showCustomMessage("❌ Введіть число!", true); return; }
+  const r = await fetch(DB + "users/" + nick + ".json");
+  const playerData = await r.json();
+  if (!playerData) { showCustomMessage("❌ Гравця не знайдено!", true); return; }
+  playerData.points = Math.max(0, (playerData.points || 0) - numAmount);
+  await fetch(DB + "users/" + nick + ".json", { method: 'PUT', body: JSON.stringify(playerData) });
+  showNotification(`✅ ${nick} -${numAmount} ₴`);
+  updateAdminPanel();
+}
+
+async function adminDeletePlayer() {
+  let nick = document.getElementById('adminPlayerNick').value.trim();
+  nick = cleanNickname(nick);
+  if (!nick) { showCustomMessage("❌ Введіть нікнейм гравця!", true); return; }
+  if (confirm(`Видалити гравця ${nick}? Цю дію не можна скасувати!`)) {
+    await fetch(DB + "users/" + nick + ".json", { method: 'DELETE' });
+    showNotification(`🗑 Гравець ${nick} видалений`);
+    updateAdminPanel();
+    document.getElementById('adminPlayerNick').value = '';
+  }
+}
+
 async function editPlayerPoints(playerName) {
   playerName = cleanNickname(playerName);
   const amount = prompt("Скільки додати до балансу? (від'ємне число для віднімання)");
@@ -874,6 +918,13 @@ function openAdminPanel() {
     adminPanel.style.display = 'block';
     updateAdminPanelFull();
     loadAdminAccessLog();
+    // Очищаємо поля вводу
+    setTimeout(function() {
+      const searchInput = document.getElementById('adminSearchInput');
+      const playerInput = document.getElementById('adminPlayerNick');
+      if (searchInput) searchInput.value = cleanNickname(searchInput.value);
+      if (playerInput) playerInput.value = cleanNickname(playerInput.value);
+    }, 100);
   }
 }
 
@@ -891,7 +942,7 @@ async function loadAdminAccessLog() {
       }).join('');
       if (logs.length === 0) logDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Лог порожній</div>';
     } else {
-      logDiv.innerHTML = '<div style="padding: 12px; text-align; color: #aaa;">Лог порожній</div>';
+      logDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Лог порожній</div>';
     }
   } catch(e) {
     logDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Помилка завантаження</div>';

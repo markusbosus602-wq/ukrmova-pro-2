@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>UkrMova Pro</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/cabinet.css">
+  <link rel="stylesheet" href="css/shop.css">
+  <link rel="stylesheet" href="css/game.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- SPLASH SCREEN -->
+  <div id="splash">
+    <video id="splash-video" playsinline preload="auto" muted></video>
+    <button id="startBtn">ПОЧАТИ ГРУ</button>
+  </div>
+
+  <!-- AUTH SCREEN -->
+  <div id="auth-screen" class="screen">
+    <div class="card">
+      <h2 style="color:var(--gold)">UKRMOVA PRO</h2>
+      <input type="text" id="nick" placeholder="Нікнейм" autocomplete="off">
+      <input type="password" id="pass" placeholder="Пароль" autocomplete="off">
+      <button class="btn" onclick="auth()">УВІЙТИ / ЗАРЕЄСТРУВАТИСЯ</button>
+      <p id="auth-error" style="color:red; margin-top:10px; min-height:24px;"></p>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <div id="menu" class="screen">
+    <div class="card">
+      <h3 onclick="admT()" style="cursor:pointer">МЕНЮ</h3>
+      <div class="nickname" id="playerNick"></div>
+      <div class="money"><span id="mon">0</span> ₴</div>
+      <button class="btn" onclick="show('sections')">ГРАТИ</button>
+      <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
+      <button class="btn green" onclick="show('shop')">КРАМНИЧКА</button>
+      <button class="btn" style="background:var(--purple)" onclick="show('cabinet')">📦 МОЯ СКРИНЬКА</button>
+
+      <div id="admin-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+          <h2 style="color: var(--blue); margin: 0;">👑 АДМІН-ПАНЕЛЬ</h2>
+          <button class="btn small" onclick="closeAdm()" style="background: var(--red); width: auto;">❌ ЗАКРИТИ</button>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <button class="btn" onclick="resetAllPlayersItems()" style="background: var(--dark); width: 100%;">⚠️ СКИНУТИ ВСІ ПОКУПКИ ВСІХ ГРАВЦІВ</button>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <input type="text" id="adminSearchInput" placeholder="🔍 Пошук гравця за ніком..." onkeyup="updateAdminPanel()" style="width: 100%; padding: 10px; border-radius: 12px; border: 1px solid #ccc;">
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+          <button class="btn" onclick="togglePlayersList()" style="background: var(--blue); width: auto; padding: 8px 16px;">👥 ПОКАЗАТИ ГРАВЦІВ</button>
+        </div>
+        
+        <div id="adminPlayersList" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 12px; padding: 5px; display: none;"></div>
+        
+        <div style="margin-bottom: 20px; margin-top: 20px;">
+          <h3 style="color: var(--gold); margin-bottom: 10px;">⚙️ Управління гравцем</h3>
+          <input type="text" id="adminPlayerNick" placeholder="Нікнейм гравця" style="margin-bottom: 10px;">
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn small" onclick="adminAddMoney()" style="background: var(--green); width: auto;">➕ Додати гроші</button>
+            <button class="btn small" onclick="adminRemoveMoney()" style="background: var(--red); width: auto;">➖ Відняти гроші</button>
+            <button class="btn small" onclick="adminDeletePlayer()" style="background: var(--dark); width: auto;">🗑 Видалити гравця</button>
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <h3 style="color: var(--gold); margin-bottom: 10px;">💬 Повідомлення в підтримку</h3>
+          <div id="adminMessagesList" style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 12px; padding: 5px;"></div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <h3 style="color: var(--gold); margin-bottom: 10px;">📋 Лог входів в АДМІНКУ</h3>
+          <div id="adminAccessLog" style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; border-radius: 12px; padding: 5px;"></div>
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn small" onclick="loadAdminAccessLog()" style="background: var(--blue); width: auto;">🔄 Оновити</button>
+            <button class="btn small" onclick="clearAdminAccessLog()" style="background: var(--red); width: auto;">🗑 Очистити лог</button>
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <h3 style="color: var(--gold); margin-bottom: 10px;">📋 Активність гравців (входи в гру)</h3>
+          <div id="adminActivityLog" style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; border-radius: 12px; padding: 5px;"></div>
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn small" onclick="loadActivityLog()" style="background: var(--blue); width: auto;">🔄 Оновити</button>
+            <button class="btn small" onclick="clearUserLog()" style="background: var(--red); width: auto;">🗑 Очистити лог</button>
+          </div>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+          <button class="btn" onclick="closeAdm()" style="background: var(--red);">ЗАКРИТИ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOP -->
+  <div id="shop" class="screen">
+    <div class="card">
+      <h2>🛒 КРАМНИЧКА</h2>
+      <div class="shop-grid">
+        <button class="shop-btn" data-item="gold_frame">✨ Золота рамка — 1000 ₴</button>
+        <button class="shop-btn" data-item="crown">👑 Корона — 2000 ₴</button>
+        <button class="shop-btn" data-item="fire">🔥 Полум'я — 1500 ₴</button>
+        <button class="shop-btn" data-item="shield">🛡️ Щит — 2500 ₴</button>
+        <button class="shop-btn" data-item="vip">💎 ВІП — 5000 ₴</button>
+        <button class="shop-btn" data-item="rainbow_name">🌈 Веселкове ім'я — 3000 ₴</button>
+        <button class="shop-btn" data-item="sparkles">✨ Блискітки — 2500 ₴</button>
+        <button class="shop-btn" data-item="avatar_frame">🖼️ Рамка аватара — 2000 ₴</button>
+        <button class="shop-btn" data-item="animated_nick">🌟 Анімований нік — 3500 ₴</button>
+        <button class="shop-btn" data-item="vyshyvanka">🎨 Вишиванка для аватара — 4000 ₴</button>
+        <button class="shop-btn" data-item="kobza">🏺 Кобза для ніка — 3000 ₴</button>
+        <button class="shop-btn" data-item="sunflowers">🌻 Соняшникове поле — 5000 ₴</button>
+        <button class="shop-btn" data-item="bookshelf">📜 Книжкова полиця — 6000 ₴</button>
+        <button class="shop-btn" data-item="theater_mask">🎭 Театральна маска — 4500 ₴</button>
+        <button class="shop-btn" data-item="secret_item" style="display:none">🤫 СЕКРЕТНИЙ ТОВАР — 10000 ₴</button>
+      </div>
+      <button class="btn red" onclick="show('menu')">◀ НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- SECTIONS -->
+  <div id="sections" class="screen">
+    <div class="card">
+      <h2>Обери розділ</h2>
+      <button class="btn theme-btn" onclick="show('imennyky')">📖 Іменники</button>
+      <button class="btn theme-btn" onclick="show('prykmetnyky')">📝 Прикметники</button>
+      <button class="btn theme-btn" onclick="show('zajmennyky')">🔤 Займенники</button>
+      <button class="btn theme-btn" onclick="show('chyslivnyky')">🔢 Числівники</button>
+      <button class="btn theme-btn" onclick="show('frazeologizmy')">💬 Фразеологізми</button>
+      <button class="btn red" onclick="show('menu')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ІМЕННИКИ -->
+  <div id="imennyky" class="screen">
+    <div class="card">
+      <h2>📖 Іменники</h2>
+      <button class="btn theme-btn" onclick="startTheme('vydminy')">Відміни іменників</button>
+      <button class="btn theme-btn" onclick="startTheme('orudnyi_1vidmina')">Орудний відмінок 1 відміни</button>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ПРИКМЕТНИКИ -->
+  <div id="prykmetnyky" class="screen">
+    <div class="card">
+      <h2>📝 Прикметники</h2>
+      <button class="btn theme-btn" onclick="startTheme('prykmetnyky')">Прикметники</button>
+      <button class="btn theme-btn" onclick="startTheme('grupy_prykmetnykiv')">Групи за значенням</button>
+      <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni')">Ступені порівняння</button>
+      <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni_2')">Ступені порівняння 2</button>
+      <button class="btn theme-btn" onclick="startTheme('ne_z_prykmetnykamy')">Правопис НЕ</button>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ЗАЙМЕННИКИ -->
+  <div id="zajmennyky" class="screen">
+    <div class="card">
+      <h2>🔤 Займенники</h2>
+      <button class="btn theme-btn" onclick="startTheme('zajmennyky_rozriady')">Розряди займенників</button>
+      <button class="btn theme-btn" onclick="startTheme('zajmennyky_pravopys')">Правопис неозначених і заперечних</button>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ЧИСЛІВНИКИ -->
+  <div id="chyslivnyky" class="screen">
+    <div class="card">
+      <h2>🔢 Числівники</h2>
+      <button class="btn theme-btn" onclick="startTheme('chyslivnyky_1')">Числівники №1</button>
+      <button class="btn theme-btn" onclick="startTheme('chyslivnyky_2')">Числівники №2</button>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ФРАЗЕОЛОГІЗМИ -->
+  <div id="frazeologizmy" class="screen">
+    <div class="card">
+      <h2>💬 Фразеологізми</h2>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy1')">ЗАВДАННЯ 1</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy2')">ЗАВДАННЯ 2</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy3')">ЗАВДАННЯ 3</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy4')">ЗАВДАННЯ 4</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy5')">ЗАВДАННЯ 5</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy6')">ЗАВДАННЯ 6</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy7')">ЗАВДАННЯ 7</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy8')">ЗАВДАННЯ 8</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy9')">ЗАВДАННЯ 9</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy10')">ЗАВДАННЯ 10</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy11')">ЗАВДАННЯ 11</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy12')">ЗАВДАННЯ 12</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy13')">ЗАВДАННЯ 13</button>
+      <button class="btn theme-btn" onclick="startTheme('frazeologizmy14')">ЗАВДАННЯ 14</button>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="game" class="screen">
+    <div class="card">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div id="question-counter"></div>
+      <h3 id="qtext"></h3>
+      <div id="feedback"></div>
+      <div id="abox"></div>
+      <button class="btn red" style="margin-top:20px;" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- TOP -->
+  <div id="top" class="screen">
+    <div class="card">
+      <h3>🏆 ТОП 1000</h3>
+      <div id="tlist">Завантаження...</div>
+      <button class="btn" onclick="show('menu')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- CABINET -->
+  <div id="cabinet" class="screen">
+    <div class="card cabinet-card">
+      <div class="cabinet-header">
+        <h2>📦 МОЯ СКРИНЬКА</h2>
+        <div class="avatar-wrapper" onclick="openAvatarModal()">
+          <div class="avatar" id="cabinetAvatar">👤</div>
+          <div class="avatar-edit-btn">📷</div>
+        </div>
+      </div>
+
+      <div class="cabinet-tabs">
+        <button class="tab-btn active" data-tab="profile">📋 Профіль</button>
+        <button class="tab-btn" data-tab="stats">📊 Статистика</button>
+        <button class="tab-btn" data-tab="achievements">🏆 Досягнення</button>
+        <button class="tab-btn" data-tab="stickers">🎨 Стікери</button>
+        <button class="tab-btn" data-tab="support">💬 Підтримка</button>
+        <button class="tab-btn" data-tab="friends">👥 Друзі</button>
+        <button class="tab-btn" data-tab="settings">⚙️ Налаштування</button>
+      </div>
+
+      <div id="tab-profile" class="cabinet-tab active">
+        <div class="cabinet-section">
+          <h3>📋 Особиста інформація</h3>
+          <div class="info-grid">
+            <div class="info-item"><span>Нікнейм:</span> <strong id="cabNick"></strong> <button class="edit-btn" onclick="editNick()">✏️</button></div>
+            <div class="info-item"><span>Рівень:</span> <strong id="cabLevel"></strong> <span id="levelBadge"></span></div>
+            <div class="info-item"><span>Баланс:</span> <strong id="cabMoney">0</strong> ₴</div>
+            <div class="info-item"><span>Реєстрація:</span> <strong id="regDate">—</strong></div>
+          </div>
+        </div>
+        <div class="cabinet-section">
+          <h3>🛍️ Мої покупки</h3>
+          <div class="purchases-grid">
+            <div class="purchase-item">✨ Золота рамка: <span id="purchaseGold">❌</span></div>
+            <div class="purchase-item">👑 Корона: <span id="purchaseCrown">❌</span></div>
+            <div class="purchase-item">🔥 Полум'я: <span id="purchaseFire">❌</span></div>
+            <div class="purchase-item">🛡️ Щит: <span id="purchaseShield">❌</span></div>
+            <div class="purchase-item">💎 ВІП: <span id="purchaseVip">❌</span></div>
+            <div class="purchase-item">🌈 Веселкове ім'я: <span id="purchaseRainbow">❌</span></div>
+            <div class="purchase-item">✨ Блискітки: <span id="purchaseSparkles">❌</span></div>
+            <div class="purchase-item">🖼️ Рамка аватара: <span id="purchaseAvatarFrame">❌</span></div>
+            <div class="purchase-item">🌟 Анімований нік: <span id="purchaseAnimated">❌</span></div>
+            <div class="purchase-item">🎨 Вишиванка: <span id="purchaseVyshyvanka">❌</span></div>
+            <div class="purchase-item">🏺 Кобза: <span id="purchaseKobza">❌</span></div>
+            <div class="purchase-item">🌻 Соняшникове поле: <span id="purchaseSunflowers">❌</span></div>
+            <div class="purchase-item">📜 Книжкова полиця: <span id="purchaseBookshelf">❌</span></div>
+            <div class="purchase-item">🎭 Театральна маска: <span id="purchaseTheaterMask">❌</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-stats" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>📊 Моя статистика</h3>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="totalThemes">0</div><div class="stat-label">Пройдено тем</div></div>
+            <div class="stat-card"><div class="stat-value" id="correctAnswers">0</div><div class="stat-label">Правильних</div></div>
+            <div class="stat-card"><div class="stat-value" id="wrongAnswers">0</div><div class="stat-label">Неправильних</div></div>
+            <div class="stat-card"><div class="stat-value" id="avgPercent">0%</div><div class="stat-label">Середній %</div></div>
+            <div class="stat-card"><div class="stat-value" id="bestResult">0%</div><div class="stat-label">Найкращий</div></div>
+            <div class="stat-card"><div class="stat-value" id="perfectCount">0</div><div class="stat-label">100% тем</div></div>
+          </div>
+        </div>
+        <div class="cabinet-section">
+          <h3>📜 Історія проходження</h3>
+          <div class="history-list" id="historyList">Ще немає пройдених тем</div>
+        </div>
+        <div class="cabinet-section">
+          <h3>🏆 Значки</h3>
+          <div class="badges-grid" id="badgesContainer"></div>
+        </div>
+      </div>
+
+      <div id="tab-achievements" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>🏆 Досягнення</h3>
+          <div class="achievements-grid" id="achievementsList"></div>
+        </div>
+      </div>
+
+      <div id="tab-stickers" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>🎨 Стікери українських письменників</h3>
+          <div class="stickers-grid" id="stickersContainer"></div>
+        </div>
+      </div>
+
+      <!-- ПІДТРИМКА -->
+      <div id="tab-support" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>💬 Технічна підтримка</h3>
+          <div style="margin-bottom: 15px;">
+            <textarea id="supportMessage" placeholder="Напишіть ваше повідомлення..." style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ccc; min-height: 120px; font-family: inherit; font-size: 16px; background: white; color: #333; resize: vertical; -webkit-appearance: none; appearance: none; box-sizing: border-box;"></textarea>
+            <div style="display: flex; gap: 10px; margin-top: 12px;">
+              <button class="btn" onclick="sendSupportMessage()" style="background: var(--green); flex: 2; padding: 12px; font-size: 16px;">📨 Відправити</button>
+              <button class="btn" onclick="refreshSupportMessages()" style="background: var(--blue); flex: 1; padding: 12px; font-size: 16px;">🔄 Оновити</button>
+            </div>
+          </div>
+          <h4 style="margin-top: 15px;">📩 Діалог з підтримкою</h4>
+          <div id="supportMessagesList" style="max-height: 400px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 5px;"></div>
+        </div>
+      </div>
+
+      <div id="tab-friends" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>👥 Мої друзі</h3>
+          <div class="add-friend">
+            <input type="text" id="friendNick" placeholder="Нікнейм друга">
+            <button class="btn small" onclick="addFriend()">➕ Додати</button>
+          </div>
+          <div class="friends-list" id="friendsList">У вас ще немає друзів</div>
+        </div>
+        <div class="cabinet-section">
+          <h3>🏆 Таблиця лідерів (друзі)</h3>
+          <div class="leaderboard-friends" id="leaderboardFriends">Додайте друзів</div>
+        </div>
+      </div>
+
+      <div id="tab-settings" class="cabinet-tab">
+        <div class="cabinet-section">
+          <h3>⚙️ Налаштування</h3>
+          <div class="settings-row">
+            <button class="btn small" onclick="changePassword()">🔐 Змінити пароль</button>
+            <button class="btn small danger" onclick="logout()">🚪 Вийти</button>
+          </div>
+          <div class="settings-row" style="margin-top:12px;">
+            <label><input type="checkbox" id="notificationsToggle" onchange="toggleNotifications()"> 📢 Сповіщення</label>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn red" onclick="show('menu')">◀ НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  <div id="avatarModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeAvatarModal()">&times;</span>
+      <h3>Виберіть аватарку</h3>
+      <div class="avatar-options">
+        <div class="avatar-option" onclick="setAvatar('👤')">👤</div>
+        <div class="avatar-option" onclick="setAvatar('😀')">😀</div>
+        <div class="avatar-option" onclick="setAvatar('🎮')">🎮</div>
+        <div class="avatar-option" onclick="setAvatar('🏆')">🏆</div>
+        <div class="avatar-option" onclick="setAvatar('⭐')">⭐</div>
+        <div class="avatar-option" onclick="setAvatar('🔥')">🔥</div>
+        <div class="avatar-option" onclick="setAvatar('💎')">💎</div>
+        <div class="avatar-option" onclick="setAvatar('👑')">👑</div>
+        <div class="avatar-option" onclick="setAvatar('📚')">📚</div>
+        <div class="avatar-option" onclick="setAvatar('🎓')">🎓</div>
+      </div>
+      <hr>
+      <h3>Або завантажте фото</h3>
+      <input type="file" id="avatarFile" accept="image/*" style="display:none">
+      <button class="btn small" onclick="document.getElementById('avatarFile').click()">📷 Вибрати фото</button>
+      <div id="avatarPreview"></div>
+    </div>
+  </div>
+
+  <div id="customPromptModal" class="modal">
+    <div class="modal-content" style="max-width: 300px;">
+      <span class="modal-close" onclick="document.getElementById('customPromptModal').style.display='none'">&times;</span>
+      <h3 id="customPromptMessage">Введіть значення</h3>
+      <input type="text" id="customPromptInput" style="margin: 15px 0; background: #333; color: white; border: 1px solid var(--gold);">
+      <div style="display: flex; gap: 10px;">
+        <button class="btn small" id="customPromptConfirm" style="background: var(--green);">Підтвердити</button>
+        <button class="btn small" id="customPromptCancel" style="background: var(--red);">Скасувати</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="customConfirmModal" class="modal">
+    <div class="modal-content" style="max-width: 300px;">
+      <span class="modal-close" onclick="document.getElementById('customConfirmModal').style.display='none'">&times;</span>
+      <h3 id="customConfirmMessage">Підтвердіть дію</h3>
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="btn small" id="customConfirmYes" style="background: var(--green);">Так</button>
+        <button class="btn small" id="customConfirmNo" style="background: var(--red);">Ні</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="notificationToast" class="notification-toast"></div>
+
+  <!-- SCRIPTS (всі ваші робочі JS файли - без змін) -->
+  <script src="js/utils.js"></script>
+  <script src="js/shop.js"></script>
+  <script src="js/bonuses.js"></script>
+  <script src="js/achievements.js"></script>
+  <script src="js/stickers.js"></script>
+  <script src="js/friends.js"></script>
+  <script src="js/support.js"></script>
+  
+  <script src="js/themes/vydminy.js"></script>
+  <script src="js/themes/orudnyi_1vidmina.js"></script>
+  <script src="js/themes/prykmetnyky.js"></script>
+  <script src="js/themes/grupy_prykmetnykiv.js"></script>
+  <script src="js/themes/prykmetnyky_stupeni.js"></script>
+  <script src="js/themes/prykmetnyky_stupeni_2.js"></script>
+  <script src="js/themes/ne_z_prykmetnykamy.js"></script>
+  <script src="js/themes/chyslivnyky_1.js"></script>
+  <script src="js/themes/chyslivnyky_2.js"></script>
+  <script src="js/themes/zajmennyky_rozriady.js"></script>
+  <script src="js/themes/zajmennyky_pravopys.js"></script>
+  <script src="js/themes/frazeologizmy1.js"></script>
+  <script src="js/themes/frazeologizmy2.js"></script>
+  <script src="js/themes/frazeologizmy3.js"></script>
+  <script src="js/themes/frazeologizmy4.js"></script>
+  <script src="js/themes/frazeologizmy5.js"></script>
+  <script src="js/themes/frazeologizmy6.js"></script>
+  <script src="js/themes/frazeologizmy7.js"></script>
+  <script src="js/themes/frazeologizmy8.js"></script>
+  <script src="js/themes/frazeologizmy9.js"></script>
+  <script src="js/themes/frazeologizmy10.js"></script>
+  <script src="js/themes/frazeologizmy11.js"></script>
+  <script src="js/themes/frazeologizmy12.js"></script>
+  <script src="js/themes/frazeologizmy13.js"></script>
+  <script src="js/themes/frazeologizmy14.js"></script>
+  <script src="js/themes/index.js"></script>
+  
+  <script src="js/cabinet.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    let playersListVisible = false;
+    function togglePlayersList() {
+      const playersList = document.getElementById('adminPlayersList');
+      const btn = event.target;
+      if (playersListVisible) {
+        playersList.style.display = 'none';
+        btn.innerHTML = '👥 ПОКАЗАТИ ГРАВЦІВ';
+        playersListVisible = false;
+      } else {
+        playersList.style.display = 'block';
+        btn.innerHTML = '👥 ПРИХОВАТИ ГРАВЦІВ';
+        playersListVisible = true;
+        updateAdminPanel();
+      }
+    }
+    
+    async function resetAllPlayersItems() {
+      if (!confirm("⚠️ УВАГА! Це скине ВСІ покупки для ВСІХ гравців! Гроші за покупки НЕ ПОВЕРНУТЬСЯ. Ви впевнені?")) return;
+      if (!confirm("🔴 ОСТАННЄ ПОПЕРЕДЖЕННЯ! Цю дію НЕ МОЖНА СКАСУВАТИ. Продовжити?")) return;
+      
+      showCustomMessage("🔄 Скидання всіх покупок...");
+      
+      try {
+        const r = await fetch(DB + "users/.json");
+        const players = await r.json();
+        if (!players) {
+          showCustomMessage("❌ Гравців не знайдено!", true);
+          return;
+        }
+        
+        let count = 0;
+        const allItems = ['gold_frame', 'crown', 'fire', 'shield', 'vip', 'rainbow_name', 'sparkles', 'avatar_frame', 'animated_nick', 'vyshyvanka', 'kobza', 'sunflowers', 'bookshelf', 'theater_mask'];
+        
+        for (let playerName in players) {
+          const player = players[playerName];
+          let changed = false;
+          
+          allItems.forEach(item => {
+            if (player.items && player.items[item]) {
+              player.items[item] = false;
+              changed = true;
+            }
+            if (player.items && player.items[item + '_active'] !== undefined) {
+              delete player.items[item + '_active'];
+              changed = true;
+            }
+          });
+          
+          if (changed && player.items) {
+            await fetch(DB + "users/" + playerName + ".json", { method: 'PUT', body: JSON.stringify(player) });
+            count++;
+          }
+        }
+        
+        showNotification(`✅ Скинуто покупки для ${count} гравців! Оновіть сторінку.`);
+        setTimeout(() => location.reload(), 2000);
+      } catch(e) {
+        console.error(e);
+        showCustomMessage("❌ Помилка при скиданні покупок!", true);
+      }
+    }
+    
+    async function adminAddMoney() {
+      const nick = document.getElementById('adminPlayerNick').value.trim();
+      if (!nick) { showCustomMessage("❌ Введіть нікнейм гравця!", true); return; }
+      const amount = prompt("Скільки додати?");
+      if (!amount) return;
+      const numAmount = parseInt(amount);
+      if (isNaN(numAmount)) { showCustomMessage("❌ Введіть число!", true); return; }
+      const r = await fetch(DB + "users/" + nick + ".json");
+      const playerData = await r.json();
+      if (!playerData) { showCustomMessage("❌ Гравця не знайдено!", true); return; }
+      playerData.points = (playerData.points || 0) + numAmount;
+      await fetch(DB + "users/" + nick + ".json", { method: 'PUT', body: JSON.stringify(playerData) });
+      showNotification(`✅ ${nick} +${numAmount} ₴`);
+      updateAdminPanel();
+    }
+    
+    async function adminRemoveMoney() {
+      const nick = document.getElementById('adminPlayerNick').value.trim();
+      if (!nick) { showCustomMessage("❌ Введіть нікнейм гравця!", true); return; }
+      const amount = prompt("Скільки відняти?");
+      if (!amount) return;
+      const numAmount = parseInt(amount);
+      if (isNaN(numAmount)) { showCustomMessage("❌ Введіть число!", true); return; }
+      const r = await fetch(DB + "users/" + nick + ".json");
+      const playerData = await r.json();
+      if (!playerData) { showCustomMessage("❌ Гравця не знайдено!", true); return; }
+      playerData.points = Math.max(0, (playerData.points || 0) - numAmount);
+      await fetch(DB + "users/" + nick + ".json", { method: 'PUT', body: JSON.stringify(playerData) });
+      showNotification(`✅ ${nick} -${numAmount} ₴`);
+      updateAdminPanel();
+    }
+    
+    async function adminDeletePlayer() {
+      const nick = document.getElementById('adminPlayerNick').value.trim();
+      if (!nick) { showCustomMessage("❌ Введіть нікнейм гравця!", true); return; }
+      if (confirm(`Видалити гравця ${nick}? Цю дію не можна скасувати!`)) {
+        await fetch(DB + "users/" + nick + ".json", { method: 'DELETE' });
+        showNotification(`🗑 Гравець ${nick} видалений`);
+        updateAdminPanel();
+        document.getElementById('adminPlayerNick').value = '';
+      }
+    }
+    
+    async function loadAdminAccessLog() {
+      const logDiv = document.getElementById('adminAccessLog');
+      if (!logDiv) return;
+      try {
+        const r = await fetch(DB + "admin_logs.json");
+        const data = await r.json();
+        if (data) {
+          const logs = Object.values(data).reverse().slice(0, 30);
+          logDiv.innerHTML = logs.map(log => `<div style="padding: 6px; border-bottom: 1px solid #ddd; font-size: 12px;">🕐 ${log.time} — <strong>${log.nick}</strong></div>`).join('');
+          if (logs.length === 0) logDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Лог порожній</div>';
+        } else { logDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Лог порожній</div>'; }
+      } catch(e) { logDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Помилка завантаження</div>'; }
+    }
+    
+    async function clearAdminAccessLog() {
+      if (!confirm("Очистити лог входів в адмінку?")) return;
+      await fetch(DB + "admin_logs.json", { method: 'DELETE' });
+      loadAdminAccessLog();
+      showNotification("✅ Лог адмінки очищено");
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.shop-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var itemName = this.getAttribute('data-item');
+          if (itemName && typeof buyItem === 'function') { buyItem(itemName); }
+          return false;
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>

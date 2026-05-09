@@ -13,6 +13,59 @@
   <link rel="stylesheet" href="css/game.css">
   <link rel="stylesheet" href="css/admin.css">
   <link rel="stylesheet" href="css/responsive.css">
+  
+  <style>
+    /* Додаткові стилі для заставки */
+    #splash {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                  url('https://file.garden/aZHnP_3ch2qR4tWj/61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    
+    #splash-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    #splash-video.visible {
+      opacity: 1;
+    }
+    
+    #startBtn {
+      position: relative;
+      z-index: 10000;
+      padding: 16px 40px;
+      font-size: 28px;
+      font-weight: bold;
+      background: linear-gradient(45deg, #FFD700, #FFEA80);
+      color: #00204A;
+      border: 3px solid #FFFFFF;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      transition: transform 0.1s;
+    }
+    
+    #startBtn:active {
+      transform: scale(0.96);
+    }
+    
+    #startBtn.hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
@@ -22,8 +75,8 @@
     <button id="startBtn">ПОЧАТИ ГРУ</button>
   </div>
 
-  <!-- AUTH SCREEN -->
-  <div id="auth-screen" class="screen">
+  <!-- AUTH SCREEN (прихована, використовується тільки для авторизації) -->
+  <div id="auth-screen" class="screen" style="display: none !important;">
     <div class="card">
       <h2 style="color:var(--gold)">СОЛОВ'ЇНА 2.0</h2>
       <input type="text" id="nick" placeholder="Нікнейм" autocomplete="off">
@@ -598,13 +651,15 @@
     });
   </script>
 
-  <!-- КОД ДЛЯ ЗАПУСКУ ГРИ ПІСЛЯ ЗАСТАВКИ -->
+  <!-- КОД ДЛЯ ЗАПУСКУ ГРИ: кнопка на фоні, відео з'являється після натискання -->
   <script>
     (function() {
-      function showGame() {
+      // Функція показу меню після відео
+      function showGameMenu() {
         const splash = document.getElementById('splash');
         if (splash) splash.style.display = 'none';
         
+        // Автоматичний вхід для зареєстрованого гравця
         const savedNick = localStorage.getItem('un');
         const savedPass = localStorage.getItem('up');
         
@@ -612,48 +667,64 @@
           document.getElementById('nick').value = savedNick;
           document.getElementById('pass').value = savedPass;
           auth();
-        } else if (typeof show === 'function') {
-          show('auth-screen');
         } else {
-          document.getElementById('auth-screen').style.display = 'flex';
-          document.getElementById('menu').style.display = 'none';
+          // Якщо немає даних - створюємо нового гравця автоматично
+          const randomName = "Гравець_" + Math.floor(Math.random() * 10000);
+          const randomPass = Math.random().toString(36).substring(2, 10);
+          localStorage.setItem('un', randomName);
+          localStorage.setItem('up', randomPass);
+          document.getElementById('nick').value = randomName;
+          document.getElementById('pass').value = randomPass;
+          auth();
         }
       }
       
+      // Чекаємо завантаження сторінки
       window.addEventListener('load', function() {
         const splash = document.getElementById('splash');
         const video = document.getElementById('splash-video');
         const startBtn = document.getElementById('startBtn');
+        const videoUrl = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
         
         if (video && startBtn) {
-          video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
+          // Завантажуємо відео але тримаємо його прихованим
+          video.src = videoUrl;
           video.load();
           
+          // При натисканні на кнопку
           startBtn.onclick = function(e) {
             e.preventDefault();
-            startBtn.style.display = 'none';
+            startBtn.classList.add('hidden'); // Ховаємо кнопку
+            video.classList.add('visible');  // Показуємо відео
             video.muted = false;
+            video.currentTime = 0;
             video.play().catch(function(err) {
               console.log("Помилка відео:", err);
-              showGame();
+              // Якщо помилка - одразу показуємо меню
+              showGameMenu();
             });
           };
           
+          // Коли відео закінчилось
           video.onended = function() {
-            showGame();
+            showGameMenu();
           };
           
+          // Помилка завантаження відео
           video.onerror = function() {
-            showGame();
+            console.log("Помилка завантаження відео");
+            showGameMenu();
           };
           
+          // Таймаут на всяк випадок (10 секунд)
           setTimeout(function() {
-            if (splash && splash.style.display !== 'none') {
-              showGame();
+            if (splash && splash.style.display !== 'none' && !video.classList.contains('visible')) {
+              console.log("Таймаут - пропускаємо відео");
+              showGameMenu();
             }
-          }, 5000);
+          }, 10000);
         } else {
-          showGame();
+          showGameMenu();
         }
       });
     })();

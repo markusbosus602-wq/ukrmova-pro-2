@@ -109,13 +109,3 @@ textarea {
   -webkit-appearance: none;
   appearance: none;
 }
-
-.log-box {
-  background: #f8f8f8;
-  padding: 10px;
-  border-radius: 12px;
-  max-height: 150px;
-  overflow-y: auto;
-  font-size: 12px;
-  margin: 10px 0;
-}

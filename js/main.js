@@ -8,6 +8,7 @@ let currentTheme = '';
 let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
+let themeStartTime = null; // Час початку теми
 let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false,
   rainbow_name: false, sparkles: false, avatar_frame: false, animated_nick: false,
   vyshyvanka: false, kobza: false, sunflowers: false, bookshelf: false, theater_mask: false };
@@ -16,40 +17,13 @@ let currentCorrectAnswer = '';
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
 
-// Функція для очищення нікнейму від посилань
-function cleanNickname(nick) {
-  if (!nick) return 'Гравець';
-  let cleaned = String(nick);
-  cleaned = cleaned.replace(/https?:\/\/[^\s]+/g, '');
-  cleaned = cleaned.replace(/github\.io/gi, '');
-  cleaned = cleaned.replace(/markusbosus602-wq/gi, '');
-  cleaned = cleaned.replace(/\.github\.io/gi, '');
-  cleaned = cleaned.replace(/github/gi, '');
-  cleaned = cleaned.replace(/\.io/gi, '');
-  cleaned = cleaned.trim();
-  if (cleaned === '' || cleaned === '.io' || cleaned === 'github.io' || cleaned === 'github') {
-    cleaned = 'Гравець';
-  }
-  return cleaned;
-}
-
-// Очищення поля вводу
-function cleanInputField(inputElement) {
-  if (inputElement && inputElement.value) {
-    const cleaned = cleanNickname(inputElement.value);
-    if (cleaned !== inputElement.value) {
-      inputElement.value = cleaned;
-    }
-  }
-}
-
 window.onload = function() {
   const splash = document.getElementById('splash');
   const video = document.getElementById('splash-video');
   const startBtn = document.getElementById('startBtn');
   
   if (video && startBtn) {
-    video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
+    video.src = "video_2026-02-14_17-15-12.mp4";
     
     startBtn.onclick = function() {
       startBtn.style.display = 'none';
@@ -78,11 +52,7 @@ function tryAutoLogin() {
   const savedNick = localStorage.getItem('un');
   const savedPass = localStorage.getItem('up');
   if (savedNick && savedPass) {
-    const cleanNick = cleanNickname(savedNick);
-    if (cleanNick !== savedNick) {
-      localStorage.setItem('un', cleanNick);
-    }
-    document.getElementById('nick').value = cleanNick;
+    document.getElementById('nick').value = savedNick;
     document.getElementById('pass').value = savedPass;
     auth();
   } else {
@@ -91,7 +61,7 @@ function tryAutoLogin() {
 }
 
 async function auth() {
-  let n = cleanNickname(document.getElementById('nick').value.trim());
+  let n = document.getElementById('nick').value.trim();
   let p = document.getElementById('pass').value.trim();
   if(!n || !p) {
     showCustomMessage("Введіть нікнейм та пароль", true);
@@ -107,9 +77,6 @@ async function auth() {
         return;
       }
       user = d;
-      if (user.name) {
-        user.name = cleanNickname(user.name);
-      }
     } else {
       user = {
         name: n, pass: p, points: 0, points_earned: 0,
@@ -122,10 +89,10 @@ async function auth() {
       };
       await fetch(DB + "users/" + n + ".json", {method:'PUT', body:JSON.stringify(user)});
     }
-    localStorage.setItem('un', user.name);
+    localStorage.setItem('un', n);
     localStorage.setItem('up', p);
     const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
-    await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify({game_nick:user.name, time:now})});
+    await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify({game_nick:n, time:now})});
     items = user.items || {};
     if (!user.themeResults) user.themeResults = {};
     if (!user.regDate) user.regDate = new Date().toISOString().split('T')[0];
@@ -195,9 +162,9 @@ function applyItems() {
   }
   
   if (items.sunflowers && items.sunflowers_active !== false) {
-    document.body.style.background = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://file.garden/aZHnP_3ch2qR4tWj/sunflowers-bg.jpg') center/cover no-repeat fixed`;
+    document.body.style.background = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('sunflowers-bg.jpg') center/cover no-repeat fixed`;
   } else {
-    document.body.style.background = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://file.garden/aZHnP_3ch2qR4tWj/61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat fixed`;
+    document.body.style.background = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat fixed`;
   }
   
   if (!document.querySelector('#animated-nick-style')) {
@@ -217,11 +184,29 @@ function show(id) {
   }
 }
 
+// ========== АДМІН-ПАНЕЛЬ: 5 КЛІКІВ → ПАРОЛЬ ==========
+
 function admT() {
-  if(++cC >= 5) {
-    openAdminPanel();
+  const adminPassword = "vedun81ansuz81"; // Змініть на свій пароль
+  
+  cC++;
+  
+  if (cC >= 5) {
+    const enteredPassword = prompt("🔐 Введіть пароль адміністратора:");
+    
+    if (enteredPassword === adminPassword) {
+      openAdminPanel();
+      logAdminAccess();
+    } else if (enteredPassword !== null) {
+      showCustomMessage("❌ Невірний пароль! Доступ заборонено.", true);
+    }
     cC = 0;
   }
+  
+  // Скидаємо лічильник через 3 секунди
+  setTimeout(function() {
+    cC = 0;
+  }, 3000);
 }
 
 async function logAdminAccess() {
@@ -247,7 +232,6 @@ function toggleP() {
 
 async function delU() {
   let n = document.getElementById('a-n').value.trim();
-  n = cleanNickname(n);
   if(!n) {
     showCustomMessage("Введіть нікнейм", true);
     return;
@@ -261,7 +245,6 @@ async function delU() {
 
 async function edO(add) {
   let n = document.getElementById('a-n').value.trim();
-  n = cleanNickname(n);
   if(!n) {
     showCustomMessage("Введіть ник", true);
     return;
@@ -293,9 +276,7 @@ async function loadPlayers() {
   }
   for (let key in d) {
     let u = d[key];
-    let playerName = u.name || key;
-    playerName = cleanNickname(playerName);
-    list.innerHTML += `<div style="padding:8px; border-bottom:1px solid #ddd;"><strong>${playerName}</strong><br><small>Баланс: ${u.points || 0} ₴ | Рейтинг: ${u.points_earned || u.points || 0} | Рівень: ${u.level || 1}</small></div>`;
+    list.innerHTML += `<div style="padding:8px; border-bottom:1px solid #ddd;"><strong>${u.name || key}</strong><br><small>Баланс: ${u.points || 0} ₴ | Рейтинг: ${u.points_earned || u.points || 0} | Рівень: ${u.level || 1}</small></div>`;
   }
 }
 
@@ -307,9 +288,7 @@ async function loadUserLog() {
     logDiv.innerHTML = '';
     if (data) {
       Object.values(data).reverse().slice(0,50).forEach(entry => {
-        let nick = entry.game_nick || '';
-        nick = cleanNickname(nick);
-        logDiv.innerHTML += `<div class="log-entry">${entry.time} — <b>${nick}</b></div>`;
+        logDiv.innerHTML += `<div class="log-entry">${entry.time} — <b>${entry.game_nick}</b></div>`;
       });
     } else {
       logDiv.innerHTML = 'Лог порожній';
@@ -333,8 +312,7 @@ async function loadAdminLogs() {
     logDiv.innerHTML = '';
     if (data) {
       Object.values(data).reverse().forEach(log => {
-        let nick = cleanNickname(log.nick);
-        logDiv.innerHTML += `<div class="log-entry">${log.time} — <b>${nick}</b></div>`;
+        logDiv.innerHTML += `<div class="log-entry">${log.time} — <b>${log.nick}</b></div>`;
       });
     } else {
       logDiv.innerHTML = 'Лог порожній';
@@ -351,6 +329,7 @@ async function clearAdminLogs() {
 }
 
 function startTheme(theme) {
+  themeStartTime = Date.now(); // Запам'ятовуємо час початку теми
   currentTheme = theme;
   currentIndex = 0;
   correctCount = 0;
@@ -377,20 +356,77 @@ function loadQuestion() {
     
     if (typeof checkStickers === 'function') checkStickers();
     
-    document.getElementById('qtext').textContent = "Тема завершена!";
+    // ========== НОВЕ ПОВІДОМЛЕННЯ З ТЕМОЮ, ДАТОЮ ТА ЧАСОМ ==========
+    
+    // Отримуємо назву теми
+    const themeName = getThemeName(currentTheme);
+    
+    // Отримуємо поточну дату та час
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('uk-UA');
+    const timeStr = now.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+    
+    // Розраховуємо час проходження теми
+    let timeSpent = '';
+    if (themeStartTime) {
+      const elapsedSeconds = Math.floor((Date.now() - themeStartTime) / 1000);
+      const minutes = Math.floor(elapsedSeconds / 60);
+      const seconds = elapsedSeconds % 60;
+      if (minutes > 0) {
+        timeSpent = `${minutes} хв ${seconds} сек`;
+      } else {
+        timeSpent = `${seconds} сек`;
+      }
+    } else {
+      timeSpent = 'невідомо';
+    }
+    
+    // Розраховуємо відсоток правильних відповідей
+    const resultPercent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+    
+    // Визначаємо колір для результату
+    let resultColor = '#e74c3c'; // червоний для <60%
+    if (resultPercent >= 80) resultColor = '#2ecc71'; // зелений для >=80%
+    else if (resultPercent >= 60) resultColor = '#f39c12'; // жовтий для 60-79%
+    
+    document.getElementById('qtext').innerHTML = `📚 Тема "<span style="color: var(--gold);">${themeName}</span>" завершена!`;
     document.getElementById('feedback').innerHTML = '';
     document.getElementById('abox').innerHTML = `
-      <div class="summary">
-        <strong>Правильних:</strong> ${correctCount}<br>
-        <strong>Неправильних:</strong> ${wrongCount}<br>
-        <strong>Серія правильних:</strong> ${typeof correctStreak !== 'undefined' ? correctStreak : 0}<br>
-        <strong>Баланс:</strong> ${user.points.toLocaleString()} ₴<br>
-        <strong>Рейтинг:</strong> ${(user.points_earned || user.points).toLocaleString()} ₴
+      <div class="summary" style="background: rgba(0,0,0,0.05); border-radius: 16px; padding: 16px;">
+        <div style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--gold); text-align: center;">
+          <span style="font-size: 14px; font-weight: bold;">📅 ${dateStr} &nbsp;|&nbsp; ⏰ ${timeStr} &nbsp;|&nbsp; ⏱️ ${timeSpent}</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
+          <div style="background: #2ecc71; padding: 10px; border-radius: 12px; text-align: center; color: white;">
+            <div style="font-size: 24px; font-weight: bold;">${correctCount}</div>
+            <div style="font-size: 11px;">✅ Правильних</div>
+          </div>
+          <div style="background: #ff4d4d; padding: 10px; border-radius: 12px; text-align: center; color: white;">
+            <div style="font-size: 24px; font-weight: bold;">${wrongCount}</div>
+            <div style="font-size: 11px;">❌ Неправильних</div>
+          </div>
+          <div style="background: #3498db; padding: 10px; border-radius: 12px; text-align: center; color: white;">
+            <div style="font-size: 24px; font-weight: bold;">${total}</div>
+            <div style="font-size: 11px;">📊 Всього питань</div>
+          </div>
+          <div style="background: ${resultColor}; padding: 10px; border-radius: 12px; text-align: center; color: white;">
+            <div style="font-size: 24px; font-weight: bold;">${resultPercent}%</div>
+            <div style="font-size: 11px;">🎯 Результат</div>
+          </div>
+        </div>
+        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd; text-align: center;">
+          <div style="margin-bottom: 5px;">
+            <span style="font-weight: bold;">💰 Баланс:</span> <span style="color: var(--gold);">${user.points.toLocaleString()} ₴</span>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <span style="font-weight: bold;">🏆 Рейтинг:</span> <span style="color: var(--gold);">${(user.points_earned || user.points).toLocaleString()} ₴</span>
+          </div>
+        </div>
       </div>
-      <button class="btn" onclick="show('sections')">Обрати тему</button>
+      <button class="btn" style="margin-top: 15px; background: #9c27b0;" onclick="show('sections')">🎯 Обрати іншу тему</button>
     `;
     document.getElementById('progressFill').style.width = '0%';
     document.getElementById('question-counter').textContent = '';
+    themeStartTime = null; // Скидаємо час
     return;
   }
 
@@ -556,17 +592,12 @@ function getPlayerBadges(playerData) {
 
 async function showPlayerProfile(nickname) {
   if (!nickname) return;
-  nickname = cleanNickname(nickname);
   try {
     const r = await fetch(DB + "users/" + nickname + ".json");
-    let playerData = await r.json();
+    const playerData = await r.json();
     if (!playerData) {
       showCustomMessage("❌ Гравця не знайдено!", true);
       return;
-    }
-    
-    if (playerData.name) {
-      playerData.name = cleanNickname(playerData.name);
     }
     
     let totalCorrect = 0, totalWrong = 0, totalThemes = 0, perfectCount = 0;
@@ -689,14 +720,12 @@ async function loadT() {
       const u = topPlayers[i];
       const rating = u.points_earned || u.points || 0;
       const avatarHtml = getUserAvatarHtmlForTop(u.avatar, u.avatarType, u.avatarData);
-      let playerName = u.name || 'Гравець';
-      playerName = cleanNickname(playerName);
       l.innerHTML += `
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #ddd;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <span style="font-weight: bold; width: 35px;">${i + 1}.</span>
             ${avatarHtml}
-            <span style="cursor: pointer; color: var(--gold); text-decoration: underline;" onclick="showPlayerProfile('${playerName.replace(/'/g, "\\'")}')">${getLevelIcon(u.level)} ${playerName}</span>
+            <span style="cursor: pointer; color: var(--gold); text-decoration: underline;" onclick="showPlayerProfile('${u.name.replace(/'/g, "\\'")}')">${getLevelIcon(u.level)} ${u.name}</span>
           </div>
           <b>${rating.toLocaleString()} ₴</b>
         </div>
@@ -712,7 +741,7 @@ function getLevelIcon(level) {
   return icons[level] || '🌱';
 }
 
-// ========== АДМІН-ПАНЕЛЬ ==========
+// ========== АДМІН-ПАНЕЛЬ (ФУНКЦІЇ) ==========
 
 async function getAllPlayers() {
   const r = await fetch(DB + "users/.json");
@@ -723,35 +752,31 @@ async function getAllPlayers() {
 
 async function updateAdminPanel() {
   const players = await getAllPlayers();
-  let searchTerm = document.getElementById('adminSearchInput')?.value || '';
-  searchTerm = cleanNickname(searchTerm).toLowerCase();
+  const searchTerm = document.getElementById('adminSearchInput')?.value.toLowerCase() || '';
   let filteredPlayers = players;
   if (searchTerm) {
-    filteredPlayers = players.filter(p => p.name && cleanNickname(p.name).toLowerCase().includes(searchTerm));
+    filteredPlayers = players.filter(p => p.name && p.name.toLowerCase().includes(searchTerm));
   }
   
   const playersList = document.getElementById('adminPlayersList');
   if (playersList) {
-    playersList.innerHTML = filteredPlayers.map(p => {
-      let playerName = p.name || '???';
-      playerName = cleanNickname(playerName);
-      return `
+    playersList.innerHTML = filteredPlayers.map(p => `
       <div style="padding: 10px; border-bottom: 1px solid #ddd; background: ${p.name === user?.name ? '#e8f5e9' : '#fff'}; border-radius: 8px; margin-bottom: 5px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
           <div>
-            <strong>${playerName}</strong><br>
+            <strong>${p.name || '???'}</strong><br>
             <small>💰 Баланс: ${(p.points || 0).toLocaleString()} ₴</small><br>
             <small>🏆 Рейтинг: ${((p.points_earned || p.points) || 0).toLocaleString()} ₴</small><br>
             <small>🎚️ Рівень: ${p.level || 1}</small><br>
             <small>🔑 Пароль: ${p.pass || 'немає'}</small>
           </div>
           <div style="display: flex; gap: 5px; margin-top: 5px;">
-            <button class="btn small" onclick="viewPlayerMessages('${playerName}')" style="background: var(--blue); width: auto; padding: 4px 8px;">💬</button>
-            <button class="btn small" onclick="editPlayerPoints('${playerName}')" style="background: var(--green); width: auto; padding: 4px 8px;">💰</button>
+            <button class="btn small" onclick="viewPlayerMessages('${p.name}')" style="background: var(--blue); width: auto; padding: 4px 8px;">💬</button>
+            <button class="btn small" onclick="editPlayerPoints('${p.name}')" style="background: var(--green); width: auto; padding: 4px 8px;">💰</button>
           </div>
         </div>
       </div>
-    `}).join('');
+    `).join('');
     if (filteredPlayers.length === 0) playersList.innerHTML = '<div style="padding: 20px; text-align: center; color: #aaa;">Гравців не знайдено</div>';
   }
   
@@ -771,24 +796,21 @@ async function updateAdminPanel() {
     if (allMessages.length === 0) {
       messagesList.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Немає повідомлень без відповіді</div>';
     } else {
-      messagesList.innerHTML = allMessages.map(msg => {
-        let playerName = cleanNickname(msg.player);
-        return `
+      messagesList.innerHTML = allMessages.map(msg => `
         <div style="padding: 10px; border-bottom: 1px solid #ddd; background: #fff3e0; border-radius: 8px; margin-bottom: 8px;">
-          <div><strong>👤 ${playerName}</strong> <small>${msg.message.date}</small></div>
+          <div><strong>👤 ${msg.player}</strong> <small>${msg.message.date}</small></div>
           <div style="margin: 8px 0; padding: 8px; background: white; border-radius: 8px;">${msg.message.message}</div>
           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <textarea id="reply_${msg.message.id}" placeholder="Відповідь..." style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; min-width: 150px;"></textarea>
-            <button class="btn small" onclick="replyToMessage('${playerName}', ${msg.message.id})" style="background: var(--green); width: auto;">📨 Відповісти</button>
+            <button class="btn small" onclick="replyToMessage('${msg.player}', ${msg.message.id})" style="background: var(--green); width: auto;">📨 Відповісти</button>
           </div>
         </div>
-      `}).join('');
+      `).join('');
     }
   }
 }
 
 async function viewPlayerMessages(playerName) {
-  playerName = cleanNickname(playerName);
   const r = await fetch(DB + "users/" + playerName + ".json");
   const playerData = await r.json();
   if (!playerData) {
@@ -811,7 +833,6 @@ async function viewPlayerMessages(playerName) {
 }
 
 async function replyToMessage(playerName, messageId) {
-  playerName = cleanNickname(playerName);
   const replyText = document.getElementById(`reply_${messageId}`)?.value.trim();
   if (!replyText) {
     showCustomMessage("❌ Введіть відповідь!", true);
@@ -830,60 +851,8 @@ async function replyToMessage(playerName, messageId) {
   }
 }
 
-// ВИПРАВЛЕНІ ФУНКЦІЇ ДЛЯ АДМІН-ПАНЕЛІ
-async function adminAddMoney() {
-  let nick = document.getElementById('adminPlayerNick').value.trim();
-  nick = cleanNickname(nick);
-  if (!nick) { showCustomMessage("❌ Введіть нікнейм гравця!", true); return; }
-  const amount = prompt("💰 Скільки додати?");
-  if (!amount) return;
-  const numAmount = parseInt(amount);
-  if (isNaN(numAmount)) { showCustomMessage("❌ Введіть число!", true); return; }
-  const r = await fetch(DB + "users/" + nick + ".json");
-  const playerData = await r.json();
-  if (!playerData) { showCustomMessage("❌ Гравця не знайдено!", true); return; }
-  playerData.points = (playerData.points || 0) + numAmount;
-  playerData.points_earned = (playerData.points_earned || playerData.points || 0);
-  await fetch(DB + "users/" + nick + ".json", { method: 'PUT', body: JSON.stringify(playerData) });
-  showNotification(`✅ ${nick} +${numAmount} ₴`);
-  updateAdminPanel();
-  cleanInputField(document.getElementById('adminPlayerNick'));
-}
-
-async function adminRemoveMoney() {
-  let nick = document.getElementById('adminPlayerNick').value.trim();
-  nick = cleanNickname(nick);
-  if (!nick) { showCustomMessage("❌ Введіть нікнейм гравця!", true); return; }
-  const amount = prompt("💰 Скільки відняти?");
-  if (!amount) return;
-  const numAmount = parseInt(amount);
-  if (isNaN(numAmount)) { showCustomMessage("❌ Введіть число!", true); return; }
-  const r = await fetch(DB + "users/" + nick + ".json");
-  const playerData = await r.json();
-  if (!playerData) { showCustomMessage("❌ Гравця не знайдено!", true); return; }
-  playerData.points = Math.max(0, (playerData.points || 0) - numAmount);
-  await fetch(DB + "users/" + nick + ".json", { method: 'PUT', body: JSON.stringify(playerData) });
-  showNotification(`✅ ${nick} -${numAmount} ₴`);
-  updateAdminPanel();
-  cleanInputField(document.getElementById('adminPlayerNick'));
-}
-
-async function adminDeletePlayer() {
-  let nick = document.getElementById('adminPlayerNick').value.trim();
-  nick = cleanNickname(nick);
-  if (!nick) { showCustomMessage("❌ Введіть нікнейм гравця!", true); return; }
-  if (confirm(`⚠️ Видалити гравця ${nick}? Цю дію НЕ МОЖНА скасувати!`)) {
-    await fetch(DB + "users/" + nick + ".json", { method: 'DELETE' });
-    showNotification(`🗑 Гравець ${nick} видалений`);
-    updateAdminPanel();
-    document.getElementById('adminPlayerNick').value = '';
-  }
-  cleanInputField(document.getElementById('adminPlayerNick'));
-}
-
 async function editPlayerPoints(playerName) {
-  playerName = cleanNickname(playerName);
-  const amount = prompt("💰 Скільки додати до балансу? (від'ємне число для віднімання)");
+  const amount = prompt("Скільки додати до балансу? (від'ємне число для віднімання)");
   if (amount === null) return;
   const numAmount = parseInt(amount);
   if (isNaN(numAmount)) {
@@ -910,10 +879,7 @@ async function loadActivityLog() {
     const data = await r.json();
     if (data) {
       const logs = Object.values(data).reverse().slice(0, 50);
-      activityDiv.innerHTML = logs.map(log => {
-        let nick = cleanNickname(log.game_nick);
-        return `<div style="padding: 8px; border-bottom: 1px solid #ddd; font-size: 12px;">🕐 ${log.time} — <strong>${nick}</strong></div>`;
-      }).join('');
+      activityDiv.innerHTML = logs.map(log => `<div style="padding: 8px; border-bottom: 1px solid #ddd; font-size: 12px;">🕐 ${log.time} — <strong>${log.game_nick}</strong></div>`).join('');
       if (logs.length === 0) activityDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Лог активності порожній</div>';
     } else {
       activityDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Лог активності порожній</div>';
@@ -934,12 +900,6 @@ function openAdminPanel() {
     adminPanel.style.display = 'block';
     updateAdminPanelFull();
     loadAdminAccessLog();
-    setTimeout(function() {
-      const searchInput = document.getElementById('adminSearchInput');
-      const playerInput = document.getElementById('adminPlayerNick');
-      if (searchInput) searchInput.value = cleanNickname(searchInput.value);
-      if (playerInput) playerInput.value = cleanNickname(playerInput.value);
-    }, 100);
   }
 }
 
@@ -951,10 +911,7 @@ async function loadAdminAccessLog() {
     const data = await r.json();
     if (data) {
       const logs = Object.values(data).reverse().slice(0, 30);
-      logDiv.innerHTML = logs.map(log => {
-        let nick = cleanNickname(log.nick);
-        return `<div style="padding: 6px; border-bottom: 1px solid #ddd; font-size: 12px;">🕐 ${log.time} — <strong>${nick}</strong></div>`;
-      }).join('');
+      logDiv.innerHTML = logs.map(log => `<div style="padding: 6px; border-bottom: 1px solid #ddd; font-size: 12px;">🕐 ${log.time} — <strong>${log.nick}</strong></div>`).join('');
       if (logs.length === 0) logDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Лог порожній</div>';
     } else {
       logDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Лог порожній</div>';

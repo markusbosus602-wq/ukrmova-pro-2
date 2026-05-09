@@ -44,7 +44,7 @@
       <button class="btn green" onclick="show('shop')">КРАМНИЧКА</button>
       <button class="btn" style="background:var(--purple)" onclick="show('cabinet')">📦 МОЯ СКРИНЬКА</button>
 
-      <!-- АДМІН-ПАНЕЛЬ (прихована, відкривається через 5 кліків + пароль) -->
+      <!-- АДМІН-ПАНЕЛЬ -->
       <div id="admin-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
           <h2 style="color: var(--blue); margin: 0;">👑 АДМІН-ПАНЕЛЬ</h2>
@@ -596,6 +596,67 @@
         });
       });
     });
+  </script>
+
+  <!-- КОД ДЛЯ ЗАПУСКУ ГРИ ПІСЛЯ ЗАСТАВКИ -->
+  <script>
+    (function() {
+      function showGame() {
+        const splash = document.getElementById('splash');
+        if (splash) splash.style.display = 'none';
+        
+        const savedNick = localStorage.getItem('un');
+        const savedPass = localStorage.getItem('up');
+        
+        if (savedNick && savedPass && typeof auth === 'function') {
+          document.getElementById('nick').value = savedNick;
+          document.getElementById('pass').value = savedPass;
+          auth();
+        } else if (typeof show === 'function') {
+          show('auth-screen');
+        } else {
+          document.getElementById('auth-screen').style.display = 'flex';
+          document.getElementById('menu').style.display = 'none';
+        }
+      }
+      
+      window.addEventListener('load', function() {
+        const splash = document.getElementById('splash');
+        const video = document.getElementById('splash-video');
+        const startBtn = document.getElementById('startBtn');
+        
+        if (video && startBtn) {
+          video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
+          video.load();
+          
+          startBtn.onclick = function(e) {
+            e.preventDefault();
+            startBtn.style.display = 'none';
+            video.muted = false;
+            video.play().catch(function(err) {
+              console.log("Помилка відео:", err);
+              showGame();
+            });
+          };
+          
+          video.onended = function() {
+            showGame();
+          };
+          
+          video.onerror = function() {
+            showGame();
+          };
+          
+          setTimeout(function() {
+            if (splash && splash.style.display !== 'none') {
+              showGame();
+            }
+          }, 5000);
+        } else {
+          showGame();
+        }
+      });
+    })();
   </script>
 
 </body>

@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="css/cabinet.css">
   <link rel="stylesheet" href="css/shop.css">
   <link rel="stylesheet" href="css/game.css">
-  <link rel="stylesheet" href="css/admin.css">
   <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
@@ -36,71 +35,13 @@
   <!-- MENU -->
   <div id="menu" class="screen">
     <div class="card">
-      <h3 onclick="admT()" style="cursor:pointer">МЕНЮ</h3>
+      <h3 style="cursor:pointer">МЕНЮ</h3>
       <div class="nickname" id="playerNick"></div>
       <div class="money"><span id="mon">0</span> ₴</div>
       <button class="btn" onclick="show('sections')">ГРАТИ</button>
       <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
       <button class="btn green" onclick="show('shop')">КРАМНИЧКА</button>
       <button class="btn" style="background:var(--purple)" onclick="show('cabinet')">📦 МОЯ СКРИНЬКА</button>
-
-      <div id="admin-panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-          <h2 style="color: var(--blue); margin: 0;">👑 АДМІН-ПАНЕЛЬ</h2>
-          <button class="btn small" onclick="closeAdm()" style="background: var(--red); width: auto;">❌ ЗАКРИТИ</button>
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-          <button class="btn" onclick="resetAllPlayersItems()" style="background: var(--dark); width: 100%;">⚠️ СКИНУТИ ВСІ ПОКУПКИ ВСІХ ГРАВЦІВ</button>
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-          <input type="text" id="adminSearchInput" placeholder="🔍 Пошук гравця за ніком..." onkeyup="updateAdminPanel()" style="width: 100%; padding: 10px; border-radius: 12px; border: 1px solid #ccc;">
-        </div>
-        
-        <div style="margin-bottom: 10px;">
-          <button class="btn" onclick="togglePlayersList()" style="background: var(--blue); width: auto; padding: 8px 16px;">👥 ПОКАЗАТИ ГРАВЦІВ</button>
-        </div>
-        
-        <div id="adminPlayersList" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 12px; padding: 5px; display: none;"></div>
-        
-        <div style="margin-bottom: 20px; margin-top: 20px;">
-          <h3 style="color: var(--gold); margin-bottom: 10px;">⚙️ Управління гравцем</h3>
-          <input type="text" id="adminPlayerNick" placeholder="Нікнейм гравця" style="margin-bottom: 10px;">
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button class="btn small" onclick="adminAddMoney()" style="background: var(--green); width: auto;">➕ Додати гроші</button>
-            <button class="btn small" onclick="adminRemoveMoney()" style="background: var(--red); width: auto;">➖ Відняти гроші</button>
-            <button class="btn small" onclick="adminDeletePlayer()" style="background: var(--dark); width: auto;">🗑 Видалити гравця</button>
-          </div>
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-          <h3 style="color: var(--gold); margin-bottom: 10px;">💬 Повідомлення в підтримку</h3>
-          <div id="adminMessagesList" style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 12px; padding: 5px;"></div>
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-          <h3 style="color: var(--gold); margin-bottom: 10px;">📋 Лог входів в АДМІНКУ</h3>
-          <div id="adminAccessLog" style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; border-radius: 12px; padding: 5px;"></div>
-          <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button class="btn small" onclick="loadAdminAccessLog()" style="background: var(--blue); width: auto;">🔄 Оновити</button>
-            <button class="btn small" onclick="clearAdminAccessLog()" style="background: var(--red); width: auto;">🗑 Очистити лог</button>
-          </div>
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-          <h3 style="color: var(--gold); margin-bottom: 10px;">📋 Активність гравців (входи в гру)</h3>
-          <div id="adminActivityLog" style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; border-radius: 12px; padding: 5px;"></div>
-          <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button class="btn small" onclick="loadActivityLog()" style="background: var(--blue); width: auto;">🔄 Оновити</button>
-            <button class="btn small" onclick="clearUserLog()" style="background: var(--red); width: auto;">🗑 Очистити лог</button>
-          </div>
-        </div>
-        
-        <div style="margin-top: 20px; text-align: center;">
-          <button class="btn" onclick="closeAdm()" style="background: var(--red);">ЗАКРИТИ</button>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -123,7 +64,6 @@
         <button class="shop-btn" data-item="sunflowers">🌻 Соняшникове поле — 5000 ₴</button>
         <button class="shop-btn" data-item="bookshelf">📜 Книжкова полиця — 6000 ₴</button>
         <button class="shop-btn" data-item="theater_mask">🎭 Театральна маска — 4500 ₴</button>
-        <button class="shop-btn" data-item="secret_item" style="display:none">🤫 СЕКРЕТНИЙ ТОВАР — 10000 ₴</button>
       </div>
       <button class="btn red" onclick="show('menu')">◀ НАЗАД</button>
     </div>
@@ -316,7 +256,6 @@
         </div>
       </div>
 
-      <!-- ПІДТРИМКА -->
       <div id="tab-support" class="cabinet-tab">
         <div class="cabinet-section">
           <h3>💬 Технічна підтримка</h3>
@@ -414,7 +353,7 @@
 
   <div id="notificationToast" class="notification-toast"></div>
 
-  <!-- SCRIPTS (всі ваші робочі JS файли - без змін) -->
+  <!-- SCRIPTS -->
   <script src="js/utils.js"></script>
   <script src="js/shop.js"></script>
   <script src="js/bonuses.js"></script>
@@ -452,146 +391,6 @@
   
   <script src="js/cabinet.js"></script>
   <script src="js/main.js"></script>
-
-  <script>
-    let playersListVisible = false;
-    function togglePlayersList() {
-      const playersList = document.getElementById('adminPlayersList');
-      const btn = event.target;
-      if (playersListVisible) {
-        playersList.style.display = 'none';
-        btn.innerHTML = '👥 ПОКАЗАТИ ГРАВЦІВ';
-        playersListVisible = false;
-      } else {
-        playersList.style.display = 'block';
-        btn.innerHTML = '👥 ПРИХОВАТИ ГРАВЦІВ';
-        playersListVisible = true;
-        updateAdminPanel();
-      }
-    }
-    
-    async function resetAllPlayersItems() {
-      if (!confirm("⚠️ УВАГА! Це скине ВСІ покупки для ВСІХ гравців! Гроші за покупки НЕ ПОВЕРНУТЬСЯ. Ви впевнені?")) return;
-      if (!confirm("🔴 ОСТАННЄ ПОПЕРЕДЖЕННЯ! Цю дію НЕ МОЖНА СКАСУВАТИ. Продовжити?")) return;
-      
-      showCustomMessage("🔄 Скидання всіх покупок...");
-      
-      try {
-        const r = await fetch(DB + "users/.json");
-        const players = await r.json();
-        if (!players) {
-          showCustomMessage("❌ Гравців не знайдено!", true);
-          return;
-        }
-        
-        let count = 0;
-        const allItems = ['gold_frame', 'crown', 'fire', 'shield', 'vip', 'rainbow_name', 'sparkles', 'avatar_frame', 'animated_nick', 'vyshyvanka', 'kobza', 'sunflowers', 'bookshelf', 'theater_mask'];
-        
-        for (let playerName in players) {
-          const player = players[playerName];
-          let changed = false;
-          
-          allItems.forEach(item => {
-            if (player.items && player.items[item]) {
-              player.items[item] = false;
-              changed = true;
-            }
-            if (player.items && player.items[item + '_active'] !== undefined) {
-              delete player.items[item + '_active'];
-              changed = true;
-            }
-          });
-          
-          if (changed && player.items) {
-            await fetch(DB + "users/" + playerName + ".json", { method: 'PUT', body: JSON.stringify(player) });
-            count++;
-          }
-        }
-        
-        showNotification(`✅ Скинуто покупки для ${count} гравців! Оновіть сторінку.`);
-        setTimeout(() => location.reload(), 2000);
-      } catch(e) {
-        console.error(e);
-        showCustomMessage("❌ Помилка при скиданні покупок!", true);
-      }
-    }
-    
-    async function adminAddMoney() {
-      const nick = document.getElementById('adminPlayerNick').value.trim();
-      if (!nick) { showCustomMessage("❌ Введіть нікнейм гравця!", true); return; }
-      const amount = prompt("Скільки додати?");
-      if (!amount) return;
-      const numAmount = parseInt(amount);
-      if (isNaN(numAmount)) { showCustomMessage("❌ Введіть число!", true); return; }
-      const r = await fetch(DB + "users/" + nick + ".json");
-      const playerData = await r.json();
-      if (!playerData) { showCustomMessage("❌ Гравця не знайдено!", true); return; }
-      playerData.points = (playerData.points || 0) + numAmount;
-      await fetch(DB + "users/" + nick + ".json", { method: 'PUT', body: JSON.stringify(playerData) });
-      showNotification(`✅ ${nick} +${numAmount} ₴`);
-      updateAdminPanel();
-    }
-    
-    async function adminRemoveMoney() {
-      const nick = document.getElementById('adminPlayerNick').value.trim();
-      if (!nick) { showCustomMessage("❌ Введіть нікнейм гравця!", true); return; }
-      const amount = prompt("Скільки відняти?");
-      if (!amount) return;
-      const numAmount = parseInt(amount);
-      if (isNaN(numAmount)) { showCustomMessage("❌ Введіть число!", true); return; }
-      const r = await fetch(DB + "users/" + nick + ".json");
-      const playerData = await r.json();
-      if (!playerData) { showCustomMessage("❌ Гравця не знайдено!", true); return; }
-      playerData.points = Math.max(0, (playerData.points || 0) - numAmount);
-      await fetch(DB + "users/" + nick + ".json", { method: 'PUT', body: JSON.stringify(playerData) });
-      showNotification(`✅ ${nick} -${numAmount} ₴`);
-      updateAdminPanel();
-    }
-    
-    async function adminDeletePlayer() {
-      const nick = document.getElementById('adminPlayerNick').value.trim();
-      if (!nick) { showCustomMessage("❌ Введіть нікнейм гравця!", true); return; }
-      if (confirm(`Видалити гравця ${nick}? Цю дію не можна скасувати!`)) {
-        await fetch(DB + "users/" + nick + ".json", { method: 'DELETE' });
-        showNotification(`🗑 Гравець ${nick} видалений`);
-        updateAdminPanel();
-        document.getElementById('adminPlayerNick').value = '';
-      }
-    }
-    
-    async function loadAdminAccessLog() {
-      const logDiv = document.getElementById('adminAccessLog');
-      if (!logDiv) return;
-      try {
-        const r = await fetch(DB + "admin_logs.json");
-        const data = await r.json();
-        if (data) {
-          const logs = Object.values(data).reverse().slice(0, 30);
-          logDiv.innerHTML = logs.map(log => `<div style="padding: 6px; border-bottom: 1px solid #ddd; font-size: 12px;">🕐 ${log.time} — <strong>${log.nick}</strong></div>`).join('');
-          if (logs.length === 0) logDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Лог порожній</div>';
-        } else { logDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Лог порожній</div>'; }
-      } catch(e) { logDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Помилка завантаження</div>'; }
-    }
-    
-    async function clearAdminAccessLog() {
-      if (!confirm("Очистити лог входів в адмінку?")) return;
-      await fetch(DB + "admin_logs.json", { method: 'DELETE' });
-      loadAdminAccessLog();
-      showNotification("✅ Лог адмінки очищено");
-    }
-    
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('.shop-btn').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          var itemName = this.getAttribute('data-item');
-          if (itemName && typeof buyItem === 'function') { buyItem(itemName); }
-          return false;
-        });
-      });
-    });
-  </script>
 
 </body>
 </html>

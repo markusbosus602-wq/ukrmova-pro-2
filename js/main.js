@@ -8,7 +8,7 @@ let currentTheme = '';
 let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
-let themeStartTime = null; // Час початку теми
+let themeStartTime = null;
 let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false,
   rainbow_name: false, sparkles: false, avatar_frame: false, animated_nick: false,
   vyshyvanka: false, kobza: false, sunflowers: false, bookshelf: false, theater_mask: false };
@@ -184,10 +184,10 @@ function show(id) {
   }
 }
 
-// ========== АДМІН-ПАНЕЛЬ: 5 КЛІКІВ → ПАРОЛЬ ==========
+// ========== НОВА АДМІН-ПАНЕЛЬ (5 КЛІКІВ → ПАРОЛЬ) ==========
 
 function admT() {
-  const adminPassword = "vedun81ansuz81"; // Змініть на свій пароль
+  const adminPassword = "vedun81ansuz81";
   
   cC++;
   
@@ -203,7 +203,6 @@ function admT() {
     cC = 0;
   }
   
-  // Скидаємо лічильник через 3 секунди
   setTimeout(function() {
     cC = 0;
   }, 3000);
@@ -329,7 +328,7 @@ async function clearAdminLogs() {
 }
 
 function startTheme(theme) {
-  themeStartTime = Date.now(); // Запам'ятовуємо час початку теми
+  themeStartTime = Date.now();
   currentTheme = theme;
   currentIndex = 0;
   correctCount = 0;
@@ -356,17 +355,11 @@ function loadQuestion() {
     
     if (typeof checkStickers === 'function') checkStickers();
     
-    // ========== НОВЕ ПОВІДОМЛЕННЯ З ТЕМОЮ, ДАТОЮ ТА ЧАСОМ ==========
-    
-    // Отримуємо назву теми
     const themeName = getThemeName(currentTheme);
-    
-    // Отримуємо поточну дату та час
     const now = new Date();
     const dateStr = now.toLocaleDateString('uk-UA');
     const timeStr = now.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
     
-    // Розраховуємо час проходження теми
     let timeSpent = '';
     if (themeStartTime) {
       const elapsedSeconds = Math.floor((Date.now() - themeStartTime) / 1000);
@@ -381,13 +374,11 @@ function loadQuestion() {
       timeSpent = 'невідомо';
     }
     
-    // Розраховуємо відсоток правильних відповідей
     const resultPercent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
     
-    // Визначаємо колір для результату
-    let resultColor = '#e74c3c'; // червоний для <60%
-    if (resultPercent >= 80) resultColor = '#2ecc71'; // зелений для >=80%
-    else if (resultPercent >= 60) resultColor = '#f39c12'; // жовтий для 60-79%
+    let resultColor = '#e74c3c';
+    if (resultPercent >= 80) resultColor = '#2ecc71';
+    else if (resultPercent >= 60) resultColor = '#f39c12';
     
     document.getElementById('qtext').innerHTML = `📚 Тема "<span style="color: var(--gold);">${themeName}</span>" завершена!`;
     document.getElementById('feedback').innerHTML = '';
@@ -426,7 +417,7 @@ function loadQuestion() {
     `;
     document.getElementById('progressFill').style.width = '0%';
     document.getElementById('question-counter').textContent = '';
-    themeStartTime = null; // Скидаємо час
+    themeStartTime = null;
     return;
   }
 
@@ -741,7 +732,7 @@ function getLevelIcon(level) {
   return icons[level] || '🌱';
 }
 
-// ========== АДМІН-ПАНЕЛЬ (ФУНКЦІЇ) ==========
+// ========== НОВА АДМІН-ПАНЕЛЬ (ПОВНІСТЮ ПЕРЕРОБЛЕНА) ==========
 
 async function getAllPlayers() {
   const r = await fetch(DB + "users/.json");
@@ -760,24 +751,33 @@ async function updateAdminPanel() {
   
   const playersList = document.getElementById('adminPlayersList');
   if (playersList) {
-    playersList.innerHTML = filteredPlayers.map(p => `
-      <div style="padding: 10px; border-bottom: 1px solid #ddd; background: ${p.name === user?.name ? '#e8f5e9' : '#fff'}; border-radius: 8px; margin-bottom: 5px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-          <div>
-            <strong>${p.name || '???'}</strong><br>
-            <small>💰 Баланс: ${(p.points || 0).toLocaleString()} ₴</small><br>
-            <small>🏆 Рейтинг: ${((p.points_earned || p.points) || 0).toLocaleString()} ₴</small><br>
-            <small>🎚️ Рівень: ${p.level || 1}</small><br>
-            <small>🔑 Пароль: ${p.pass || 'немає'}</small>
+    if (filteredPlayers.length === 0) {
+      playersList.innerHTML = '<div class="admin-empty-state">🎮 Гравців не знайдено</div>';
+    } else {
+      playersList.innerHTML = filteredPlayers.map(p => `
+        <div class="admin-player-card ${p.name === user?.name ? 'current-user' : ''}">
+          <div class="admin-player-info">
+            <div class="admin-player-name">
+              <span class="admin-player-avatar">${p.avatar || '👤'}</span>
+              <strong>${p.name || '???'}</strong>
+              ${p.name === user?.name ? '<span class="admin-badge">Ви</span>' : ''}
+            </div>
+            <div class="admin-player-stats">
+              <span class="admin-stat">💰 ${(p.points || 0).toLocaleString()} ₴</span>
+              <span class="admin-stat">🏆 ${((p.points_earned || p.points) || 0).toLocaleString()}</span>
+              <span class="admin-stat">🎚️ Рівень ${p.level || 1}</span>
+            </div>
+            <div class="admin-player-pass">
+              🔑 <span class="admin-pass-value">${p.pass || 'немає'}</span>
+            </div>
           </div>
-          <div style="display: flex; gap: 5px; margin-top: 5px;">
-            <button class="btn small" onclick="viewPlayerMessages('${p.name}')" style="background: var(--blue); width: auto; padding: 4px 8px;">💬</button>
-            <button class="btn small" onclick="editPlayerPoints('${p.name}')" style="background: var(--green); width: auto; padding: 4px 8px;">💰</button>
+          <div class="admin-player-actions">
+            <button class="admin-btn admin-btn-message" onclick="viewPlayerMessages('${p.name}')" title="Повідомлення">💬</button>
+            <button class="admin-btn admin-btn-points" onclick="editPlayerPoints('${p.name}')" title="Редагувати баланс">💰</button>
           </div>
         </div>
-      </div>
-    `).join('');
-    if (filteredPlayers.length === 0) playersList.innerHTML = '<div style="padding: 20px; text-align: center; color: #aaa;">Гравців не знайдено</div>';
+      `).join('');
+    }
   }
   
   const allMessages = [];
@@ -794,15 +794,18 @@ async function updateAdminPanel() {
   const messagesList = document.getElementById('adminMessagesList');
   if (messagesList) {
     if (allMessages.length === 0) {
-      messagesList.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Немає повідомлень без відповіді</div>';
+      messagesList.innerHTML = '<div class="admin-empty-state">📭 Немає повідомлень без відповіді</div>';
     } else {
       messagesList.innerHTML = allMessages.map(msg => `
-        <div style="padding: 10px; border-bottom: 1px solid #ddd; background: #fff3e0; border-radius: 8px; margin-bottom: 8px;">
-          <div><strong>👤 ${msg.player}</strong> <small>${msg.message.date}</small></div>
-          <div style="margin: 8px 0; padding: 8px; background: white; border-radius: 8px;">${msg.message.message}</div>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <textarea id="reply_${msg.message.id}" placeholder="Відповідь..." style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; min-width: 150px;"></textarea>
-            <button class="btn small" onclick="replyToMessage('${msg.player}', ${msg.message.id})" style="background: var(--green); width: auto;">📨 Відповісти</button>
+        <div class="admin-message-card">
+          <div class="admin-message-header">
+            <span class="admin-message-player">👤 ${msg.player}</span>
+            <span class="admin-message-date">${msg.message.date}</span>
+          </div>
+          <div class="admin-message-text">${msg.message.message}</div>
+          <div class="admin-reply-area">
+            <textarea id="reply_${msg.message.id}" class="admin-reply-input" placeholder="Напишіть відповідь..."></textarea>
+            <button class="admin-btn admin-btn-reply" onclick="replyToMessage('${msg.player}', ${msg.message.id})">📨 Відповісти</button>
           </div>
         </div>
       `).join('');
@@ -852,7 +855,7 @@ async function replyToMessage(playerName, messageId) {
 }
 
 async function editPlayerPoints(playerName) {
-  const amount = prompt("Скільки додати до балансу? (від'ємне число для віднімання)");
+  const amount = prompt("💰 Скільки додати до балансу?\n(від'ємне число для віднімання)");
   if (amount === null) return;
   const numAmount = parseInt(amount);
   if (isNaN(numAmount)) {
@@ -879,13 +882,21 @@ async function loadActivityLog() {
     const data = await r.json();
     if (data) {
       const logs = Object.values(data).reverse().slice(0, 50);
-      activityDiv.innerHTML = logs.map(log => `<div style="padding: 8px; border-bottom: 1px solid #ddd; font-size: 12px;">🕐 ${log.time} — <strong>${log.game_nick}</strong></div>`).join('');
-      if (logs.length === 0) activityDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Лог активності порожній</div>';
+      if (logs.length === 0) {
+        activityDiv.innerHTML = '<div class="admin-empty-state">📋 Лог активності порожній</div>';
+      } else {
+        activityDiv.innerHTML = logs.map(log => `
+          <div class="admin-log-entry">
+            <span class="admin-log-time">🕐 ${log.time}</span>
+            <span class="admin-log-user">${log.game_nick}</span>
+          </div>
+        `).join('');
+      }
     } else {
-      activityDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Лог активності порожній</div>';
+      activityDiv.innerHTML = '<div class="admin-empty-state">📋 Лог активності порожній</div>';
     }
   } catch(e) {
-    activityDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Помилка завантаження</div>';
+    activityDiv.innerHTML = '<div class="admin-empty-state">❌ Помилка завантаження</div>';
   }
 }
 
@@ -911,12 +922,20 @@ async function loadAdminAccessLog() {
     const data = await r.json();
     if (data) {
       const logs = Object.values(data).reverse().slice(0, 30);
-      logDiv.innerHTML = logs.map(log => `<div style="padding: 6px; border-bottom: 1px solid #ddd; font-size: 12px;">🕐 ${log.time} — <strong>${log.nick}</strong></div>`).join('');
-      if (logs.length === 0) logDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Лог порожній</div>';
+      if (logs.length === 0) {
+        logDiv.innerHTML = '<div class="admin-empty-state">🔒 Лог доступу порожній</div>';
+      } else {
+        logDiv.innerHTML = logs.map(log => `
+          <div class="admin-log-entry">
+            <span class="admin-log-time">🕐 ${log.time}</span>
+            <span class="admin-log-user">${log.nick}</span>
+          </div>
+        `).join('');
+      }
     } else {
-      logDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Лог порожній</div>';
+      logDiv.innerHTML = '<div class="admin-empty-state">🔒 Лог доступу порожній</div>';
     }
   } catch(e) {
-    logDiv.innerHTML = '<div style="padding: 12px; text-align: center; color: #aaa;">Помилка завантаження</div>';
+    logDiv.innerHTML = '<div class="admin-empty-state">❌ Помилка завантаження</div>';
   }
 }

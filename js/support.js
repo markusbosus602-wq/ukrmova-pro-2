@@ -1,8 +1,10 @@
 // js/support.js - Технічна підтримка
 
 // Відправити повідомлення в підтримку
+// Повідомлення зберігаються ОКРЕМО від профілю, у приватній гілці support/{uid},
+// яку за Security Rules може читати і писати тільки сам власник акаунта.
 async function sendSupportMessage() {
-  if (!user) return;
+  if (!user || !user.uid) return;
   
   const messageInput = document.getElementById('supportMessage');
   const message = messageInput.value.trim();
@@ -13,8 +15,6 @@ async function sendSupportMessage() {
     return;
   }
   
-  if (!user.supportMessages) user.supportMessages = [];
-  
   const newMessage = {
     id: Date.now(),
     from: user.name,
@@ -24,32 +24,45 @@ async function sendSupportMessage() {
     reply: null
   };
   
-  user.supportMessages.push(newMessage);
-  if (typeof save === 'function') save();
-  
-  messageInput.value = '';
-  messageInput.blur();
-  
-  loadSupportMessages();
-  showNotification("✅ Повідомлення відправлено! Очікуйте відповіді.");
-  
-  if (navigator.vibrate) navigator.vibrate(50);
+  try {
+    const list = (await dbGet('support/' + user.uid + '/messages')) || [];
+    list.push(newMessage);
+    await dbSet('support/' + user.uid + '/messages', list);
+    
+    messageInput.value = '';
+    messageInput.blur();
+    
+    loadSupportMessages();
+    showNotification("✅ Повідомлення відправлено! Очікуйте відповіді.");
+    
+    if (navigator.vibrate) navigator.vibrate(50);
+  } catch (e) {
+    console.error(e);
+    showNotification("❌ Не вдалося відправити повідомлення", true);
+  }
 }
 
 // Завантажити повідомлення гравця (весь діалог)
-function loadSupportMessages() {
-  if (!user) return;
+async function loadSupportMessages() {
+  if (!user || !user.uid) return;
   
   const container = document.getElementById('supportMessagesList');
   if (!container) return;
   
-  if (!user.supportMessages || user.supportMessages.length === 0) {
+  let messages = [];
+  try {
+    messages = (await dbGet('support/' + user.uid + '/messages')) || [];
+  } catch (e) {
+    console.error(e);
+  }
+  
+  if (!messages.length) {
     container.innerHTML = '<div style="text-align: center; padding: 20px; color: #aaa;">📭 У вас ще немає повідомлень</div>';
     return;
   }
   
   // Сортуємо за датою (старі зверху, нові знизу)
-  const sortedMessages = [...user.supportMessages].sort((a, b) => a.id - b.id);
+  const sortedMessages = [...messages].sort((a, b) => a.id - b.id);
   
   container.innerHTML = sortedMessages.map(msg => `
     <div class="message-bubble ${msg.from === user.name ? 'outgoing' : 'incoming'}" style="margin-bottom: 15px;">
@@ -82,12 +95,4 @@ function loadSupportMessages() {
 // Оновити повідомлення (для адмін-панелі)
 function refreshSupportMessages() {
   loadSupportMessages();
-}
-
-// Функція для захисту від XSS
-function escapeHtml(text) {
-  if (!text) return '';
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
 }

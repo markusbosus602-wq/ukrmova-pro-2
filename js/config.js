@@ -1,6 +1,5 @@
 // js/config.js - Глобальні налаштування
-
-const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
+// (адреса бази задається у js/firebase-config.js разом з рештою налаштувань Firebase)
 
 const CONFIG = {
   // Ігрові налаштування

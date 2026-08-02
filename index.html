@@ -12,6 +12,13 @@
   <link rel="stylesheet" href="css/shop.css">
   <link rel="stylesheet" href="css/game.css">
   <link rel="stylesheet" href="css/responsive.css">
+
+  <!-- Firebase SDK (Authentication + Realtime Database) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/db.js"></script>
 </head>
 <body>
 
@@ -27,7 +34,7 @@
       <h2 style="color:var(--gold)">UKRMOVA PRO</h2>
       <input type="text" id="nick" placeholder="Нікнейм" autocomplete="off">
       <input type="password" id="pass" placeholder="Пароль" autocomplete="off">
-      <button class="btn" onclick="auth()">УВІЙТИ / ЗАРЕЄСТРУВАТИСЯ</button>
+      <button class="btn" onclick="auth_submit()">УВІЙТИ / ЗАРЕЄСТРУВАТИСЯ</button>
       <p id="auth-error" style="color:red; margin-top:10px; min-height:24px;"></p>
     </div>
   </div>
@@ -78,7 +85,16 @@
       <button class="btn theme-btn" onclick="show('zajmennyky')">🔤 Займенники</button>
       <button class="btn theme-btn" onclick="show('chyslivnyky')">🔢 Числівники</button>
       <button class="btn theme-btn" onclick="show('frazeologizmy')">💬 Фразеологізми</button>
+      <button class="btn theme-btn" onclick="show('custom-tests-screen')">📝 Додаткові тести</button>
       <button class="btn red" onclick="show('menu')">НАЗАД</button>
+    </div>
+  </div>
+
+  <!-- ДОДАТКОВІ ТЕСТИ (додаються через адмін-панель) -->
+  <div id="custom-tests-screen" class="screen">
+    <div class="card">
+      <div id="customTestsSection"><p style="color:#aaa;text-align:center;">Ще немає жодного додаткового тесту</p></div>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
     </div>
   </div>
 
@@ -359,8 +375,8 @@
   <script src="js/bonuses.js"></script>
   <script src="js/achievements.js"></script>
   <script src="js/stickers.js"></script>
-  <script src="js/friends.js"></script>
   <script src="js/support.js"></script>
+  <script src="js/custom-tests.js"></script>
   
   <script src="js/themes/vydminy.js"></script>
   <script src="js/themes/orudnyi_1vidmina.js"></script>

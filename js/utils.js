@@ -1,5 +1,14 @@
 // js/utils.js - Допоміжні функції
 
+// Захист від XSS: перетворює будь-який текст (нік, повідомлення тощо)
+// у безпечний для вставки в innerHTML вигляд
+function escapeHtml(text) {
+  if (text === null || text === undefined) return '';
+  const div = document.createElement('div');
+  div.textContent = String(text);
+  return div.innerHTML;
+}
+
 // Кастомне сповіщення
 function showCustomMessage(msg, isError = false) {
   const toast = document.getElementById('notificationToast');

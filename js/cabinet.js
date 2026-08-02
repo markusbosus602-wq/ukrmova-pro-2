@@ -239,6 +239,9 @@ function loadHistory() {
 }
 
 function getThemeName(key) {
+  if (window.customThemeNames && window.customThemeNames[key]) {
+    return window.customThemeNames[key];
+  }
   const names = {
     vydminy: 'Відміни',
     orudnyi_1vidmina: 'Орудний відмінок',
@@ -270,45 +273,71 @@ function getThemeName(key) {
 }
 
 function editNick() {
-  showCustomPrompt('Новий нікнейм:', user.name, (newNick) => {
+  showCustomPrompt('Новий нікнейм:', user.name, async (newNick) => {
     if (!newNick || newNick === user.name) return;
+    newNick = newNick.trim();
     
-    fetch(DB + "users/" + newNick + ".json").then(r => r.json()).then(existing => {
-      if (existing && existing.name !== user.name) {
-        showNotification('❌ Нікнейм зайнятий!', true);
-        return;
+    if (!isValidNick(newNick)) {
+      showNotification('❌ Нік: 3-20 символів, тільки літери/цифри/підкреслення', true);
+      return;
+    }
+    
+    const oldKey = user.name.toLowerCase();
+    const newKey = newNick.toLowerCase();
+    
+    try {
+      if (newKey !== oldKey) {
+        const takenUid = await getUidByNick(newKey);
+        if (takenUid && takenUid !== user.uid) {
+          showNotification('❌ Нікнейм зайнятий!', true);
+          return;
+        }
       }
-      const oldNick = user.name;
-      const newUser = { ...user, name: newNick };
-      fetch(DB + "users/" + newNick + ".json", { method: 'PUT', body: JSON.stringify(newUser) })
-        .then(() => fetch(DB + "users/" + oldNick + ".json", { method: 'DELETE' }))
-        .then(() => {
-          user = newUser;
-          localStorage.setItem('un', newNick);
-          if (typeof update === 'function') update();
-          if (typeof applyItems === 'function') applyItems();
-          loadCabinet();
-          showNotification('✅ Нікнейм змінено!');
-        });
-    });
+      
+      // Дані гравця не переносяться (uid не змінюється) — оновлюється тільки індекс нікнеймів і поле name
+      await claimNickname(newNick, user.uid);
+      if (newKey !== oldKey) await dbRemove('nicknames/' + oldKey);
+      
+      user.name = newNick;
+      if (typeof save === 'function') save();
+      localStorage.removeItem('un'); // старий формат більше не використовується
+      if (typeof update === 'function') update();
+      if (typeof applyItems === 'function') applyItems();
+      loadCabinet();
+      showNotification('✅ Нікнейм змінено!');
+    } catch (e) {
+      console.error(e);
+      showNotification('❌ Помилка зміни нікнейму', true);
+    }
   });
 }
 
 function changePassword() {
-  showCustomPrompt('Новий пароль:', '', (newPass) => {
-    if (!newPass) return;
-    user.pass = newPass;
-    localStorage.setItem('up', newPass);
-    if (typeof save === 'function') save();
-    showNotification('✅ Пароль змінено!');
+  showCustomPrompt('Введіть поточний пароль:', '', (currentPass) => {
+    if (!currentPass) return;
+    showCustomPrompt('Новий пароль:', '', async (newPass) => {
+      if (!newPass) return;
+      try {
+        const credential = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, normalizePassword(currentPass));
+        await auth.currentUser.reauthenticateWithCredential(credential);
+        await auth.currentUser.updatePassword(normalizePassword(newPass));
+        showNotification('✅ Пароль змінено!');
+      } catch (e) {
+        console.error(e);
+        if (e.code === 'auth/wrong-password') {
+          showNotification('❌ Неправильний поточний пароль', true);
+        } else {
+          showNotification('❌ Помилка зміни пароля', true);
+        }
+      }
+    });
   });
 }
 
 function logout() {
   showCustomConfirm('Вийти з акаунту?', (confirmed) => {
     if (confirmed) {
-      localStorage.removeItem('un');
-      localStorage.removeItem('up');
+      auth.signOut().catch(e => console.error(e));
       user = null;
       if (typeof show === 'function') show('auth-screen');
     }
@@ -398,30 +427,34 @@ async function addFriend() {
     showNotification('❌ Введіть нікнейм друга', true);
     return;
   }
-  if (friendNick === user.name) {
+  if (friendNick.toLowerCase() === user.name.toLowerCase()) {
     showNotification('❌ Не можна додати себе', true);
     return;
   }
-  if (user.friends?.includes(friendNick)) {
+  if (user.friends?.some(f => f.toLowerCase() === friendNick.toLowerCase())) {
     showNotification('❌ Вже є в друзях', true);
     return;
   }
   
-  const r = await fetch(DB + "users/" + friendNick + ".json");
-  const friendData = await r.json();
-  if (!friendData) {
-    showNotification('❌ Користувача не знайдено', true);
-    return;
+  try {
+    const friendUid = await getUidByNick(friendNick);
+    if (!friendUid) {
+      showNotification('❌ Користувача не знайдено', true);
+      return;
+    }
+    
+    if (!user.friends) user.friends = [];
+    user.friends.push(friendNick);
+    if (typeof save === 'function') save();
+    document.getElementById('friendNick').value = '';
+    loadFriends();
+    showNotification(`👥 ${friendNick} додано!`);
+    
+    if (typeof checkAchievements === 'function') checkAchievements();
+  } catch (e) {
+    console.error(e);
+    showNotification('❌ Помилка додавання друга', true);
   }
-  
-  if (!user.friends) user.friends = [];
-  user.friends.push(friendNick);
-  if (typeof save === 'function') save();
-  document.getElementById('friendNick').value = '';
-  loadFriends();
-  showNotification(`👥 ${friendNick} додано!`);
-  
-  if (typeof checkAchievements === 'function') checkAchievements();
 }
 
 function loadFriends() {
@@ -437,20 +470,26 @@ function loadFriends() {
   }
   
   Promise.all(user.friends.map(async f => {
-    const r = await fetch(DB + "users/" + f + ".json");
-    const d = await r.json();
-    return d ? { name: f, points: d.points || 0, avatar: d.avatar || '👤', avatarType: d.avatarType || 'emoji', avatarData: d.avatarData || null, level: d.level || 1 } : null;
+    try {
+      const friendUid = await getUidByNick(f);
+      if (!friendUid) return null;
+      const d = await dbGet('users/' + friendUid);
+      return d ? { name: f, points: d.points || 0, avatar: d.avatar || '👤', avatarType: d.avatarType || 'emoji', avatarData: d.avatarData || null, level: d.level || 1 } : null;
+    } catch (e) {
+      console.error('Помилка завантаження друга:', f, e);
+      return null;
+    }
   })).then(friends => {
     const valid = friends.filter(f => f);
     friendsDiv.innerHTML = valid.map(f => `
       <div class="friend-item">
         <div class="friend-info">
           <div class="friend-avatar">${getAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
-          <span class="friend-name">${f.name}</span>
+          <span class="friend-name">${escapeHtml(f.name)}</span>
           <span class="friend-points">${f.points.toLocaleString()} ₴</span>
           <span class="friend-level">${getLevelIcon(f.level)}</span>
         </div>
-        <button class="remove-friend" onclick="removeFriend('${f.name}')">❌</button>
+        <button class="remove-friend" onclick="removeFriend('${escapeHtml(f.name).replace(/'/g, "&#39;")}')">❌</button>
       </div>
     `).join('');
     
@@ -461,7 +500,7 @@ function loadFriends() {
       <div class="leaderboard-item">
         <span class="leaderboard-rank">${i+1}</span>
         <div class="friend-avatar">${getAvatarHtml(f.avatar, f.avatarType, f.avatarData)}</div>
-        <span class="leaderboard-name">${f.name} ${f.name === user.name ? '(Ви)' : ''}</span>
+        <span class="leaderboard-name">${escapeHtml(f.name)} ${f.name === user.name ? '(Ви)' : ''}</span>
         <span class="leaderboard-points">${f.points.toLocaleString()} ₴</span>
         <span class="leaderboard-level">${getLevelIcon(f.level)}</span>
       </div>

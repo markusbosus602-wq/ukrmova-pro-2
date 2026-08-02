@@ -1,7 +1,9 @@
 // js/main.js - Головний файл (авторизація, гра)
+// Авторизація тепер повністю на Firebase Authentication.
+// Паролі ніколи не потрапляють у Realtime Database і не зберігаються в localStorage.
+// firebase-config.js та db.js мають бути підключені в index.html ПЕРЕД цим файлом.
 
-const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
-let user = null;
+let user = null;          // публічні дані профілю гравця (без пароля)
 let pOn = true;
 let currentTheme = '';
 let currentIndex = 0;
@@ -21,6 +23,11 @@ window.onload = function() {
   const video = document.getElementById('splash-video');
   const startBtn = document.getElementById('startBtn');
   
+  function afterSplash() {
+    if (splash) splash.style.display = 'none';
+    enterAppAfterSplash();
+  }
+  
   if (video && startBtn) {
     video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
     
@@ -31,67 +38,119 @@ window.onload = function() {
       video.play().catch(function(e) { console.log("Video play error:", e); });
     };
     
-    video.onended = function() {
-      splash.style.display = 'none';
-      tryAutoLogin();
-    };
+    video.onended = afterSplash;
     
     setTimeout(function() {
       if (splash && splash.style.display !== 'none') {
-        splash.style.display = 'none';
-        tryAutoLogin();
+        afterSplash();
       }
     }, 10000);
   } else {
-    tryAutoLogin();
+    afterSplash();
   }
 };
 
-function tryAutoLogin() {
-  const savedNick = localStorage.getItem('un');
-  const savedPass = localStorage.getItem('up');
-  if (savedNick && savedPass) {
-    document.getElementById('nick').value = savedNick;
-    document.getElementById('pass').value = savedPass;
-    auth();
+// Чекаємо, поки Firebase визначить статус сесії (є вона в цьому браузері чи ні),
+// і в залежності від цього або одразу заходимо в гру, або показуємо екран входу.
+function waitForAuthState() {
+  return new Promise(resolve => {
+    const unsubscribe = auth.onAuthStateChanged(fbUser => {
+      unsubscribe();
+      resolve(fbUser);
+    });
+  });
+}
+
+async function enterAppAfterSplash() {
+  const fbUser = await waitForAuthState();
+  if (fbUser) {
+    await loadUserAndEnterGame(fbUser.uid);
   } else {
     show('auth-screen');
   }
 }
 
-async function auth() {
-  let n = document.getElementById('nick').value.trim();
-  let p = document.getElementById('pass').value.trim();
-  if(!n || !p) {
+// Кнопка "УВІЙТИ / ЗАРЕЄСТРУВАТИСЯ"
+async function auth_submit() {
+  let nick = document.getElementById('nick').value.trim();
+  let pass = document.getElementById('pass').value.trim();
+  
+  if (!nick || !pass) {
     showCustomMessage("Введіть нікнейм та пароль", true);
     return;
   }
+  if (!isValidNick(nick)) {
+    showCustomMessage("Нік: 3-20 символів, тільки літери/цифри/підкреслення", true);
+    return;
+  }
+  
   showCustomMessage("Завантаження...");
+  const email = nickToEmail(nick);
+  const nickKey = nick.toLowerCase();
+  const safePass = normalizePassword(pass);
+  
   try {
-    let r = await fetch(DB + "users/" + n + ".json");
-    let d = await r.json();
-    if (d) {
-      if (d.pass !== p) {
+    let cred;
+    try {
+      cred = await auth.signInWithEmailAndPassword(email, safePass);
+    } catch (signInErr) {
+      if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential') {
+        // Такого акаунта ще немає — реєструємо нового гравця.
+        // Перевіряємо, чи нік уже не зайнятий (про всяк випадок, Auth теж це перевірить по email).
+        const takenUid = await getUidByNick(nickKey);
+        if (takenUid) {
+          showCustomMessage("Цей нікнейм вже зайнятий", true);
+          return;
+        }
+        cred = await auth.createUserWithEmailAndPassword(email, safePass);
+      } else if (signInErr.code === 'auth/wrong-password') {
         showCustomMessage("Неправильний пароль!", true);
         return;
+      } else if (signInErr.code === 'auth/too-many-requests') {
+        showCustomMessage("Забагато спроб. Спробуйте через кілька хвилин", true);
+        return;
+      } else {
+        throw signInErr;
       }
-      user = d;
-    } else {
-      user = {
-        name: n, pass: p, points: 0, points_earned: 0,
-        items: {gold_frame: false},
+    }
+    
+    const uid = cred.user.uid;
+    let data = await dbGet('users/' + uid);
+    
+    if (!data) {
+      // Новий гравець — створюємо профіль і закріплюємо нік в індексі
+      data = {
+        name: nick, points: 0, points_earned: 0,
+        items: { gold_frame: false },
         themeAttempts: {}, themeResults: {},
         regDate: new Date().toISOString().split('T')[0],
         avatar: '👤', avatarType: 'emoji', avatarData: null,
         friends: [], notifications: true, level: 1,
-        achievements: {}, lastDailyBonus: null, stickers: {}, supportMessages: []
+        achievements: {}, lastDailyBonus: null, stickers: {}
       };
-      await fetch(DB + "users/" + n + ".json", {method:'PUT', body:JSON.stringify(user)});
+      await dbSet('users/' + uid, data);
+      await claimNickname(nick, uid);
     }
-    localStorage.setItem('un', n);
-    localStorage.setItem('up', p);
-    const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
-    await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify({game_nick:n, time:now})});
+    
+    await loadUserAndEnterGame(uid, data);
+  } catch (e) {
+    console.error(e);
+    showCustomMessage("Помилка підключення", true);
+  }
+}
+
+async function loadUserAndEnterGame(uid, preloadedData) {
+  try {
+    const data = preloadedData || await dbGet('users/' + uid);
+    if (!data) {
+      // Дані не знайдено (наприклад, акаунт існує в Auth, але профіль ще не створено) —
+      // повертаємо на екран входу, а не показуємо порожню гру.
+      show('auth-screen');
+      return;
+    }
+    
+    user = data;
+    user.uid = uid;
     items = user.items || {};
     if (!user.themeResults) user.themeResults = {};
     if (!user.regDate) user.regDate = new Date().toISOString().split('T')[0];
@@ -103,7 +162,6 @@ async function auth() {
     if (!user.achievements) user.achievements = {};
     if (!user.lastDailyBonus) user.lastDailyBonus = null;
     if (!user.stickers) user.stickers = {};
-    if (!user.supportMessages) user.supportMessages = [];
     if (user.points_earned === undefined) user.points_earned = user.points || 0;
     
     save();
@@ -117,18 +175,21 @@ async function auth() {
     applyItems();
     update();
     show('menu');
-  } catch(e) {
-    showCustomMessage("Помилка підключення", true);
+    
+    if (typeof loadCustomTests === 'function') loadCustomTests();
+  } catch (e) {
     console.error(e);
+    showCustomMessage("Помилка завантаження профілю", true);
+    show('auth-screen');
   }
 }
 
 function save() {
-  if (!user) return;
+  if (!user || !user.uid) return;
   user.items = items;
-  user.stickers = user.stickers || {};
-  user.supportMessages = user.supportMessages || [];
-  fetch(DB + "users/" + user.name + ".json", {method:'PUT', body:JSON.stringify(user)});
+  const toSave = Object.assign({}, user);
+  delete toSave.uid; // технічне поле, не зберігаємо його всередині запису
+  dbSet('users/' + user.uid, toSave).catch(e => console.error('Помилка збереження:', e));
 }
 
 function update() {
@@ -232,14 +293,38 @@ function loadQuestion() {
     
     const resultPercent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
     
+    // Зберігаємо результат в базу — окремий, незмінний запис для перевірки вчителем
+    // (навіть якщо скріншот десь загубиться або буде відредагований, тут лишиться правда)
+    if (total > 0 && user.uid) {
+      const resultRecord = {
+        nick: user.name,
+        themeId: currentTheme,
+        themeName: themeName,
+        correct: correctCount,
+        wrong: wrongCount,
+        total: total,
+        percent: resultPercent,
+        date: dateStr,
+        time: timeStr,
+        timeSpent: timeSpent,
+        timestamp: Date.now()
+      };
+      rtdb.ref('results/' + user.uid).push(resultRecord).catch(e => console.error('Не вдалося зберегти результат:', e));
+    }
+    
     let resultColor = '#e74c3c';
     if (resultPercent >= 80) resultColor = '#2ecc71';
     else if (resultPercent >= 60) resultColor = '#f39c12';
     
-    document.getElementById('qtext').innerHTML = `📚 Тема "<span style="color: var(--gold);">${themeName}</span>" завершена!`;
+    document.getElementById('qtext').innerHTML = `🎓 Сертифікат проходження тесту`;
     document.getElementById('feedback').innerHTML = '';
     document.getElementById('abox').innerHTML = `
-      <div class="summary" style="background: rgba(0,0,0,0.05); border-radius: 16px; padding: 16px;">
+      <div class="summary" id="resultCertificate" style="background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(0,0,0,0.04)); border: 2px solid var(--gold); border-radius: 16px; padding: 18px;">
+        <div style="text-align:center;margin-bottom:10px;">
+          <div style="font-size:13px;color:#888;">Учень / учениця</div>
+          <div style="font-size:22px;font-weight:bold;color:var(--gold);">${escapeHtml(user.name)}</div>
+          <div style="font-size:15px;margin-top:4px;">Тест: <b>${escapeHtml(themeName)}</b></div>
+        </div>
         <div style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--gold); text-align: center;">
           <span style="font-size: 14px; font-weight: bold;">📅 ${dateStr} &nbsp;|&nbsp; ⏰ ${timeStr} &nbsp;|&nbsp; ⏱️ ${timeSpent}</span>
         </div>
@@ -261,14 +346,9 @@ function loadQuestion() {
             <div style="font-size: 11px;">🎯 Результат</div>
           </div>
         </div>
-        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd; text-align: center;">
-          <div style="margin-bottom: 5px;">
-            <span style="font-weight: bold;">💰 Баланс:</span> <span style="color: var(--gold);">${user.points.toLocaleString()} ₴</span>
-            &nbsp;&nbsp;|&nbsp;&nbsp;
-            <span style="font-weight: bold;">🏆 Рейтинг:</span> <span style="color: var(--gold);">${(user.points_earned || user.points).toLocaleString()} ₴</span>
-          </div>
-        </div>
+        <div style="text-align:center;font-size:11px;color:#888;">Результат також збережено в системі під ніком гравця</div>
       </div>
+      <div style="text-align:center;font-size:12px;color:#888;margin-top:8px;">📸 Зробіть скріншот цього екрана і надішліть вчителю</div>
       <button class="btn" style="margin-top: 15px; background: #9c27b0;" onclick="show('sections')">🎯 Обрати іншу тему</button>
     `;
     document.getElementById('progressFill').style.width = '0%';
@@ -440,8 +520,12 @@ function getPlayerBadges(playerData) {
 async function showPlayerProfile(nickname) {
   if (!nickname) return;
   try {
-    const r = await fetch(DB + "users/" + nickname + ".json");
-    const playerData = await r.json();
+    const targetUid = await getUidByNick(nickname);
+    if (!targetUid) {
+      showCustomMessage("❌ Гравця не знайдено!", true);
+      return;
+    }
+    const playerData = await dbGet('users/' + targetUid);
     if (!playerData) {
       showCustomMessage("❌ Гравця не знайдено!", true);
       return;
@@ -496,7 +580,7 @@ async function showPlayerProfile(nickname) {
           <span class="modal-close" onclick="closePlayerProfileModal()">&times;</span>
           <div style="text-align: center;">
             ${avatarHtml}
-            <h2 style="margin: 10px 0; color: var(--gold);">${playerData.name}</h2>
+            <h2 style="margin: 10px 0; color: var(--gold);">${escapeHtml(playerData.name)}</h2>
             <p style="margin: 5px 0;"><strong>${levelName}</strong></p>
             <p style="margin: 5px 0;">💰 Баланс: <strong>${(playerData.points || 0).toLocaleString()} ₴</strong></p>
             <p style="margin: 5px 0;">🏆 Рейтинг: <strong>${rating.toLocaleString()} ₴</strong></p>
@@ -551,9 +635,18 @@ function closePlayerProfileModal() {
 
 async function loadT() {
   show('top');
-  let r = await fetch(DB + "users/.json");
-  let d = await r.json();
   let l = document.getElementById('tlist');
+  l.innerHTML = '<div style="padding:12px;color:#aaa">Завантаження...</div>';
+  
+  let d;
+  try {
+    d = await dbGet('users');
+  } catch (e) {
+    console.error(e);
+    l.innerHTML = '<div style="padding:12px;color:#aaa">Не вдалося завантажити топ</div>';
+    return;
+  }
+  
   l.innerHTML = '';
   
   if (d) {
@@ -567,12 +660,14 @@ async function loadT() {
       const u = topPlayers[i];
       const rating = u.points_earned || u.points || 0;
       const avatarHtml = getUserAvatarHtmlForTop(u.avatar, u.avatarType, u.avatarData);
+      const safeName = escapeHtml(u.name);
+      const nickAttr = safeName.replace(/'/g, "&#39;");
       l.innerHTML += `
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #ddd;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <span style="font-weight: bold; width: 35px;">${i + 1}.</span>
             ${avatarHtml}
-            <span style="cursor: pointer; color: var(--gold); text-decoration: underline;" onclick="showPlayerProfile('${u.name.replace(/'/g, "\\'")}')">${getLevelIcon(u.level)} ${u.name}</span>
+            <span style="cursor: pointer; color: var(--gold); text-decoration: underline;" onclick="showPlayerProfile('${nickAttr}')">${getLevelIcon(u.level)} ${safeName}</span>
           </div>
           <b>${rating.toLocaleString()} ₴</b>
         </div>

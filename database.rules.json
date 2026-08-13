@@ -1,0 +1,61 @@
+{
+  "rules": {
+
+    "users": {
+      "$uid": {
+        ".read": true,
+        ".write": "auth != null && (auth.uid === $uid || root.child('admins/'+auth.uid).val() === true)"
+      }
+    },
+
+    "nicknames": {
+      "$nick": {
+        ".read": true,
+        ".write": "auth != null && (!data.exists() || data.val() === auth.uid || root.child('admins/'+auth.uid).val() === true)"
+      }
+    },
+
+    "support": {
+      ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && (auth.uid === $uid || root.child('admins/'+auth.uid).val() === true)"
+      }
+    },
+
+    "admins": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": false
+      }
+    },
+
+    "customTests": {
+      ".read": true,
+      "$testId": {
+        ".write": "auth != null && root.child('admins/'+auth.uid).val() === true"
+      }
+    },
+
+    "results": {
+      ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        "$resultId": {
+          ".validate": "!data.exists()"
+        }
+      }
+    },
+
+    "user_logs": {
+      ".read": false,
+      ".write": false
+    },
+
+    "$other": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}

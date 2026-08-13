@@ -1,0 +1,89 @@
+#feedback {
+  text-align: center;
+  font-size: 36px;
+  margin: 15px 0;
+}
+
+.correct { color: #2ecc71; }
+.wrong { color: #ff4d4d; }
+
+#abox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.duolingo-progress {
+  width: 100%;
+  height: 14px;
+  background: #e5e5e5;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 4px 0 18px;
+  box-shadow: inset 0 2px 0 rgba(0,0,0,.08);
+}
+
+.progress-fill {
+  height: 100%;
+  background: #58cc02;
+  width: 0%;
+  transition: width .35s ease;
+  border-radius: 999px;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,.15);
+}
+
+#question-counter {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.mascot-guide {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin: -4px 0 14px;
+}
+
+.mascot-image {
+  width: 102px;
+  height: 132px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.mascot-cloud {
+  position: relative;
+  flex: 1;
+  padding: 12px 13px;
+  border: 2px solid #d9d9d9;
+  border-radius: 18px;
+  background: #fff;
+  color: #3c3c3c;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  box-shadow: 0 3px 0 #d9d9d9;
+}
+
+.mascot-cloud::after {
+  content: '';
+  position: absolute;
+  left: -9px;
+  bottom: 20px;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-left: 2px solid #d9d9d9;
+  border-bottom: 2px solid #d9d9d9;
+  transform: rotate(45deg);
+}
+
+.theme-intro {
+  margin: -4px 0 14px;
+  color: #777;
+  font-size: 13px;
+  text-align: center;
+}

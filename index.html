@@ -95,16 +95,28 @@
       </div>
       <h2>Обери тему</h2>
       <p class="theme-intro">Ти сам обираєш розділ і конкретне завдання.</p>
-      <button class="btn theme-btn" onclick="show('imennyky')">📖 Іменники</button>
-      <button class="btn theme-btn" onclick="show('prykmetnyky')">📝 Прикметники</button>
-      <button class="btn theme-btn" onclick="show('zajmennyky')">🔤 Займенники</button>
-      <button class="btn theme-btn" onclick="show('chyslivnyky')">🔢 Числівники</button>
-      <button class="btn theme-btn" onclick="show('frazeologizmy')">💬 Фразеологізми</button>
-      <button class="btn theme-btn" onclick="show('antisurzhyk')">🗣️ Антисуржик</button>
-      <button class="btn theme-btn" onclick="show('punctuation')">✍️ Пунктуація</button>
-      <button class="btn theme-btn" onclick="show('apostrophe')">’ Апостроф</button>
-      <button class="btn theme-btn" onclick="show('custom-tests-screen')">📝 Додаткові тести</button>
+      <button class="btn theme-btn" onclick="openCurriculumSection('structure')">🧩 РОЗДІЛ І. Будова слова</button>
+      <button class="btn theme-btn" onclick="openCurriculumSection('formation')">🛠️ РОЗДІЛ ІІ. Словотвір</button>
+      <button class="btn theme-btn" onclick="openCurriculumSection('speech')">📚 РОЗДІЛ ІІІ. Частини мови</button>
       <button class="btn red" onclick="show('menu')">НАЗАД</button>
+    </div>
+  </div>
+
+  <div id="curriculum-section" class="screen">
+    <div class="card">
+      <h2 id="curriculum-title">Розділ</h2>
+      <p class="theme-intro">Обери тему, а потім один із п’яти тестів.</p>
+      <div id="curriculum-topics"></div>
+      <button class="btn red" onclick="show('sections')">НАЗАД</button>
+    </div>
+  </div>
+
+  <div id="curriculum-tests-screen" class="screen">
+    <div class="card">
+      <h2 id="curriculum-tests-title">Тема</h2>
+      <p class="theme-intro">У кожному тесті — 5 питань і 3 варіанти відповіді.</p>
+      <div id="curriculum-tests"></div>
+      <button class="btn red" onclick="show('curriculum-section')">НАЗАД</button>
     </div>
   </div>
 
@@ -417,6 +429,7 @@
   <script src="js/themes/frazeologizmy14.js"></script>
   <script src="js/themes/practice-packs.js"></script>
   <script src="js/themes/index.js"></script>
+  <script src="js/themes/curriculum.js?v=1"></script>
   
   <script src="js/cabinet.js"></script>
   <script src="js/main.js?v=5"></script>

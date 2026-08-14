@@ -267,6 +267,9 @@ function getThemeName(key) {
   if (window.customThemeNames && window.customThemeNames[key]) {
     return window.customThemeNames[key];
   }
+  if (window.curriculumThemeNames && window.curriculumThemeNames[key]) {
+    return window.curriculumThemeNames[key];
+  }
   const names = {
     vydminy: 'Відміни',
     orudnyi_1vidmina: 'Орудний відмінок',

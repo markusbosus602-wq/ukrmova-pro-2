@@ -116,6 +116,7 @@ function showNotification(msg, isError = false, duration = 3000) {
 
 // Отримання назви теми
 function getThemeName(key) {
+  if (window.curriculumThemeNames && window.curriculumThemeNames[key]) return window.curriculumThemeNames[key];
   const names = {
     vydminy: 'Відміни',
     orudnyi_1vidmina: 'Орудний відмінок',

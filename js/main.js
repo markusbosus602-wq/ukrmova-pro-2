@@ -282,7 +282,7 @@ function updateMascotHint(screenId) {
   if (!mascot || !bubble) return;
   // Topic-selection screens already have their own guide at the top.  Do not
   // show a second fixed mascot over the task buttons.
-  const selectionScreens = ['auth-screen', 'shop', 'sections', 'imennyky', 'prykmetnyky', 'zajmennyky', 'chyslivnyky', 'frazeologizmy', 'antisurzhyk', 'punctuation', 'apostrophe', 'custom-tests-screen'];
+  const selectionScreens = ['auth-screen', 'shop', 'sections', 'curriculum-section', 'curriculum-tests-screen', 'imennyky', 'prykmetnyky', 'zajmennyky', 'chyslivnyky', 'frazeologizmy', 'antisurzhyk', 'punctuation', 'apostrophe', 'custom-tests-screen'];
   document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('mascot-safe'));
   const screen = document.getElementById(screenId);
   const hasFloatingMascot = !selectionScreens.includes(screenId);

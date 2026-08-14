@@ -75,8 +75,7 @@
     'Правопис неозначених і заперечних займенників': ['будь-хто', 'будь хто', 'будьхто']
   };
   const focusedBank = (title, fact) => ['Обери правильний варіант.', 'Який запис відповідає правилу?', 'Знайди нормативний варіант.', 'Обери правильний приклад.', 'Познач вірну відповідь.'].map(question => q(`${question} Тема: «${title}».`, fact[0], fact[1], fact[2]));
-  // Five source rules produce 25 different two-rule tasks with concise answer
-  // buttons. The rules are shown in the question, not repeated on every button.
+  // Teacher-provided question banks contain five separate tests per topic.
   const questionFrames = [
     'Визнач правильний варіант для правила.', 'Знайди нормативну відповідь.', 'Обери варіант без помилки.', 'Який варіант відповідає темі?', 'Познач правильний приклад.',
     'Перевір себе: обери правильну відповідь.', 'Застосуй правило й обери варіант.', 'Який запис є літературною нормою?', 'Визнач вірний мовний варіант.', 'Обери відповідь за правилом.',
@@ -85,6 +84,8 @@
     'Уважно прочитай і вибери відповідь.', 'Визнач правильне застосування правила.', 'Знайди мовну норму.', 'Обери вірний варіант відповіді.', 'Підсумкове запитання: обери правильно.'
   ];
   const makeTests = (topic, bank) => {
+    const imported = window.curriculumTestData?.[topic];
+    if (imported) return imported;
     const wrong = item => item.w.find(answer => answer !== item.a) || 'неправильний варіант';
     const tasks = bank.flatMap((first, firstIndex) => bank.map((second, secondIndex) => {
       const frame = questionFrames[firstIndex * bank.length + secondIndex];

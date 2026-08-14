@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="css/shop.css?v=4">
   <link rel="stylesheet" href="css/game.css">
   <link rel="stylesheet" href="css/responsive.css">
-  <link rel="stylesheet" href="css/ukrainian-theme.css?v=1">
+  <link rel="stylesheet" href="css/ukrainian-theme.css?v=2">
   <style>
     /* Inline shop styles prevent stale Telegram WebView CSS cache from breaking the layout. */
     #shop .card{max-width:450px;color:#f7f5ff;background:radial-gradient(circle at 90% 0,rgba(129,75,255,.35),transparent 42%),linear-gradient(145deg,#17122f,#090b1e);border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 55px rgba(8,5,28,.55)}
@@ -223,6 +223,7 @@
         <button class="tab-btn" data-tab="stickers">🎨 Стікери</button>
         <button class="tab-btn" data-tab="support">💬 Підтримка</button>
         <button class="tab-btn" data-tab="friends">👥 Друзі</button>
+        <button class="tab-btn" data-tab="community">🌐 Спільнота</button>
         <button class="tab-btn" data-tab="settings">⚙️ Налаштування</button>
       </div>
 
@@ -308,6 +309,15 @@
         </div>
       </div>
 
+      <div id="tab-community" class="cabinet-tab">
+        <div class="cabinet-section community-chat">
+          <h3>🌐 Спільнота Солов'їна</h3>
+          <p class="community-note">Спілкуйтеся українською та поважайте інших гравців.</p>
+          <div id="communityMessages" class="community-messages">Завантаження чату…</div>
+          <div class="community-compose"><input id="communityMessageInput" type="text" maxlength="280" placeholder="Напишіть повідомлення…"><button class="btn small" onclick="sendCommunityMessage()">Надіслати</button></div>
+        </div>
+      </div>
+
       <div id="tab-settings" class="cabinet-tab">
         <div class="cabinet-section">
           <h3>⚙️ Налаштування</h3>
@@ -386,6 +396,7 @@
   <script src="js/achievements.js"></script>
   <script src="js/stickers.js"></script>
   <script src="js/support.js"></script>
+  <script src="js/community-chat.js?v=1"></script>
   <script src="js/custom-tests.js"></script>
   
   <script src="js/themes/vydminy.js"></script>
@@ -417,7 +428,7 @@
   <script src="js/themes/index.js"></script>
   
   <script src="js/cabinet.js"></script>
-  <script src="js/main.js?v=4"></script>
+  <script src="js/main.js?v=5"></script>
 
 </body>
 </html>

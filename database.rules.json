@@ -23,6 +23,14 @@
       }
     },
 
+    "communityChat": {
+      ".read": "auth != null",
+      "$messageId": {
+        ".write": "auth != null && !data.exists() && newData.child('uid').val() === auth.uid",
+        ".validate": "newData.hasChildren(['uid', 'nick', 'text', 'timestamp']) && newData.child('nick').isString() && newData.child('text').isString() && newData.child('text').val().length <= 280"
+      }
+    },
+
     "admins": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",

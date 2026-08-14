@@ -98,8 +98,8 @@
   }));
 
   window.practicePacks = {
-    antisurzhyk: makeTests('antisurzhyk', antiUnique),
-    punctuation: makeTests('punctuation', punctuationUnique),
-    apostrophe: makeTests('apostrophe', apostropheUnique)
+    antisurzhyk: window.importedPracticeTests?.antisurzhyk || makeTests('antisurzhyk', antiUnique),
+    punctuation: window.importedPracticeTests?.punctuation || makeTests('punctuation', punctuationUnique),
+    apostrophe: window.importedPracticeTests?.apostrophe || makeTests('apostrophe', apostropheUnique)
   };
 })();

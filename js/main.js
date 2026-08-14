@@ -256,6 +256,7 @@ function applyItems() {
     style.textContent = `@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); text-shadow: 0 0 10px gold; } 100% { transform: scale(1); } }`;
     document.head.appendChild(style);
   }
+  if (typeof applyPurchasedShopEffects === 'function') applyPurchasedShopEffects();
 }
 
 const MASCOT_HINTS = {
@@ -281,7 +282,7 @@ function updateMascotHint(screenId) {
   if (!mascot || !bubble) return;
   // Topic-selection screens already have their own guide at the top.  Do not
   // show a second fixed mascot over the task buttons.
-  const selectionScreens = ['auth-screen', 'sections', 'imennyky', 'prykmetnyky', 'zajmennyky', 'chyslivnyky', 'frazeologizmy', 'antisurzhyk', 'punctuation', 'apostrophe', 'custom-tests-screen'];
+  const selectionScreens = ['auth-screen', 'shop', 'sections', 'imennyky', 'prykmetnyky', 'zajmennyky', 'chyslivnyky', 'frazeologizmy', 'antisurzhyk', 'punctuation', 'apostrophe', 'custom-tests-screen'];
   document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('mascot-safe'));
   const screen = document.getElementById(screenId);
   const hasFloatingMascot = !selectionScreens.includes(screenId);

@@ -20,6 +20,47 @@ const SHOP_NAMES = {
   secret_item: 'Секретний товар'
 };
 
+const EXTRA_SHOP_ITEMS = [
+  ['neon_frame','Неонова рамка','Профіль у фіолетовому неоні',2200,'profile'], ['crystal_frame','Кришталева рамка','Холодний кришталевий контур',2600,'profile'],
+  ['forest_frame','Лісова рамка','Зелений природний стиль',2400,'profile'], ['ocean_frame','Океанська рамка','Синя хвиля навколо профілю',2400,'profile'],
+  ['neon_nick','Неоновий нік','Яскраве сяйво нікнейма',2800,'effects'], ['gold_nick','Золотий нік','Золотий градієнт для імені',3200,'effects'],
+  ['ice_nick','Крижаний нік','Холодний блакитний стиль',2700,'effects'], ['shadow_nick','Тіньовий нік','Темний ефект для нікнейма',2500,'effects'],
+  ['aurora_bg','Полярне сяйво','Анімований фон профілю',4200,'premium'], ['night_bg','Нічне небо','Зоряний фон для гри',4000,'premium'],
+  ['cyber_bg','Кібермісто','Неоновий ігровий фон',4500,'premium'], ['sakura_bg','Сакура','Ніжний рожевий фон',4300,'premium'],
+  ['confetti_fx','Конфеті','Святкові частинки на екрані',1800,'effects'], ['snow_fx','Снігопад','Легкий зимовий ефект',1800,'effects'],
+  ['stars_fx','Зоряний пил','Мерехтливі зірки навколо',2000,'effects'], ['fireflies_fx','Світлячки','Тепле вечірнє сяйво',2000,'effects'],
+  ['badge_legend','Бейдж «Легенда»','Преміум-позначка біля ніка',3500,'premium'], ['badge_master','Бейдж «Майстер»','Покажи свій рівень',3000,'profile'],
+  ['badge_star','Бейдж «Зірка»','Яскрава зірка біля імені',2800,'profile'], ['badge_guardian','Бейдж «Оберіг»','Особливий символ профілю',2800,'profile']
+];
+
+EXTRA_SHOP_ITEMS.forEach(([id, name, description, price]) => { SHOP_PRICES[id] = price; SHOP_NAMES[id] = name; });
+
+function renderExtraShopItems() {
+  const list = document.querySelector('.shop-grid');
+  if (!list || list.dataset.extraRendered) return;
+  list.dataset.extraRendered = 'true';
+  EXTRA_SHOP_ITEMS.forEach(([id, name, description, price, category]) => {
+    const premium = category === 'premium' ? ' premium' : '';
+    list.insertAdjacentHTML('beforeend', `<button class="shop-item${premium}" data-category="${category}" onclick="buyItem('${id}')"><span class="shop-icon"><svg viewBox="0 0 24 24"><path d="m12 3 2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5z"/></svg></span><span class="shop-copy"><span class="shop-name">${name}</span><span class="shop-description">${description}</span></span><span class="shop-price">🪙 ${price}</span></button>`);
+  });
+}
+
+function applyPurchasedShopEffects() {
+  if (typeof items === 'undefined') return;
+  const body = document.body;
+  const effects = ['aurora_bg', 'night_bg', 'cyber_bg', 'sakura_bg', 'confetti_fx', 'snow_fx', 'stars_fx', 'fireflies_fx'];
+  effects.forEach(effect => body.classList.toggle('effect-' + effect, !!items[effect]));
+  const nick = document.getElementById('playerNick');
+  if (!nick) return;
+  nick.classList.remove('style-neon-nick', 'style-gold-nick', 'style-ice-nick', 'style-shadow-nick', 'style-neon-frame', 'style-crystal-frame', 'style-forest-frame', 'style-ocean-frame');
+  ['neon_nick', 'gold_nick', 'ice_nick', 'shadow_nick', 'neon_frame', 'crystal_frame', 'forest_frame', 'ocean_frame'].forEach(effect => {
+    if (items[effect]) nick.classList.add('style-' + effect.replace('_', '-'));
+  });
+  const badges = [['badge_legend','◆'], ['badge_master','✦'], ['badge_star','★'], ['badge_guardian','✹']].filter(([id]) => items[id]).map(([, icon]) => icon).join(' ');
+  nick.querySelector('.shop-badge')?.remove();
+  if (badges) nick.insertAdjacentHTML('afterbegin', `<span class="shop-badge">${badges}</span> `);
+}
+
 // Купівля товару
 let activeShopCategory = 'all';
 
@@ -28,13 +69,14 @@ function refreshShopUi() {
   if (balance && typeof user !== 'undefined' && user) balance.textContent = (user.points || 0).toLocaleString();
   document.querySelectorAll('.shop-item').forEach(item => {
     const action = item.getAttribute('onclick') || '';
-    const category = action.includes('gold_frame') || action.includes('avatar_frame') ? 'profile'
-      : action.includes('vip') || action.includes('sunflowers') ? 'premium' : 'effects';
+    const category = item.dataset.category || (action.includes('gold_frame') || action.includes('avatar_frame') ? 'profile'
+      : action.includes('vip') || action.includes('sunflowers') ? 'premium' : 'effects');
     item.hidden = activeShopCategory !== 'all' && category !== activeShopCategory;
   });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  renderExtraShopItems();
   document.querySelectorAll('.shop-tab').forEach(tab => tab.addEventListener('click', () => {
     const label = tab.textContent.trim();
     activeShopCategory = label === 'Профіль' ? 'profile' : label === 'Ефекти' ? 'effects' : label === 'Преміум' ? 'premium' : 'all';

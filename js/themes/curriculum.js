@@ -92,11 +92,10 @@
 
   Object.entries(sections).forEach(([sectionId, section]) => section.topics = section.topics.map(([title, kind]) => {
     const id = `curriculum_${slug(title)}`;
-    // Section III is kept intact; in sections I–II each question comes from the
-    // topic's own five-question bank instead of repeating one focused fact.
-    const source = sectionId === 'speech' && focusedFacts[title]
-      ? focusedBank(title, focusedFacts[title])
-      : banks[kind]();
+    // Every test uses five different questions from its thematic bank. This
+    // replaces the old focused-fact generator, which repeated one answer five
+    // times in a single test.
+    const source = banks[kind]();
     const testIds = makeTests(title, source).map((questions, index) => {
       const testId = `${id}_${index + 1}`;
       themes[testId] = questions;

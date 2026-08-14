@@ -222,6 +222,31 @@ function toggleEffect(itemKey, itemName) {
   if (typeof applyItems === 'function') applyItems();
 }
 
+// Render only items the player has actually purchased. New shop items appear
+// here automatically because the list is read from the saved items object.
+function updatePurchases() {
+  const container = document.getElementById('purchasesList');
+  if (!container || typeof items === 'undefined') return;
+  const bought = Object.keys(items).filter(key => items[key] === true && !key.endsWith('_active'));
+  if (!bought.length) {
+    container.innerHTML = '<div class="purchases-empty">Ще немає покупок. Завітай до крамниці!</div>';
+    return;
+  }
+  const names = typeof SHOP_NAMES !== 'undefined' ? SHOP_NAMES : {};
+  container.innerHTML = bought.map(key => {
+    const active = items[key + '_active'] !== false;
+    const name = names[key] || key.replaceAll('_', ' ');
+    return `<div class="purchase-item"><span class="purchase-name">${escapeHtml(name)}</span><button class="purchase-toggle" data-item="${key}">${active ? '✓ УВІМК.' : 'УВІМКНУТИ'}</button></div>`;
+  }).join('');
+  container.querySelectorAll('.purchase-toggle').forEach(button => button.addEventListener('click', () => {
+    const key = button.dataset.item;
+    items[key + '_active'] = items[key + '_active'] === false;
+    if (typeof save === 'function') save();
+    if (typeof applyItems === 'function') applyItems();
+    updatePurchases();
+  }));
+}
+
 function loadHistory() {
   const container = document.getElementById('historyList');
   if (!user.themeResults || Object.keys(user.themeResults).length === 0) {

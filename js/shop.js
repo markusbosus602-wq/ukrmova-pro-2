@@ -49,14 +49,14 @@ function applyPurchasedShopEffects() {
   if (typeof items === 'undefined') return;
   const body = document.body;
   const effects = ['aurora_bg', 'night_bg', 'cyber_bg', 'sakura_bg', 'confetti_fx', 'snow_fx', 'stars_fx', 'fireflies_fx'];
-  effects.forEach(effect => body.classList.toggle('effect-' + effect, !!items[effect]));
+  effects.forEach(effect => body.classList.toggle('effect-' + effect, !!items[effect] && items[effect + '_active'] !== false));
   const nick = document.getElementById('playerNick');
   if (!nick) return;
   nick.classList.remove('style-neon-nick', 'style-gold-nick', 'style-ice-nick', 'style-shadow-nick', 'style-neon-frame', 'style-crystal-frame', 'style-forest-frame', 'style-ocean-frame');
   ['neon_nick', 'gold_nick', 'ice_nick', 'shadow_nick', 'neon_frame', 'crystal_frame', 'forest_frame', 'ocean_frame'].forEach(effect => {
-    if (items[effect]) nick.classList.add('style-' + effect.replace('_', '-'));
+    if (items[effect] && items[effect + '_active'] !== false) nick.classList.add('style-' + effect.replace('_', '-'));
   });
-  const badges = [['badge_legend','◆'], ['badge_master','✦'], ['badge_star','★'], ['badge_guardian','✹']].filter(([id]) => items[id]).map(([, icon]) => icon).join(' ');
+  const badges = [['badge_legend','◆'], ['badge_master','✦'], ['badge_star','★'], ['badge_guardian','✹']].filter(([id]) => items[id] && items[id + '_active'] !== false).map(([, icon]) => icon).join(' ');
   nick.querySelector('.shop-badge')?.remove();
   if (badges) nick.insertAdjacentHTML('afterbegin', `<span class="shop-badge">${badges}</span> `);
 }

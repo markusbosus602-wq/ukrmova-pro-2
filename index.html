@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="css/shop.css?v=4">
   <link rel="stylesheet" href="css/game.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/ukrainian-theme.css?v=1">
   <style>
     /* Inline shop styles prevent stale Telegram WebView CSS cache from breaking the layout. */
     #shop .card{max-width:450px;color:#f7f5ff;background:radial-gradient(circle at 90% 0,rgba(129,75,255,.35),transparent 42%),linear-gradient(145deg,#17122f,#090b1e);border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 55px rgba(8,5,28,.55)}
@@ -237,22 +238,7 @@
         </div>
         <div class="cabinet-section">
           <h3>🛍️ Мої покупки</h3>
-          <div class="purchases-grid">
-            <div class="purchase-item">✨ Золота рамка: <span id="purchaseGold">❌</span></div>
-            <div class="purchase-item">👑 Корона: <span id="purchaseCrown">❌</span></div>
-            <div class="purchase-item">🔥 Полум'я: <span id="purchaseFire">❌</span></div>
-            <div class="purchase-item">🛡️ Щит: <span id="purchaseShield">❌</span></div>
-            <div class="purchase-item">💎 ВІП: <span id="purchaseVip">❌</span></div>
-            <div class="purchase-item">🌈 Веселкове ім'я: <span id="purchaseRainbow">❌</span></div>
-            <div class="purchase-item">✨ Блискітки: <span id="purchaseSparkles">❌</span></div>
-            <div class="purchase-item">🖼️ Рамка аватара: <span id="purchaseAvatarFrame">❌</span></div>
-            <div class="purchase-item">🌟 Анімований нік: <span id="purchaseAnimated">❌</span></div>
-            <div class="purchase-item">🎨 Вишиванка: <span id="purchaseVyshyvanka">❌</span></div>
-            <div class="purchase-item">🏺 Кобза: <span id="purchaseKobza">❌</span></div>
-            <div class="purchase-item">🌻 Соняшникове поле: <span id="purchaseSunflowers">❌</span></div>
-            <div class="purchase-item">📜 Книжкова полиця: <span id="purchaseBookshelf">❌</span></div>
-            <div class="purchase-item">🎭 Театральна маска: <span id="purchaseTheaterMask">❌</span></div>
-          </div>
+          <div class="purchases-grid" id="purchasesList"></div>
         </div>
       </div>
 

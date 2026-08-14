@@ -64,7 +64,6 @@ function loadCabinet() {
       document.querySelectorAll('.cabinet-tab').forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
-      if (btn.dataset.tab === 'community' && typeof loadCommunityChat === 'function') loadCommunityChat();
     };
   });
 }

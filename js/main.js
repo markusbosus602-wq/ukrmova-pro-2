@@ -300,7 +300,7 @@ function renderPracticePacks() {
     window.customThemeNames = window.customThemeNames || {};
     container.innerHTML = Object.keys(tests).map((key, index) => {
       window.customThemeNames[key] = label + ' — тест ' + (index + 1);
-      return `<button class="btn theme-btn" onclick="startTheme('${key}')">Тест ${index + 1} <span>• 5 питань</span></button>`;
+      return `<button class="btn theme-btn" onclick="startTheme('${key}')">Тест ${index + 1}</button>`;
     }).join('');
   });
 }

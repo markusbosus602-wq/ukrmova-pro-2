@@ -47,13 +47,13 @@
   window.openCurriculumSection = function (sectionId) {
     const section = sections[sectionId];
     document.getElementById('curriculum-title').textContent = section.title;
-    document.getElementById('curriculum-topics').innerHTML = section.topics.map(topic => `<button class="btn theme-btn curriculum-topic" onclick="openCurriculumTopic('${topic.id}')">${topic.title}<span>5 тестів • 5 питань</span></button>`).join('');
+    document.getElementById('curriculum-topics').innerHTML = section.topics.map(topic => `<button class="btn theme-btn curriculum-topic" onclick="openCurriculumTopic('${topic.id}')">${topic.title}</button>`).join('');
     show('curriculum-section');
   };
   window.openCurriculumTopic = function (topicId) {
     const topic = Object.values(sections).flatMap(section => section.topics).find(item => item.id === topicId);
     document.getElementById('curriculum-tests-title').textContent = topic.title;
-    document.getElementById('curriculum-tests').innerHTML = topic.testIds.map((id, index) => `<button class="btn theme-btn" onclick="startTheme('${id}')">Тест ${index + 1}<span>5 питань</span></button>`).join('');
+    document.getElementById('curriculum-tests').innerHTML = topic.testIds.map((id, index) => `<button class="btn theme-btn" onclick="startTheme('${id}')">Тест ${index + 1}</button>`).join('');
     show('curriculum-tests-screen');
   };
 }());

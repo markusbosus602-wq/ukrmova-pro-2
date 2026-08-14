@@ -24,7 +24,9 @@
     formation: { title: 'РОЗДІЛ ІІ. Словотвір', icon: '🛠️', topics: [
       ['Основні способи словотворення. Префіксальний спосіб творення', 'formation'], ['Суфіксальний спосіб творення', 'formation'], ['Префіксально-суфіксальний спосіб творення', 'formation'], ['Безафіксний спосіб творення', 'formation']
     ]},
-    speech: { title: 'РОЗДІЛ ІІІ. Частини мови', icon: '📚', topics: [
+    speech: { title: 'РОЗДІЛ ІІІ. Частини мови', icon: '📚', legacy: [
+      ['📖 Іменники — попередні тести', 'imennyky'], ['📝 Прикметники — попередні тести', 'prykmetnyky'], ['🔤 Займенники — попередні тести', 'zajmennyky'], ['🔢 Числівники — попередні тести', 'chyslivnyky']
+    ], topics: [
       ['Іменники загальні і власні, конкретні та абстрактні', 'noun'], ['Рід іменників', 'noun'], ['Число іменників. Збірні іменники', 'nounSpelling'], ['Відмінки іменників. Особливості кличного відмінка', 'noun'], ['Поділ іменників на відміни та групи. Відмінювання іменників І відміни', 'nounDeclension'], ['Відмінювання іменників ІІ відміни', 'nounDeclension'], ['Відмінювання іменників ІІІ відміни', 'nounDeclension'], ['Відмінювання іменників IV відміни', 'nounDeclension'], ['Незмінювані іменники. Рід незмінюваних іменників', 'change'], ['Відмінювання множинних іменників', 'nounDeclension'], ['Написання й відмінювання чоловічих і жіночих прізвищ', 'nounSpelling'], ['Написання й відмінювання чоловічих і жіночих імен по батькові', 'nounSpelling'], ['Правопис складних іменників', 'compound'], ['Написання не з іменниками', 'nounSpelling'], ['Ступені порівняння якісних прикметників, творення їх', 'adjective'], ['Прикметники твердої і м’якої груп. Відмінювання прикметників', 'adjectiveSpelling'], ['Написання не з прикметниками', 'adjective'], ['Написання -н- і -нн- у прикметниках', 'adjectiveSpelling'], ['Написання складних прикметників', 'adjectiveSpelling'], ['Числівники кількісні і порядкові, прості, складні та складені', 'numeral'], ['Відмінювання числівників', 'numeral'], ['Написання складних і складених числівників', 'numeral'], ['Розряди займенників за значенням', 'pronoun'], ['Відмінювання займенників', 'pronoun'], ['Правопис неозначених і заперечних займенників', 'pronoun']
     ]}
   };
@@ -47,7 +49,8 @@
   window.openCurriculumSection = function (sectionId) {
     const section = sections[sectionId];
     document.getElementById('curriculum-title').textContent = section.title;
-    document.getElementById('curriculum-topics').innerHTML = section.topics.map(topic => `<button class="btn theme-btn curriculum-topic" onclick="openCurriculumTopic('${topic.id}')">${topic.title}</button>`).join('');
+    const legacy = section.legacy ? `<h3 class="curriculum-subtitle">Попередні тести</h3>${section.legacy.map(([label, screen]) => `<button class="btn theme-btn" onclick="show('${screen}')">${label}</button>`).join('')}` : '';
+    document.getElementById('curriculum-topics').innerHTML = legacy + `<h3 class="curriculum-subtitle">Нові теми</h3>` + section.topics.map(topic => `<button class="btn theme-btn curriculum-topic" onclick="openCurriculumTopic('${topic.id}')">${topic.title}</button>`).join('');
     show('curriculum-section');
   };
   window.openCurriculumTopic = function (topicId) {

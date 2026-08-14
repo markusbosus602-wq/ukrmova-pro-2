@@ -26,5 +26,8 @@ const themes = {
   frazeologizmy11: window.frazeologizmy11 || [],
   frazeologizmy12: window.frazeologizmy12 || [],
   frazeologizmy13: window.frazeologizmy13 || [],
-  frazeologizmy14: window.frazeologizmy14 || []
+  frazeologizmy14: window.frazeologizmy14 || [],
+  ...(window.practicePacks ? window.practicePacks.antisurzhyk : {}),
+  ...(window.practicePacks ? window.practicePacks.punctuation : {}),
+  ...(window.practicePacks ? window.practicePacks.apostrophe : {})
 };

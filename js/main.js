@@ -258,6 +258,47 @@ function applyItems() {
   }
 }
 
+const MASCOT_HINTS = {
+  menu: 'Обери, з чого почнемо сьогодні!',
+  sections: 'Обери тему, а потім завдання — я поруч!',
+  imennyky: 'Вибери завдання та покажи, що знаєш!',
+  prykmetnyky: 'Знайди завдання до душі!',
+  zajmennyky: 'Тренуйся крок за кроком!',
+  chyslivnyky: 'Уважно читай кожне питання!',
+  frazeologizmy: 'Фразеологізми — це цікаво!',
+  antisurzhyk: 'Обери тест і говори українською впевнено!',
+  punctuation: 'Коми й тире стануть твоїми друзями!',
+  apostrophe: 'Апостроф любить уважність!',
+  game: 'Не поспішай — ти впораєшся!',
+  cabinet: 'Тут твої досягнення. Пишаюся тобою!',
+  shop: 'Обирай нагороди за свої старання!',
+  top: 'Піднімайся вище в рейтингу!'
+};
+
+function updateMascotHint(screenId) {
+  const mascot = document.getElementById('globalMascot');
+  const bubble = document.getElementById('globalMascotBubble');
+  if (!mascot || !bubble) return;
+  mascot.style.display = screenId === 'auth-screen' ? 'none' : 'flex';
+  bubble.textContent = MASCOT_HINTS[screenId] || 'Я вірю в тебе!';
+}
+
+function renderPracticePacks() {
+  document.querySelectorAll('.practice-tests').forEach(container => {
+    const pack = container.dataset.pack;
+    const tests = window.practicePacks && window.practicePacks[pack];
+    if (!tests) return;
+    const label = { antisurzhyk: 'Антисуржик', punctuation: 'Пунктуація', apostrophe: 'Апостроф' }[pack];
+    window.customThemeNames = window.customThemeNames || {};
+    container.innerHTML = Object.keys(tests).map((key, index) => {
+      window.customThemeNames[key] = label + ' — тест ' + (index + 1);
+      return `<button class="btn theme-btn" onclick="startTheme('${key}')">Тест ${index + 1} <span>• 5 питань</span></button>`;
+    }).join('');
+  });
+}
+
+document.addEventListener('DOMContentLoaded', renderPracticePacks);
+
 function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
   const screen = document.getElementById(id);
@@ -265,6 +306,7 @@ function show(id) {
   if (id === 'cabinet' && user && typeof loadCabinet === 'function') {
     loadCabinet();
   }
+  updateMascotHint(id);
 }
 
 function startTheme(theme) {

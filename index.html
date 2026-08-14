@@ -12,7 +12,6 @@
   <link rel="stylesheet" href="css/shop.css?v=4">
   <link rel="stylesheet" href="css/game.css">
   <link rel="stylesheet" href="css/responsive.css">
-  <link rel="stylesheet" href="css/ukrainian-theme.css?v=3">
   <style>
     /* Inline shop styles prevent stale Telegram WebView CSS cache from breaking the layout. */
     #shop .card{max-width:450px;color:#f7f5ff;background:radial-gradient(circle at 90% 0,rgba(129,75,255,.35),transparent 42%),linear-gradient(145deg,#17122f,#090b1e);border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 55px rgba(8,5,28,.55)}
@@ -23,6 +22,8 @@
     .style-neon-nick{color:#e2c8ff!important;text-shadow:0 0 8px #a568ff,0 0 18px #6636ff}.style-gold-nick{color:#ffe37d!important;text-shadow:0 0 12px #ffb020}.style-ice-nick{color:#bdf3ff!important;text-shadow:0 0 12px #38c9ff}.style-shadow-nick{color:#25213e!important;text-shadow:2px 2px 0 #d5b4ff}.style-neon-frame,.style-crystal-frame,.style-forest-frame,.style-ocean-frame{display:inline-block;padding:5px 9px;border-radius:12px}.style-neon-frame{border:2px solid #a568ff;box-shadow:0 0 12px #a568ff}.style-crystal-frame{border:2px solid #b4f6ff;box-shadow:0 0 12px #6cddff}.style-forest-frame{border:2px solid #68da80;box-shadow:0 0 12px #42b85c}.style-ocean-frame{border:2px solid #4acbff;box-shadow:0 0 12px #338fff}.shop-badge{color:#ffd758;text-shadow:0 0 7px #ffb326}
     body.effect-aurora_bg{background:linear-gradient(130deg,#15194b,#4a2272,#0f5f67)!important}body.effect-night_bg{background:radial-gradient(circle at 70% 10%,#565ca4,#101327 55%,#060716)!important}body.effect-cyber_bg{background:linear-gradient(135deg,#08051d,#381264,#103c62)!important}body.effect-sakura_bg{background:linear-gradient(135deg,#44244f,#d96a9c,#6c3b83)!important}body.effect-confetti_fx::before,body.effect-snow_fx::before,body.effect-stars_fx::before,body.effect-fireflies_fx::before{content:'✦ · ✧ · ✦ · ✧ · ✦';position:fixed;inset:15% 0 auto;color:rgba(255,255,255,.6);font-size:22px;letter-spacing:20px;pointer-events:none;z-index:5;animation:floatFx 5s linear infinite}@keyframes floatFx{to{transform:translateY(60vh) rotate(12deg);opacity:.1}}
   </style>
+  <!-- Must be last: overrides legacy and cached shop colours in Telegram WebView. -->
+  <link rel="stylesheet" href="css/ukrainian-theme.css?v=8">
 
   <!-- Firebase SDK (Authentication + Realtime Database) -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>

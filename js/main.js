@@ -313,6 +313,7 @@ function show(id) {
   if (id === 'cabinet' && user && typeof loadCabinet === 'function') {
     loadCabinet();
   }
+  if (id === 'shop' && typeof refreshShopUi === 'function') refreshShopUi();
   updateMascotHint(id);
 }
 

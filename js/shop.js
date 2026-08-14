@@ -21,6 +21,29 @@ const SHOP_NAMES = {
 };
 
 // Купівля товару
+let activeShopCategory = 'all';
+
+function refreshShopUi() {
+  const balance = document.getElementById('shopBalance');
+  if (balance && typeof user !== 'undefined' && user) balance.textContent = (user.points || 0).toLocaleString();
+  document.querySelectorAll('.shop-item').forEach(item => {
+    const action = item.getAttribute('onclick') || '';
+    const category = action.includes('gold_frame') || action.includes('avatar_frame') ? 'profile'
+      : action.includes('vip') || action.includes('sunflowers') ? 'premium' : 'effects';
+    item.hidden = activeShopCategory !== 'all' && category !== activeShopCategory;
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.shop-tab').forEach(tab => tab.addEventListener('click', () => {
+    const label = tab.textContent.trim();
+    activeShopCategory = label === 'Профіль' ? 'profile' : label === 'Ефекти' ? 'effects' : label === 'Преміум' ? 'premium' : 'all';
+    document.querySelectorAll('.shop-tab').forEach(button => button.classList.toggle('active', button === tab));
+    refreshShopUi();
+  }));
+  refreshShopUi();
+});
+
 function buyItem(item) {
   if (!user) return;
   
@@ -79,6 +102,7 @@ function buyItem(item) {
     if (typeof update === 'function') update();
     if (typeof applyItems === 'function') applyItems();
     if (typeof updatePurchases === 'function') updatePurchases();
+    refreshShopUi();
   } else {
     showCustomMessage(`❌ Недостатньо грошей! Потрібно ${finalPrice} ₴ ❌`, true);
   }

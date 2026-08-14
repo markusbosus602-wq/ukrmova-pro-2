@@ -279,7 +279,10 @@ function updateMascotHint(screenId) {
   const mascot = document.getElementById('globalMascot');
   const bubble = document.getElementById('globalMascotBubble');
   if (!mascot || !bubble) return;
-  mascot.style.display = screenId === 'auth-screen' ? 'none' : 'flex';
+  // Topic-selection screens already have their own guide at the top.  Do not
+  // show a second fixed mascot over the task buttons.
+  const selectionScreens = ['auth-screen', 'sections', 'imennyky', 'prykmetnyky', 'zajmennyky', 'chyslivnyky', 'frazeologizmy', 'antisurzhyk', 'punctuation', 'apostrophe', 'custom-tests-screen'];
+  mascot.style.display = selectionScreens.includes(screenId) ? 'none' : 'flex';
   bubble.textContent = MASCOT_HINTS[screenId] || 'Я вірю в тебе!';
 }
 

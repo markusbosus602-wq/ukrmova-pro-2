@@ -281,10 +281,12 @@ function updateMascotHint(screenId) {
   if (!mascot || !bubble) return;
   // Topic-selection screens already have their own guide at the top.  Do not
   // show a second fixed mascot over the task buttons.
-  // The floating version can cover controls on compact Telegram windows.
-  // The mascot remains on the topic screen as part of the normal layout;
-  // here it is never placed over an action button.
-  mascot.style.display = 'none';
+  const selectionScreens = ['auth-screen', 'sections', 'imennyky', 'prykmetnyky', 'zajmennyky', 'chyslivnyky', 'frazeologizmy', 'antisurzhyk', 'punctuation', 'apostrophe', 'custom-tests-screen'];
+  document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('mascot-safe'));
+  const screen = document.getElementById(screenId);
+  const hasFloatingMascot = !selectionScreens.includes(screenId);
+  mascot.style.display = hasFloatingMascot ? 'flex' : 'none';
+  if (hasFloatingMascot && screen) screen.classList.add('mascot-safe');
   bubble.textContent = MASCOT_HINTS[screenId] || 'Я вірю в тебе!';
 }
 

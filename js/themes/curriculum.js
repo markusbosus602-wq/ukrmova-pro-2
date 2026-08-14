@@ -75,7 +75,8 @@
     'Правопис неозначених і заперечних займенників': ['будь-хто', 'будь хто', 'будьхто']
   };
   const focusedBank = (title, fact) => ['Обери правильний варіант.', 'Який запис відповідає правилу?', 'Знайди нормативний варіант.', 'Обери правильний приклад.', 'Познач вірну відповідь.'].map(question => q(`${question} Тема: «${title}».`, fact[0], fact[1], fact[2]));
-  // 25 distinct question wordings per topic: five different questions in every test.
+  // Five source rules produce 25 different two-rule tasks.  A topic therefore
+  // has five genuinely different tests instead of five rotations of one test.
   const questionFrames = [
     'Визнач правильний варіант для правила.', 'Знайди нормативну відповідь.', 'Обери варіант без помилки.', 'Який варіант відповідає темі?', 'Познач правильний приклад.',
     'Перевір себе: обери правильну відповідь.', 'Застосуй правило й обери варіант.', 'Який запис є літературною нормою?', 'Визнач вірний мовний варіант.', 'Обери відповідь за правилом.',
@@ -83,11 +84,20 @@
     'Зістав правило та правильну відповідь.', 'Знайди вірний приклад уживання.', 'Обери правильну форму.', 'Познач нормативне написання.', 'Який із варіантів правильний?',
     'Уважно прочитай і вибери відповідь.', 'Визнач правильне застосування правила.', 'Знайди мовну норму.', 'Обери вірний варіант відповіді.', 'Підсумкове запитання: обери правильно.'
   ];
-  const makeTests = (topic, bank) => Array.from({ length: 5 }, (_, test) => Array.from({ length: 5 }, (_, index) => {
-    const item = bank[(index + test) % bank.length];
-    const frame = questionFrames[test * 5 + index];
-    return { ...item, q: `${frame} Тема «${topic}»: ${item.q}` };
-  }));
+  const makeTests = (topic, bank) => {
+    const fact = (item, answer) => `${item.q} ${answer}`;
+    const wrong = item => item.w.find(answer => answer !== item.a) || 'неправильний варіант';
+    const tasks = bank.flatMap((first, firstIndex) => bank.map((second, secondIndex) => {
+      const frame = questionFrames[firstIndex * bank.length + secondIndex];
+      return q(
+        `${frame} Тема «${topic}». Обери рядок, у якому обидві відповіді правильні.`,
+        `${fact(first, first.a)}; ${fact(second, second.a)}`,
+        `${fact(first, wrong(first))}; ${fact(second, second.a)}`,
+        `${fact(first, first.a)}; ${fact(second, wrong(second))}`
+      );
+    }));
+    return Array.from({ length: 5 }, (_, test) => tasks.slice(test * 5, test * 5 + 5));
+  };
   window.curriculumThemeNames = window.curriculumThemeNames || {};
 
   Object.entries(sections).forEach(([sectionId, section]) => section.topics = section.topics.map(([title, kind]) => {

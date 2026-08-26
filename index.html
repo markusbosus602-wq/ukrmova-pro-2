@@ -216,8 +216,14 @@
 
   <!-- TOP -->
   <div id="top" class="screen">
-    <div class="card">
-      <h3>🏆 ТОП 1000</h3>
+    <div class="card top-card">
+      <div class="top-hero">
+        <div>
+          <span class="top-kicker">SOLOVIYNA RATING</span>
+          <h3 class="top-title">ТОП 1000</h3>
+          <p class="top-subtitle">Найсильніші гравці Солов'їної</p>
+        </div>
+      </div>
       <div id="tlist">Завантаження...</div>
       <button class="btn" onclick="show('menu')">НАЗАД</button>
     </div>
@@ -227,7 +233,11 @@
   <div id="cabinet" class="screen">
     <div class="card cabinet-card">
       <div class="cabinet-header">
-        <h2>📦 МОЯ СКРИНЬКА</h2>
+        <div class="cabinet-heading">
+          <span class="cabinet-kicker">SOLOVIYNA PROFILE</span>
+          <h2 class="cabinet-title">Моя скринька</h2>
+          <p class="cabinet-subtitle">Профіль, нагороди і друзі</p>
+        </div>
         <div class="avatar-wrapper" onclick="openAvatarModal()">
           <div class="avatar" id="cabinetAvatar">👤</div>
           <div class="avatar-edit-btn">📷</div>
@@ -340,7 +350,7 @@
         </div>
       </div>
 
-      <button class="btn red" onclick="show('menu')">◀ НАЗАД</button>
+      <button class="btn red cabinet-back" onclick="show('menu')">◀ НАЗАД</button>
     </div>
   </div>
 

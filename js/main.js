@@ -710,14 +710,14 @@ function closePlayerProfileModal() {
 async function loadT() {
   show('top');
   let l = document.getElementById('tlist');
-  l.innerHTML = '<div style="padding:12px;color:#aaa">Завантаження...</div>';
+  l.innerHTML = '<div class="top-empty">Завантаження...</div>';
   
   let d;
   try {
     d = await dbGet('users');
   } catch (e) {
     console.error(e);
-    l.innerHTML = '<div style="padding:12px;color:#aaa">Не вдалося завантажити топ</div>';
+    l.innerHTML = '<div class="top-empty">Не вдалося завантажити топ</div>';
     return;
   }
   
@@ -737,18 +737,18 @@ async function loadT() {
       const safeName = escapeHtml(u.name);
       const nickAttr = safeName.replace(/'/g, "&#39;");
       l.innerHTML += `
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #ddd;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-weight: bold; width: 35px;">${i + 1}.</span>
+        <div class="top-row">
+          <div class="top-player">
+            <span class="top-rank">${i + 1}.</span>
             ${avatarHtml}
-            <span style="cursor: pointer; color: var(--gold); text-decoration: underline;" onclick="showPlayerProfile('${nickAttr}')">${getLevelIcon(u.level)} ${safeName}</span>
+            <button class="top-name" onclick="showPlayerProfile('${nickAttr}')">${getLevelIcon(u.level)} ${safeName}</button>
           </div>
-          <b>${rating.toLocaleString()} ₴</b>
+          <b class="top-score">${rating.toLocaleString()} ₴</b>
         </div>
       `;
     }
   } else {
-    l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
+    l.innerHTML = '<div class="top-empty">Топ порожній</div>';
   }
 }
 

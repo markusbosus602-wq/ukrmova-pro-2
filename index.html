@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>UkrMova Pro</title>
-  
+
   <!-- CSS -->
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
@@ -62,6 +62,7 @@
       <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
       <button class="btn green" onclick="show('shop')">КРАМНИЧКА</button>
       <button class="btn" style="background:var(--purple)" onclick="show('cabinet')">📦 МОЯ СКРИНЬКА</button>
+      <button class="btn" style="background:#0f766e" onclick="show('minigames')">🎮 МІНІ-ІГРИ</button>
     </div>
   </div>
 
@@ -103,7 +104,6 @@
       <button class="btn theme-btn" onclick="show('antisurzhyk')">🗣️ Антисуржик</button>
       <button class="btn theme-btn" onclick="show('punctuation')">✍️ Пунктуація</button>
       <button class="btn theme-btn" onclick="show('apostrophe')">’ Апостроф</button>
-      <button class="btn theme-btn" onclick="openSpaceGame()">🚀 Космічний мисливець</button>
       <button class="btn theme-btn" onclick="show('custom-tests-screen')">📝 Додаткові тести</button>
       <button class="btn red" onclick="show('menu')">НАЗАД</button>
     </div>
@@ -215,15 +215,27 @@
       <button class="btn red" style="margin-top:20px;" onclick="show('sections')">НАЗАД</button>
     </div>
   </div>
+
+  <!-- МІНІ-ІГРИ -->
+  <div id="minigames" class="screen">
+    <div class="card">
+      <h2>🎮 Міні-ігри</h2>
+      <p class="theme-intro">Тренуй українську мову у грі.</p>
+      <button class="btn theme-btn" onclick="openSpaceGame()">🚀 Космічний мисливець</button>
+      <button class="btn red" onclick="show('menu')">◀ НАЗАД</button>
+    </div>
+  </div>
+
   <!-- КОСМІЧНИЙ МИСЛИВЕЦЬ (міні-гра) -->
   <div id="space-game" class="screen space-screen">
     <div class="card space-card">
       <div class="sg-stage">
         <canvas id="spaceCanvas"></canvas>
       </div>
-      <button class="btn red space-back" onclick="show('sections')">◀ НАЗАД</button>
+      <button class="btn red space-back" onclick="show('minigames')">◀ НАЗАД</button>
     </div>
   </div>
+
   <!-- TOP -->
   <div id="top" class="screen">
     <div class="card top-card">
@@ -426,7 +438,7 @@
   <script src="js/stickers.js"></script>
   <script src="js/support.js"></script>
   <script src="js/custom-tests.js"></script>
-  
+
   <script src="js/themes/vydminy.js"></script>
   <script src="js/themes/orudnyi_1vidmina.js"></script>
   <script src="js/themes/prykmetnyky.js"></script>
@@ -457,7 +469,7 @@
   <script src="js/themes/index.js"></script>
   <script src="js/themes/curriculum-data.js?v=1"></script>
   <script src="js/themes/curriculum.js?v=11"></script>
-  
+
   <script src="js/cabinet.js"></script>
   <script src="js/space-game.js"></script>
   <script src="js/main.js?v=6"></script>

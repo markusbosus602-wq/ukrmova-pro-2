@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="css/shop.css?v=4">
   <link rel="stylesheet" href="css/game.css">
   <link rel="stylesheet" href="css/space-game.css">
+  <link rel="stylesheet" href="css/memory-game.css">
+  <link rel="stylesheet" href="css/snake-game.css">
   <link rel="stylesheet" href="css/responsive.css">
   <style>
     /* Inline shop styles prevent stale Telegram WebView CSS cache from breaking the layout. */
@@ -222,6 +224,8 @@
       <h2>🎮 Міні-ігри</h2>
       <p class="theme-intro">Тренуй українську мову у грі.</p>
       <button class="btn theme-btn" onclick="openSpaceGame()">🚀 Космічний мисливець</button>
+      <button class="btn theme-btn" onclick="openMemoryGame()">🃏 Пари слів</button>
+      <button class="btn theme-btn" onclick="openSnakeGame()">🐍 Змійка-мовознавець</button>
       <button class="btn red" onclick="show('menu')">◀ НАЗАД</button>
     </div>
   </div>
@@ -235,6 +239,12 @@
       <button class="btn red space-back" onclick="show('minigames')">◀ НАЗАД</button>
     </div>
   </div>
+
+  <!-- ПАРИ СЛІВ (міні-гра) -->
+  <div id="memory-game" class="screen"></div>
+
+  <!-- ЗМІЙКА-МОВОЗНАВЕЦЬ (міні-гра) -->
+  <div id="snake-game" class="screen"></div>
 
   <!-- TOP -->
   <div id="top" class="screen">
@@ -472,6 +482,8 @@
 
   <script src="js/cabinet.js"></script>
   <script src="js/space-game.js"></script>
+  <script src="js/memory-game.js"></script>
+  <script src="js/snake-game.js"></script>
   <script src="js/main.js?v=6"></script>
 
 </body>

@@ -3,7 +3,8 @@
 // Треба збивати лише слова заданої частини мови. Стріляти — тап/клік або пробіл.
 //
 // Правила гри навмисно прості: за правильне влучання +очки, за пропущене
-// правильне слово -життя, за підбите зайве слово -очки. Після гри результат
+// правильне слово -життя, за підбите зайве слово -життя і -очки. Наприкінці
+// гри нараховується ігрова валюта (1 ₴ за кожні 10 очок), а результат
 // зберігається у профіль гравця (ігри/{uid}) і показується у кабінеті.
 
 (function () {
@@ -61,7 +62,7 @@
     ship: { x: 0, y: 0, vx: 0, cooldown: 0, invuln: 0 },
     input: { left: false, right: false },
     pointer: { active: false, x: 0 },
-    score: 0, lives: 3, hits: 0, misses: 0, wrongHits: 0,
+    score: 0, lives: 3, hits: 0, misses: 0, wrongHits: 0, reward: 0,
     streak: 0, maxStreak: 0, level: 1,
     spawnTimer: 0, spawnInterval: 1.15,
     elapsed: 0,
@@ -150,6 +151,7 @@
     game.targetKind = kind || game.targetKind;
     game.words = []; game.shots = []; game.particles = [];
     game.score = 0; game.lives = 3; game.hits = 0; game.misses = 0; game.wrongHits = 0;
+    game.reward = 0;
     game.streak = 0; game.maxStreak = 0; game.level = 1;
     game.spawnTimer = 0; game.spawnInterval = 1.15; game.elapsed = 0;
     game.ship.x = game.width / 2; game.ship.cooldown = 0; game.ship.invuln = 0;
@@ -204,7 +206,6 @@
     }
 
     // Падіння слів
-    const fallSpeed = 46 + game.level * 9;
     for (let i = game.words.length - 1; i >= 0; i--) {
       const word = game.words[i];
       word.y += word.speed * dt;
@@ -283,19 +284,22 @@
       game.hits++;
       game.streak++;
       if (game.streak > game.maxStreak) game.maxStreak = game.streak;
-      const points = 100 + Math.min(game.streak, 10) * 10;
+      const points = 20 + Math.min(game.streak, 10) * 2;
       game.score += points;
       spawnParticles(word.x, word.y, '#46dc91', 16);
       showFloating(word.x, word.y, '+' + points, '#46dc91');
     } else {
+      // Влучання в зайве слово знімає життя, а не лише бали.
       game.wrongHits++;
       game.streak = 0;
       game.score = Math.max(0, game.score - 50);
+      game.lives--;
       spawnParticles(word.x, word.y, '#ff5b6f', 16);
-      showFloating(word.x, word.y, '−50', '#ff5b6f');
+      showFloating(word.x, word.y, '−50 ❤', '#ff5b6f');
     }
     game.words.splice(index, 1);
     updateHud();
+    if (game.lives <= 0) gameOver();
   }
 
   function shoot() {
@@ -340,9 +344,8 @@
     }
     ctx.globalAlpha = 1;
 
-    // Слова
+    // Усі слова виглядають однаково — підказок немає.
     for (const word of game.words) {
-      const isTarget = word.kind === game.targetKind;
       ctx.font = '800 19px "Segoe UI", system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -353,7 +356,7 @@
       ctx.fillStyle = 'rgba(30,28,66,.92)';
       ctx.fill();
       ctx.lineWidth = 2;
-      ctx.strokeStyle = isTarget ? 'rgba(120,220,255,.85)' : 'rgba(255,255,255,.28)';
+      ctx.strokeStyle = 'rgba(255,255,255,.35)';
       ctx.stroke();
       ctx.fillStyle = '#f4f1ff';
       ctx.fillText(word.text, x, y + 1);
@@ -465,12 +468,14 @@
   function gameOver() {
     game.running = false;
     if (game.rafId) { cancelAnimationFrame(game.rafId); game.rafId = 0; }
+    // Нагорода за гру: 1 ₴ за кожні 10 очок.
+    game.reward = Math.floor(game.score / 10);
     saveResult();
     const total = game.hits + game.wrongHits;
     const accuracy = total > 0 ? Math.round((game.hits / total) * 100) : 0;
     showOverlay(
       'Гру завершено',
-      `Рахунок: ${game.score} · Влучань: ${game.hits} · Помилок: ${game.wrongHits} · Точність: ${accuracy}% · Серія: ${game.maxStreak}`,
+      `Рахунок: ${game.score} · Нагорода: +${game.reward} ₴ · Влучань: ${game.hits} · Помилок: ${game.wrongHits} · Точність: ${accuracy}% · Серія: ${game.maxStreak}`,
       [
         { label: '🔁 Ще раз', className: 'green', onClick: () => start(game.targetKind) },
         { label: '🎯 Інша ціль', onClick: startScreen }
@@ -480,10 +485,14 @@
 
   function saveResult() {
     if (typeof user === 'undefined' || !user || !user.uid) return;
+    const reward = game.reward || 0;
+    user.points = (user.points || 0) + reward;
+    user.points_earned = (user.points_earned || 0) + reward;
     const record = {
       kind: game.targetKind,
       label: TARGETS[game.targetKind].label,
       score: game.score,
+      reward: reward,
       hits: game.hits,
       wrongHits: game.wrongHits,
       misses: game.misses,
@@ -494,6 +503,8 @@
     if (!user.games) user.games = {};
     user.games.space = record;
     if (typeof save === 'function') save();
+    const monEl = document.getElementById('mon');
+    if (monEl) monEl.innerText = user.points.toLocaleString();
   }
 
   function togglePause() {

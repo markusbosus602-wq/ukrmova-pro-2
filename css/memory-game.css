@@ -1,0 +1,158 @@
+/* css/memory-game.css — міні-гра «Пари слів» (меморі на антонімах) */
+
+#memory-game {
+  padding: 14px 12px;
+}
+
+.mem-card {
+  max-width: 430px;
+  width: 100%;
+  padding: 14px !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.mem-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mem-hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mem-hud-item {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.mem-hud-label {
+  font-size: 9px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #9d97c4;
+}
+
+.mem-hud-item b {
+  font-size: 16px;
+  color: #fff;
+}
+
+.mem-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.mem-tile {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(150deg, #2a2456, #171436);
+  color: transparent;
+  font-weight: 800;
+  font-size: 15px;
+  text-align: center;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition: transform 0.15s, background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.mem-tile::after {
+  content: '?';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #7f77b5;
+  font-size: 26px;
+}
+
+.mem-tile:active {
+  transform: scale(0.96);
+}
+
+.mem-tile.open {
+  background: linear-gradient(150deg, #1d5a44, #123a2e);
+  border-color: #5af0a0;
+  color: #eafff4;
+}
+
+.mem-tile.open::after {
+  content: '';
+}
+
+.mem-tile.done {
+  background: linear-gradient(150deg, #3a3168, #241d4a);
+  border-color: #8f7dff;
+  color: #fff;
+  opacity: 0.75;
+  cursor: default;
+}
+
+.mem-tile.done::after {
+  content: '';
+}
+
+.mem-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(6, 5, 22, 0.82);
+  backdrop-filter: blur(4px);
+}
+
+.mem-panel {
+  width: 100%;
+  max-width: 340px;
+  padding: 20px 18px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(38, 32, 88, 0.96), rgba(14, 12, 40, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.mem-panel-title {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 20px;
+}
+
+.mem-panel-text {
+  margin: 0 0 16px;
+  color: #c7c2e4;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.mem-panel-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.mem-panel-actions .btn {
+  width: 100%;
+  margin: 0;
+}
+
+.mem-back {
+  margin: 12px 0 0;
+}

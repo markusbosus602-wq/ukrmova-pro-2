@@ -32,10 +32,10 @@
   ];
 
   const TARGETS = {
-    noun: { label: 'Іменники' },
-    adj: { label: 'Прикметники' },
-    num: { label: 'Числівники' },
-    pron: { label: 'Займенники' }
+    noun: { label: 'Іменники', short: 'хто? що?', question: 'З’їж лише ІМЕННИКИ — слова, що відповідають на питання хто? що?' },
+    adj: { label: 'Прикметники', short: 'який? яка?', question: 'З’їж лише ПРИКМЕТНИКИ — слова, що відповідають на питання який? яка? яке?' },
+    num: { label: 'Числівники', short: 'скільки? котрий?', question: 'З’їж лише ЧИСЛІВНИКИ — слова, що означають кількість або порядок.' },
+    pron: { label: 'Займенники', short: 'вказує, не називає', question: 'З’їж лише ЗАЙМЕННИКИ — слова, що вказують на предмет, але не називають його.' }
   };
   const KINDS = Object.keys(TARGETS);
 
@@ -55,6 +55,7 @@
     snake: [], dir: { x: 1, y: 0 }, nextDir: { x: 1, y: 0 },
     food: null, step: BASE_STEP, acc: 0,
     score: 0, lives: 3, eaten: 0, wrong: 0, reward: 0,
+    floats: [], spawnDelay: 0,
     dom: {}
   };
 
@@ -76,6 +77,7 @@
           '<div class="snake-hud-item"><span class="snake-hud-label">Життя</span><b id="snakeLives">❤❤❤</b></div>' +
         '</div>' +
         '<canvas id="snakeCanvas"></canvas>' +
+        '<div class="snake-task" id="snakeTask">З’їж лише ІМЕННИКИ</div>' +
         '<div class="snake-overlay" id="snakeOverlay">' +
           '<div class="snake-panel">' +
             '<h3 class="snake-panel-title" id="snakePanelTitle">Змійка-мовознавець</h3>' +
@@ -95,6 +97,7 @@
       target: card.querySelector('#snakeTarget'),
       lives: card.querySelector('#snakeLives'),
       overlay: card.querySelector('#snakeOverlay'),
+      task: card.querySelector('#snakeTask'),
       panelTitle: card.querySelector('#snakePanelTitle'),
       panelText: card.querySelector('#snakePanelText'),
       panelActions: card.querySelector('#snakePanelActions')
@@ -143,6 +146,7 @@
     game.nextDir = { x: 1, y: 0 };
     game.score = 0; game.lives = 3; game.eaten = 0; game.wrong = 0; game.reward = 0;
     game.step = BASE_STEP; game.acc = 0; game.lastTs = 0;
+    game.floats = []; game.spawnDelay = 0;
     game.paused = false; game.running = true;
     spawnFood();
     hideOverlay();
@@ -175,11 +179,16 @@
     game.lastTs = ts;
     if (dt > 0.1) dt = 0.1;
     if (!game.paused) {
+      if (game.spawnDelay > 0) {
+        game.spawnDelay -= dt;
+        if (game.spawnDelay <= 0 && game.running) spawnFood();
+      }
       game.acc += dt;
       while (game.acc >= game.step && game.running && !game.paused) {
         game.acc -= game.step;
         tick();
       }
+      updateFloats(dt);
     }
     render();
     game.rafId = requestAnimationFrame(loop);
@@ -204,22 +213,42 @@
 
     if (game.food && game.food.x === nx && game.food.y === ny) {
       const correct = game.food.kind === game.targetKind;
+      const cx = game.food.x * game.cell + game.cell / 2;
+      const cy = game.food.y * game.cell + game.cell / 2;
       if (correct) {
         game.eaten++;
         game.score += POINTS_CORRECT;
         game.step = Math.max(MIN_STEP, game.step - 0.004);
+        addFloat(cx, cy, '+' + POINTS_CORRECT, '#8ff0c0');
       } else {
-        // Зайве слово: життя мінус, хвіст не росте.
+        // Зайве слово зникає з поля, забирає життя і бали.
         game.wrong++;
         game.score = Math.max(0, game.score - PENALTY_WRONG);
         game.lives--;
         game.snake.pop();
+        addFloat(cx, cy, '−' + PENALTY_WRONG + ' ❤', '#ff6b81');
       }
+      // Слово з'їдене — прибираємо його з поля. Нове з'явиться за мить,
+      // щоб гравець встиг побачити, що воно зникло.
+      game.food = null;
+      game.spawnDelay = 0.45;
       updateHud();
-      spawnFood();
       if (game.lives <= 0) { gameOver(); return; }
     } else {
       game.snake.pop();
+    }
+  }
+
+  function addFloat(x, y, text, color) {
+    game.floats.push({ x: x, y: y, text: text, color: color, life: 0.9 });
+  }
+
+  function updateFloats(dt) {
+    for (let i = game.floats.length - 1; i >= 0; i--) {
+      const f = game.floats[i];
+      f.y -= 34 * dt;
+      f.life -= dt;
+      if (f.life <= 0) game.floats.splice(i, 1);
     }
   }
 
@@ -258,6 +287,20 @@
 
     drawFood();
     drawSnake();
+    drawFloats();
+  }
+
+  function drawFloats() {
+    const ctx = game.ctx;
+    for (const f of game.floats) {
+      ctx.globalAlpha = Math.max(0, Math.min(1, f.life * 1.4));
+      ctx.fillStyle = f.color;
+      ctx.font = '800 ' + Math.max(13, Math.round(game.cell * 0.46)) + 'px "Segoe UI", system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(f.text, f.x, f.y);
+    }
+    ctx.globalAlpha = 1;
   }
 
   function drawSnake() {
@@ -310,6 +353,7 @@
     dom.score.textContent = game.score;
     dom.target.textContent = TARGETS[game.targetKind].label;
     dom.lives.textContent = '❤'.repeat(Math.max(0, game.lives)) || '—';
+    if (dom.task) dom.task.textContent = 'З’їж лише ' + TARGETS[game.targetKind].label.toUpperCase();
   }
 
   function hideOverlay() { if (game.dom.overlay) game.dom.overlay.style.display = 'none'; }
@@ -335,13 +379,13 @@
     game.running = false;
     if (game.rafId) { cancelAnimationFrame(game.rafId); game.rafId = 0; }
     const buttons = KINDS.map(kind => ({
-      label: TARGETS[kind].label,
+      label: TARGETS[kind].label + ' (' + TARGETS[kind].short + ')',
       className: kind === game.targetKind ? 'green' : '',
       onClick: () => start(kind)
     }));
     showOverlay(
       '🐍 Змійка-мовознавець',
-      'Обери, які слова збирати. Керуй стрілками, WASD або свайпом.',
+      'Обери завдання. З’їж правильні слова — отримаєш бали. З’їж зайве слово — втратиш життя. Керуй стрілками, WASD або свайпом.',
       buttons
     );
   }

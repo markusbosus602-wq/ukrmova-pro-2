@@ -92,6 +92,28 @@
   backdrop-filter: blur(4px);
 }
 
+.snake-task {
+  position: absolute;
+  left: 50%;
+  top: 58px;
+  transform: translateX(-50%);
+  z-index: 4;
+  max-width: calc(100% - 24px);
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(143, 240, 192, 0.55);
+  background: rgba(8, 32, 24, 0.82);
+  color: #d8ffec;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-align: center;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .snake-panel {
   width: 100%;
   max-width: 340px;

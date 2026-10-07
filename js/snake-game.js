@@ -218,7 +218,7 @@
       if (correct) {
         game.eaten++;
         game.score += POINTS_CORRECT;
-        game.step = Math.max(MIN_STEP, game.step - 0.004);
+        game.step = Math.max(MIN_STEP, game.step - 0.0025);
         addFloat(cx, cy, '+' + POINTS_CORRECT, '#8ff0c0');
       } else {
         // Зайве слово зникає з поля, забирає життя і бали.

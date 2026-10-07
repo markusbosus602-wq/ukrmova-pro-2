@@ -42,8 +42,8 @@
   const COLS = 13;
   const POINTS_CORRECT = 25;
   const PENALTY_WRONG = 40;
-  const BASE_STEP = 0.23;
-  const MIN_STEP = 0.12;
+  const BASE_STEP = 0.34;
+  const MIN_STEP = 0.19;
   const START_LEN = 4;
 
   const game = {

@@ -1,6 +1,6 @@
 // js/space-game.js — міні-гра «Космічний мисливець»
 // Космічний корабель летить унизу, а зверху падають українські слова.
-// Треба збивати лише слова заданої частини мови. Стріляти — тап/клік або пробіл.
+// Треба збивати лише слова заданої частини мови. Стріляти — тап по кораблю або пробіл.
 //
 // Правила гри навмисно прості: за правильне влучання +очки, за пропущене
 // правильне слово -життя, за підбите зайве слово -життя і -очки. Наприкінці
@@ -62,7 +62,7 @@
     ship: { x: 0, y: 0, vx: 0, cooldown: 0, invuln: 0 },
     input: { left: false, right: false },
     pointer: { active: false, x: 0 },
-    score: 0, lives: 3, hits: 0, misses: 0, wrongHits: 0, reward: 0,
+    score: 0, lives: 3, hits: 0, misses: 0, wrongHits: 0,
     streak: 0, maxStreak: 0, level: 1,
     spawnTimer: 0, spawnInterval: 1.15,
     elapsed: 0,
@@ -151,7 +151,6 @@
     game.targetKind = kind || game.targetKind;
     game.words = []; game.shots = []; game.particles = [];
     game.score = 0; game.lives = 3; game.hits = 0; game.misses = 0; game.wrongHits = 0;
-    game.reward = 0;
     game.streak = 0; game.maxStreak = 0; game.level = 1;
     game.spawnTimer = 0; game.spawnInterval = 1.15; game.elapsed = 0;
     game.ship.x = game.width / 2; game.ship.cooldown = 0; game.ship.invuln = 0;
@@ -460,7 +459,7 @@
     }));
     showOverlay(
       '🚀 Космічний мисливець',
-      'Обери, які слова ловити. Збивай правильні слова тапом або пробілом і не чіпай зайвих!',
+      'Обери, які слова ловити. Рухай корабель пальцем, а щоб вистрелити — тапни по кораблю. На клавіатурі: стрілки — рух, пробіл — постріл.',
       buttons
     );
   }
@@ -524,10 +523,16 @@
   function onPointerDown(e) {
     if (!game.running || game.paused) return;
     const rect = game.canvas.getBoundingClientRect();
-    const x = (e.clientX !== undefined ? e.clientX : e.touches[0].clientX) - rect.left;
+    const clientX = e.clientX !== undefined ? e.clientX : e.touches[0].clientX;
+    const clientY = e.clientY !== undefined ? e.clientY : e.touches[0].clientY;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
     game.pointer.active = true;
     game.pointer.x = x;
-    shoot();
+    // Стріляємо лише коли натиснули на сам корабель — решта жестів рухає його.
+    if (Math.abs(x - game.ship.x) < 30 && Math.abs(y - game.ship.y) < 34) {
+      shoot();
+    }
   }
   function onPointerMove(e) {
     if (!game.pointer.active) return;
